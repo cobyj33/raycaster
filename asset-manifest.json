@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/web_raycaster/static/css/main.be7a5174.css",
-    "main.js": "/web_raycaster/static/js/main.0f0fe459.js",
+    "main.js": "/web_raycaster/static/js/main.cf9f2fae.js",
     "static/js/787.81e48b36.chunk.js": "/web_raycaster/static/js/787.81e48b36.chunk.js",
     "index.html": "/web_raycaster/index.html",
     "main.be7a5174.css.map": "/web_raycaster/static/css/main.be7a5174.css.map",
-    "main.0f0fe459.js.map": "/web_raycaster/static/js/main.0f0fe459.js.map",
+    "main.cf9f2fae.js.map": "/web_raycaster/static/js/main.cf9f2fae.js.map",
     "787.81e48b36.chunk.js.map": "/web_raycaster/static/js/787.81e48b36.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.be7a5174.css",
-    "static/js/main.0f0fe459.js"
+    "static/js/main.cf9f2fae.js"
   ]
 }
