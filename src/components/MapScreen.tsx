@@ -1,7 +1,7 @@
 import React, { RefObject, useEffect, useRef } from 'react'
 import { Angle } from '../classes/Angle';
 import { Camera } from '../classes/Camera';
-import { CameraControls } from '../classes/CameraControls';
+import { BirdsEyeCameraControls } from '../classes/CameraControls';
 import { Dimension } from '../classes/Dimension';
 import { GameMap } from '../classes/GameMap'
 import { useKeyHandler } from '../classes/KeyHandler';
@@ -15,7 +15,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
     const [camera, setCamera] = cameraData;
     const [map, setMap] = mapData;
-    const cameraControls = useKeyHandler(new CameraControls(setCamera));
+    const cameraControls = useKeyHandler(new BirdsEyeCameraControls(setCamera));
     const containerRef = useRef<HTMLDivElement>(null);
     const getMapScale: () => number = () => containerRef.current !== null && containerRef !== undefined ? Math.min( containerRef.current.clientWidth / map.Dimensions.rows, containerRef.current.clientHeight / map.Dimensions.cols ) : 1;
 

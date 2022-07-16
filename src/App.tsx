@@ -10,6 +10,9 @@ import { Vector2 } from './classes/Vector2';
 import { MapScreen } from './components/MapScreen';
 import { WallTile } from './classes/Tiles/WallTile';
 import { CyclicalArray } from './classes/CyclicalArray';
+import { KeyHandler, useKeyHandler } from './classes/KeyHandler';
+import { KeyBinding } from './classes/KeyBinding';
+import { EventEmitter } from 'stream';
 
 enum Menu {
   GAMEMAP, CAMERAVIEW
@@ -24,6 +27,11 @@ function App() {
 
   const ref: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
 
+  const keyHandler = useKeyHandler(new KeyHandler( [
+    new KeyBinding({ key: 'LeftArrow', onDown: () => setCurrentMenu(menus.back()) }),
+    new KeyBinding({ key: 'RightArrow', onDown: () => setCurrentMenu(menus.forward()) })
+  ]  ))
+
   useEffect( () => {
     setCamera(camera.setMap(gameMap));
   }, [gameMap])
@@ -35,10 +43,8 @@ function App() {
     }
   }
 
-
-
   return (
-    <div className="app">
+    <div className="app" onKeyDown={(event) => keyHandler.current.onKeyDown(event)} onKeyUp={(event) => keyHandler.current.onKeyUp(event)} tabIndex={0}>
       { getMenu(currentMenu)}
       <div className='menu-switch-buttons'>
         <button className='menu-switch-button back'  onClick={() => setCurrentMenu(menus.back()) } onFocus={(event) => event.target.blur()}> To: { menus.peekBack().toString() } </button>

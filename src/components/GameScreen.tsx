@@ -1,7 +1,8 @@
 import React, { KeyboardEvent, KeyboardEventHandler, RefObject, useEffect, useRef } from 'react'
+import { start } from 'repl';
 import { Angle } from '../classes/Angle';
 import { Camera } from '../classes/Camera'
-import { CameraControls } from '../classes/CameraControls';
+import {  FirstPersonCameraControls } from '../classes/CameraControls';
 import { GameMap } from '../classes/GameMap';
 import { KeyBinding } from '../classes/KeyBinding';
 import { KeyHandler, useKeyHandler } from '../classes/KeyHandler';
@@ -10,9 +11,10 @@ import "./gamescreen.css"
 
 export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap> }  ) => {
     const gameCanvas: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+    const containerRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const [camera, setCamera] = cameraData;
     const [map, setMap] = mapData;
-    const keyHandlerRef = useKeyHandler(new CameraControls(setCamera));
+    const keyHandlerRef = useKeyHandler(new FirstPersonCameraControls(setCamera));
 
     function render() {
         if (gameCanvas.current != null) {
@@ -22,9 +24,43 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
 
     useEffect(render, [camera]);
 
+    const startPointerLock = () => {
+        document.removeEventListener('pointerlockchange', startPointerLock);
+        const container: HTMLDivElement | null = containerRef.current;
+        console.log(container);
+        if (container !== null && container !== undefined) {
+            container.requestPointerLock();
+            document.addEventListener('mousemove', mouseControls, true);
+        }  
+    }
+
+    const endPointerLock = () => {
+        document.exitPointerLock();
+        document.removeEventListener('mousemove', mouseControls, false);
+    }
+
+    useEffect( () => {
+         startPointerLock();
+        return endPointerLock;
+    }, [])
+
+    const mouseControls = (event: MouseEvent) => {
+        console.log("mouse controlling");
+        const xMovement = -event.movementX;
+        setCamera( (camera) => camera.setDirection(camera.direction.rotate( Angle.fromDegrees( xMovement / 40 ) )) );
+    }
+
+
   return (
-    <div className="container" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
-        <canvas ref={gameCanvas} width={window.innerWidth} height={window.innerHeight} style={{backgroundColor: 'black'}}> </canvas>
+    <div  onPointerDown={() => {
+        if (document.pointerLockElement !== null && document.pointerLockElement !== undefined) {
+            endPointerLock();
+            document.addEventListener('pointerlockchange', startPointerLock);
+        } else {
+            startPointerLock();
+        }
+    }} ref={containerRef} className="container" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
+        <canvas ref={gameCanvas} width={window.innerWidth} height={window.innerHeight} style={{backgroundColor: 'black'}} tabIndex={0}> </canvas>
         {/* <p> {camera.toString()} </p>  */}
     </div>
   )
