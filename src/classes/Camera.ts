@@ -1,13 +1,13 @@
 import { rawListeners } from "process";
 import { Cardinal } from "../enums/Cardinal";
 import { ICamera } from "../interfaces/ICamera";
-import { Angle } from "./Angle";
-import { CameraLine } from "./CameraLine";
-import { Color } from "./Color";
+import { Angle } from "./Data/Angle";
+import { CameraLine } from "./Data/CameraLine";
+import { Color } from "./Data/Color";
 import { GameMap } from "./GameMap";
-import { LineSegment } from "./LineSegment";
+import { LineSegment } from "./Data/LineSegment";
 import { Ray } from "./Ray";
-import { Vector2 } from "./Vector2";
+import { Vector2 } from "./Data/Vector2";
 
 
 

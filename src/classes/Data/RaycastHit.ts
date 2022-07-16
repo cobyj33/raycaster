@@ -1,5 +1,5 @@
-import { Cardinal } from "../enums/Cardinal";
-import { Tile } from "../interfaces/Tile";
+import { Cardinal } from "../../enums/Cardinal";
+import { Tile } from "../../interfaces/Tile";
 import { Vector2 } from "./Vector2";
 
 export class RaycastHit {

@@ -1,8 +1,8 @@
 import { Cardinal } from "../enums/Cardinal";
 import { Tile } from "../interfaces/Tile";
 import { GameMap } from "./GameMap";
-import { RaycastHit } from "./RaycastHit";
-import { Vector2 } from "./Vector2";
+import { RaycastHit } from "./Data/RaycastHit";
+import { Vector2 } from "./Data/Vector2";
 
 export class Ray {
     public readonly origin: Vector2;
@@ -39,23 +39,30 @@ export class Ray {
     //     }
     // }
 
+    testHit(tileToCheck: Vector2, map: GameMap): boolean {
+        if (map.inBounds(tileToCheck.row, tileToCheck.col)) {
+            const tile: Tile = map.at(tileToCheck.row, tileToCheck.col);
+            if (tile.canHit()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     cast(distance: number, map: GameMap): void {
         let firstRowHit: RaycastHit | null = null;
         let firstColHit: RaycastHit | null = null;
 
         let currentRowPosition: Vector2 = this.origin.clone();
         if (this.direction.row !== 0) {
-            const rowStepDirection: number = this.direction.row < 0 ? -1 : 1;
+            const rowStepDirection: number = this.direction.row < 0 ? -1 : 1;          
             while (firstRowHit == null && Vector2.distance(currentRowPosition, this.origin) < distance && map.inBounds(currentRowPosition.row, currentRowPosition.col)) {
                 const nextRow: number = rowStepDirection > 0 ? Math.floor(currentRowPosition.row + rowStepDirection) : Math.ceil(currentRowPosition.row + rowStepDirection);
                 currentRowPosition = currentRowPosition.add( this.direction.alterToRow(nextRow - currentRowPosition.row) );
-                const tileToCheck: Vector2 = rowStepDirection > 0 ? currentRowPosition.int() : new Vector2( Math.floor( currentRowPosition.row + rowStepDirection ), Math.floor(currentRowPosition.col));
-                if (map.inBounds(tileToCheck.row, tileToCheck.col)) {
-                    const tile: Tile = map.at(tileToCheck.row, tileToCheck.col);
-                    if (tile.canHit()) {
-                        firstRowHit = new RaycastHit(currentRowPosition, this.direction.row <= 0 ? Cardinal.NORTH : Cardinal.SOUTH, tile);
-                        break;
-                    }
+                const tileToCheck: Vector2 = rowStepDirection > 0 ? currentRowPosition.int() : new Vector2( Math.floor( currentRowPosition.row + rowStepDirection), Math.floor(currentRowPosition.col));
+                if (this.testHit(tileToCheck, map)) {
+                    const tile = map.at(tileToCheck.row, tileToCheck.col);
+                    firstRowHit = new RaycastHit(currentRowPosition, this.direction.row <= 0 ? Cardinal.NORTH : Cardinal.SOUTH, tile);
                 }
             }
         }
@@ -70,19 +77,14 @@ export class Ray {
                 const nextCol: number = colStepDirection > 0 ? Math.floor(currentColPosition.col + colStepDirection) : Math.ceil(currentColPosition.col + colStepDirection);
                 distanceTraveled += nextCol - currentColPosition.col;
 
-                if (distanceTraveled > rowDistance && (firstRowHit !== null && firstRowHit !== undefined)) {
-                    break;
-                }
+                if (distanceTraveled > rowDistance && (firstRowHit !== null && firstRowHit !== undefined)) { break; }
 
                 currentColPosition = currentColPosition.add( this.direction.alterToCol(nextCol - currentColPosition.col) );
     
                 const tileToCheck: Vector2 = colStepDirection > 0 ? currentColPosition.int() : new Vector2(Math.floor(currentColPosition.row), Math.floor( currentColPosition.col + colStepDirection  ));
-                if (map.inBounds(tileToCheck.row, tileToCheck.col)) {
-                    const tile: Tile = map.at(tileToCheck.row, tileToCheck.col);
-                    if (tile.canHit()) {
-                        firstColHit = new RaycastHit(currentColPosition, this.direction.col <= 0 ? Cardinal.WEST : Cardinal.EAST, tile);
-                        break;
-                    }
+                if (this.testHit(tileToCheck, map)) {
+                    const tile = map.at(tileToCheck.row, tileToCheck.col);
+                    firstColHit = new RaycastHit(currentColPosition, this.direction.col <= 0 ? Cardinal.WEST : Cardinal.EAST, tile);
                 }
             }
         }

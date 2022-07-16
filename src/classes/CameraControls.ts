@@ -1,11 +1,11 @@
 import React from "react";
-import { Angle } from "./Angle";
+import { Angle } from "./Data/Angle";
 import { Camera } from "./Camera";
 import { GameMap } from "./GameMap";
 import { KeyBinding } from "./KeyBinding";
 import { KeyHandler } from "./KeyHandler";
 import { WallTile } from "./Tiles/WallTile";
-import { Vector2 } from "./Vector2";
+import { Vector2 } from "./Data/Vector2";
 
 const MOVEMENT_CHECKING_DISTANCE = 0.05;
 

@@ -1,5 +1,5 @@
-import { Angle } from "../classes/Angle";
-import { Vector2 } from "../classes/Vector2"
+import { Angle } from "../classes/Data/Angle";
+import { Vector2 } from "../classes/Data/Vector2"
 
 test('vector2 addition', () => {
     const first = new Vector2(10, 5);

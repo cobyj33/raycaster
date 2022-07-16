@@ -1,8 +1,8 @@
-import { Dimension } from "./Dimension";
+import { Dimension } from "./Data/Dimension";
 import { Tile } from "../interfaces/Tile";
 import { EmptyTile } from "./Tiles/EmptyTile";
 import { TimeHTMLAttributes } from "react";
-import { Vector2 } from "./Vector2";
+import { Vector2 } from "./Data/Vector2";
 import { WallTile } from "./Tiles/WallTile";
 
 export class GameMap {

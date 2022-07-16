@@ -1,4 +1,4 @@
-import { IClonable } from "../interfaces/IClonable";
+import { IClonable } from "../../interfaces/IClonable";
 import { Angle } from "./Angle";
 
 export class Vector2 implements IClonable<Vector2> {

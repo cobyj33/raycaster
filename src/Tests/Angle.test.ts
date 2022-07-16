@@ -1,4 +1,4 @@
-import { Angle } from "../classes/Angle"
+import { Angle } from "../classes/Data/Angle"
 
 test("radian conversion", () => {
     expect(Angle.fromDegrees(30).radians).toEqual( Math.PI / 6 );

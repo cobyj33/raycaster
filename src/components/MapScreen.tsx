@@ -1,11 +1,11 @@
 import React, { RefObject, useEffect, useRef } from 'react'
-import { Angle } from '../classes/Angle';
+import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera';
 import { BirdsEyeCameraControls } from '../classes/CameraControls';
-import { Dimension } from '../classes/Dimension';
+import { Dimension } from '../classes/Data/Dimension';
 import { GameMap } from '../classes/GameMap'
 import { useKeyHandler } from '../classes/KeyHandler';
-import { LineSegment } from '../classes/LineSegment';
+import { LineSegment } from '../classes/Data/LineSegment';
 import { Ray } from '../classes/Ray';
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
@@ -69,6 +69,14 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     return (
     <div ref={containerRef} className="container" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
         <canvas ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
+
+        <div className='touch-camera-controls'> 
+            <div className="movement-controls">
+                
+            </div>
+
+
+        </div>
     </div>
   )
 }

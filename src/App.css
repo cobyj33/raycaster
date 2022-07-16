@@ -18,6 +18,7 @@ html, body, .app, #root {
     align-items: center;
     top: 0;
     left: 0;
+    pointer-events:;
 }
 
 .menu-switch-button {
@@ -30,6 +31,7 @@ html, body, .app, #root {
     margin-left: 10px;
     font-family: monospace;
     color: white;
+    pointer-events: auto;
 }
 
 .menu-switch-button:hover {

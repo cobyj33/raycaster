@@ -1,4 +1,4 @@
-import { Color } from "../Color";
+import { Color } from "../Data/Color";
 import { Tile } from "../../interfaces/Tile";
 
 export class EmptyTile implements Tile {

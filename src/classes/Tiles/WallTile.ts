@@ -1,5 +1,5 @@
 import { Tile } from "../../interfaces/Tile";
-import { Color } from "../Color";
+import { Color } from "../Data/Color";
 
 export class WallTile implements Tile {
     constructor() { }
