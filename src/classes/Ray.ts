@@ -20,12 +20,31 @@ export class Ray {
         this.onNoHit = onNoHit;
     }
 
+    // castOptimized(distance: number, map: GameMap) {
+    //     let hit: RaycastHit | null = null;
+    //     let traveledDistance = 0;
+    //     let currentPosition = this.origin.clone();
+
+    //     const rowStepDirection = this.direction.row < 0 ? -1 : 1;
+    //     const colStepDirection = this.direction.col < 0 ? -1 : 1;
+
+    //     while (hit == null && traveledDistance < 0 && map.inBounds(currentPosition.row, currentPosition.col)) {
+
+    //     }
+
+    //     if (hit !== null && hit !== undefined) {
+    //         this.onHit(hit);
+    //     } else {
+    //         this.onNoHit?.();
+    //     }
+    // }
+
     cast(distance: number, map: GameMap): void {
         let firstRowHit: RaycastHit | null = null;
         let firstColHit: RaycastHit | null = null;
 
+        let currentRowPosition: Vector2 = this.origin.clone();
         if (this.direction.row !== 0) {
-            let currentRowPosition: Vector2 = this.origin.clone();
             const rowStepDirection: number = this.direction.row < 0 ? -1 : 1;
             while (firstRowHit == null && Vector2.distance(currentRowPosition, this.origin) < distance && map.inBounds(currentRowPosition.row, currentRowPosition.col)) {
                 const nextRow: number = rowStepDirection > 0 ? Math.floor(currentRowPosition.row + rowStepDirection) : Math.ceil(currentRowPosition.row + rowStepDirection);
@@ -41,11 +60,20 @@ export class Ray {
             }
         }
 
+        const rowDistance = Vector2.distance(currentRowPosition, this.origin);
+
         if (this.direction.col !== 0) {
             let currentColPosition: Vector2 = this.origin.clone();
+            let distanceTraveled = 0;
             const colStepDirection = this.direction.col <= 0 ? -1 : 1;
             while (firstColHit == null && Vector2.distance(currentColPosition, this.origin) < distance && map.inBounds(currentColPosition.row, currentColPosition.col)) {
                 const nextCol: number = colStepDirection > 0 ? Math.floor(currentColPosition.col + colStepDirection) : Math.ceil(currentColPosition.col + colStepDirection);
+                distanceTraveled += nextCol - currentColPosition.col;
+
+                if (distanceTraveled > rowDistance && (firstRowHit !== null && firstRowHit !== undefined)) {
+                    break;
+                }
+
                 currentColPosition = currentColPosition.add( this.direction.alterToCol(nextCol - currentColPosition.col) );
     
                 const tileToCheck: Vector2 = colStepDirection > 0 ? currentColPosition.int() : new Vector2(Math.floor(currentColPosition.row), Math.floor( currentColPosition.col + colStepDirection  ));
@@ -53,6 +81,7 @@ export class Ray {
                     const tile: Tile = map.at(tileToCheck.row, tileToCheck.col);
                     if (tile.canHit()) {
                         firstColHit = new RaycastHit(currentColPosition, this.direction.col <= 0 ? Cardinal.WEST : Cardinal.EAST, tile);
+                        break;
                     }
                 }
             }

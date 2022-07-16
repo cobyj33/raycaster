@@ -1,43 +1,51 @@
 import React, { RefObject, useEffect, useRef } from 'react'
+import { Angle } from '../classes/Angle';
 import { Camera } from '../classes/Camera';
+import { CameraControls } from '../classes/CameraControls';
 import { Dimension } from '../classes/Dimension';
 import { GameMap } from '../classes/GameMap'
+import { useKeyHandler } from '../classes/KeyHandler';
 import { LineSegment } from '../classes/LineSegment';
 import { Ray } from '../classes/Ray';
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
+import "./mapscreen.css";
 
 export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera> }) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
     const [camera, setCamera] = cameraData;
-    const mapScale = 10;
+    const [map, setMap] = mapData;
+    const cameraControls = useKeyHandler(new CameraControls(setCamera));
+    const containerRef = useRef<HTMLDivElement>(null);
+    const getMapScale: () => number = () => containerRef.current !== null && containerRef !== undefined ? Math.min( containerRef.current.clientWidth / map.Dimensions.rows, containerRef.current.clientHeight / map.Dimensions.cols ) : 1;
 
     function render() {
         if (canvasRef.current !== null && canvasRef.current !== undefined) {
             const canvas: HTMLCanvasElement = canvasRef.current;
             const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
             if (context !== null && context !== undefined) {
-                const mapDimensions: Dimension = mapData[0].Dimensions;
+                const mapDimensions: Dimension = map.Dimensions;
                 context.clearRect(0, 0, canvas.width, canvas.height);
-                canvas.width = mapDimensions.cols * mapScale;
-                canvas.height = mapDimensions.rows * mapScale;
+                canvas.width = mapDimensions.cols * getMapScale();
+                canvas.height = mapDimensions.rows * getMapScale();
                 for (let row = 0; row < mapDimensions.rows; row++) {
                     for (let col = 0; col < mapDimensions.cols; col++) {
-                        context.fillStyle = mapData[0].at(row, col).color().toRGBString();
-                        context.fillRect(col * mapScale, row * mapScale, mapScale, mapScale);
+                        context.fillStyle = map.at(row, col).color().toRGBString();
+                        context.fillRect(col * getMapScale(), row * getMapScale(), getMapScale(), getMapScale());
                     }
                 }
 
                 context.fillStyle = 'red';
-                context.fillRect(camera.position.col * mapScale, camera.position.row * mapScale, 1 * mapScale, 1 * mapScale)
+                context.fillRect(camera.position.col * getMapScale(), camera.position.row * getMapScale(), 1 * getMapScale(), 1 * getMapScale())
                 
                 context.beginPath();
                 context.strokeStyle = 'green';
-                const rays: Ray[] = camera.getRays(100);
+                const rays: Ray[] = camera.getRays(200);
                 rays.forEach(ray => {
+                    ray.cast(camera.viewDistance, camera.map);
                     if (ray.end !== null && ray.end !== undefined) {
-                        context.moveTo(camera.position.col * mapScale, camera.position.row * mapScale);
-                        context.lineTo(ray.end.col * mapScale, ray.end.row * mapScale);
+                        context.moveTo(camera.position.col * getMapScale(), camera.position.row * getMapScale());
+                        context.lineTo(ray.end.col * getMapScale(), ray.end.row * getMapScale());
                     }
                 })
                 context.stroke();
@@ -45,11 +53,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
                 context.beginPath();
                 context.strokeStyle = 'blue';
                 const cameraPlane: LineSegment = camera.getCameraPlane();
-                console.log(cameraPlane);
-                context.moveTo(cameraPlane.start.col * mapScale, cameraPlane.start.row * mapScale);
-                context.lineTo(cameraPlane.end.col * mapScale, cameraPlane.end.row * mapScale);
+                context.moveTo(cameraPlane.start.col * getMapScale(), cameraPlane.start.row * getMapScale());
+                context.lineTo(cameraPlane.end.col * getMapScale(), cameraPlane.end.row * getMapScale());
                 context.stroke();
-
             }
         }   
     }
@@ -57,12 +63,12 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     useEffect( () => {
         render();
         // setTimeout(() => mapData[1](mapData[0].placeTile(new WallTile(), Math.floor(Math.random() * mapData[0].Dimensions.rows),  Math.floor(Math.random() * mapData[0].Dimensions.cols) )), 500);
-    })
+    }, [camera, map])
 
 
     return (
-    <div>
-        <canvas ref={canvasRef} width={mapData[0].Dimensions.rows * mapScale} height={mapData[0].Dimensions.rows * mapScale}> </canvas>
+    <div ref={containerRef} className="container" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
+        <canvas ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
     </div>
   )
 }

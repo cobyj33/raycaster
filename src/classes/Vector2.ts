@@ -2,7 +2,7 @@ import { IClonable } from "../interfaces/IClonable";
 import { Angle } from "./Angle";
 
 export class Vector2 implements IClonable<Vector2> {
-    public static readonly PRECISION: number = 1000;
+    public static readonly PRECISION: number = 100000000;
 
     public static readonly up: Vector2 = new Vector2(-1, 0);
     public static readonly down: Vector2 = new Vector2(1, 0);
@@ -15,8 +15,16 @@ export class Vector2 implements IClonable<Vector2> {
     get length() { return Math.sqrt( this.row * this.row + this.col * this.col )}
 
     constructor(row: number, col: number) {
-        this.row = Math.round(row * Vector2.PRECISION) / Vector2.PRECISION;
-        this.col = Math.round(col * Vector2.PRECISION) / Vector2.PRECISION;
+        this.row = row;
+        this.col = col;
+    }
+
+    getRowComponent(): Vector2 {
+        return new Vector2(this.row, 0);
+    }
+
+    getColComponent(): Vector2 {
+        return new Vector2(0, this.col);
     }
 
     rotate(angle: Angle): Vector2 {
