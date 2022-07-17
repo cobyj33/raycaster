@@ -53,3 +53,14 @@ test('vector2 length', () => {
     expect(vector.length).toBeCloseTo(Math.sqrt(89), 2);
 })
 
+test("normalized dot product perpendicular", () => {
+    const first = new Vector2(0, 1);
+    const second = new Vector2(1, 0);
+    expect(Vector2.dotProduct(first, second)).toBeCloseTo(0, 2);
+})
+
+test("normalized dot product 45 degrees", () => {
+    const first = new Vector2(0, 1);
+    const second = new Vector2(1, 1).normalized();
+    expect(Vector2.dotProduct(first, second)).toBeCloseTo(Math.cos(Math.PI / 4), 2);
+})

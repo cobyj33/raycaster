@@ -18,7 +18,7 @@ enum Menu {
 const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITOR]);
 
 function App() {
-  const [gameMap, setGameMap] = useState<GameMap>(GameMap.random(new Dimension(100, 100), 30)   );
+  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(50, 50))   );
   const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
   const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
 

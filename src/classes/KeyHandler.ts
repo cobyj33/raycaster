@@ -15,7 +15,7 @@ export class KeyHandler {
     }
 
     onKeyDown(event: KeyboardEvent<Element>) {
-        console.log(event);
+        // console.log(event);
         console.log('valid events: ' + this.bindings.filter(binding => binding.testDown(event)).length);
         if (!this.downedKeys.some(key => key.key === event.key)) {
             this.downedKeys.push(event);
@@ -25,6 +25,7 @@ export class KeyHandler {
     }
 
     onKeyUp(event: KeyboardEvent<Element>) {
+        console.log(event);
         this.downedKeys = this.downedKeys.filter(downed => downed.key !== event.key);
         this.bindings.filter(binding => binding.testUp(event)).forEach(successfulBinding => successfulBinding.runUp(event));
     }

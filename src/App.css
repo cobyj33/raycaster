@@ -18,7 +18,7 @@ html, body, .app, #root {
     align-items: center;
     top: 0;
     left: 0;
-    pointer-events:;
+    pointer-events: none;
 }
 
 .menu-switch-button {

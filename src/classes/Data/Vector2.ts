@@ -4,6 +4,7 @@ import { Angle } from "./Angle";
 export class Vector2 implements IClonable<Vector2> {
     public static readonly PRECISION: number = 100000000;
 
+    public static readonly zero: Vector2 = new Vector2(0, 0);
     public static readonly up: Vector2 = new Vector2(-1, 0);
     public static readonly down: Vector2 = new Vector2(1, 0);
     public static readonly left: Vector2 = new Vector2(0, -1);
@@ -34,6 +35,10 @@ export class Vector2 implements IClonable<Vector2> {
     }
 
     toLength(length: number): Vector2 {
+        if (this.length === 0) {
+            console.error('cannot change length of 0 length vector');
+        }
+
         return this.scale(  length / this.length );
     }
 
@@ -76,7 +81,7 @@ export class Vector2 implements IClonable<Vector2> {
     }
 
     int(): Vector2 {
-        return new Vector2(Math.floor(this.row), Math.floor(this.col));
+        return new Vector2(Math.trunc(this.row), Math.trunc(this.col));
     }
     
     static fromAngle(angle: Angle): Vector2 {
@@ -94,9 +99,18 @@ export class Vector2 implements IClonable<Vector2> {
     static angleBetween(first: Vector2, second: Vector2): Angle {
         return Angle.fromRadians( Math.abs( first.toAngle().radians - second.toAngle().radians ) );
     }
+
+    static dotProduct(first: Vector2, second: Vector2): number {
+        const angle: Angle = Vector2.angleBetween(first, second);
+        return first.length * second.length * Math.cos(angle.radians);
+    }
     
     clone() {
         return new Vector2(this.row, this.col);
+    }
+
+    equals(other: Vector2): boolean {
+        return this.row == other.row && this.col == other.col
     }
 }
 

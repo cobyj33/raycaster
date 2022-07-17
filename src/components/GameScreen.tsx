@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, KeyboardEventHandler, RefObject, useEffect, useRef } from 'react'
+import React, { KeyboardEvent, KeyboardEventHandler, MutableRefObject, RefObject, useEffect, useRef } from 'react'
 import { start } from 'repl';
 import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera'
@@ -8,6 +8,9 @@ import { KeyBinding } from '../classes/KeyBinding';
 import { KeyHandler, useKeyHandler } from '../classes/KeyHandler';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./gamescreen.css"
+import { collapseTextChangeRangesAcrossMultipleVersions, createLanguageServiceSourceFile } from 'typescript';
+import { PointerLockEvents } from '../classes/PointerLockEvents';
+
 
 export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap> }  ) => {
     const gameCanvas: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
@@ -23,43 +26,36 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
 
     function render() {
         if (gameCanvas.current != null) {
+            gameCanvas.current.width = gameCanvas.current.clientWidth;
+            gameCanvas.current.height = gameCanvas.current.clientHeight;
             cameraData[0].render(gameCanvas.current);
         }
     }
 
     useEffect(render, [camera]);
-
-    const startPointerLock = () => {
-        document.removeEventListener('pointerlockchange', startPointerLock);
-        const container: HTMLDivElement | null = containerRef.current;
-        console.log(container);
-        if (container !== null && container !== undefined) {
-            container.requestPointerLock();
-            document.addEventListener('mousemove', mouseControls.current, true);
-        }  
-    }
-
-    const endPointerLock = () => {
-        document.exitPointerLock();
-        document.removeEventListener('mousemove', mouseControls.current, false);
-    }
-
+    
+    const pointerLockEvents: MutableRefObject<PointerLockEvents | null> = useRef<PointerLockEvents | null>(null);
     useEffect( () => {
-        return endPointerLock;
+        if (containerRef.current !== null && containerRef.current !== undefined) {
+            pointerLockEvents.current = new PointerLockEvents( [ ['mousemove', mouseControls.current] ], containerRef.current )
+        }
+
+        return () => {
+            if (pointerLockEvents.current !== null && pointerLockEvents.current !== undefined) {
+                pointerLockEvents.current.dispose();
+            }
+        }
     }, [])
 
 
 
   return (
     <div  onPointerDown={() => {
-        if (document.pointerLockElement !== null && document.pointerLockElement !== undefined) {
-            endPointerLock();
-            document.addEventListener('pointerlockchange', startPointerLock);
-        } else {
-            startPointerLock();
+        if (pointerLockEvents.current !== null && pointerLockEvents.current !== undefined) {
+            pointerLockEvents.current.bind();
         }
     }} ref={containerRef} className="container" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
-        <canvas ref={gameCanvas} width={window.innerWidth} height={window.innerHeight} style={{backgroundColor: 'black'}} tabIndex={0}> </canvas>
+        <canvas className="game-canvas" ref={gameCanvas} style={{backgroundColor: 'black'}} tabIndex={0}> </canvas>
         {/* <p> {camera.toString()} </p>  */}
     </div>
   )

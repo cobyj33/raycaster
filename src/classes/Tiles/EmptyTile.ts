@@ -3,7 +3,7 @@ import { Tile } from "../../interfaces/Tile";
 
 export class EmptyTile implements Tile {
     constructor() { }
-    color() { return new Color(0, 0, 0, 1); }
+    color() { return new Color(30, 30, 30, 30); }
     clone() { return new EmptyTile(); }
     canHit(): boolean {
         return false;

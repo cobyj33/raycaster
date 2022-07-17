@@ -62,9 +62,9 @@ export class KeyBinding {
     testUp(event: KeyboardEvent<Element>) {
         return this.onUp !== null && this.onUp !== undefined
         && event.type == 'keyup' && (event.key == this.key || this.key == 'any') 
-         && (this.onShift ? this.onShift != event.shiftKey : this.onShift == event.shiftKey)
-         && (this.onControl ? this.onControl != event.ctrlKey : this.onControl == event.ctrlKey)
-         && (this.onAlt ? this.onAlt != event.altKey : this.onAlt == event.altKey)
+        //  && (this.onShift ? this.onShift != event.shiftKey : this.onShift == event.shiftKey)
+        //  && (this.onControl ? this.onControl != event.ctrlKey : this.onControl == event.ctrlKey)
+        //  && (this.onAlt ? this.onAlt != event.altKey : this.onAlt == event.altKey)
     }
 
     runUp(event: KeyboardEvent<Element>) {

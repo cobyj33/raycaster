@@ -39,23 +39,26 @@ const move = (currentPosition: Vector2, currentDirection: Vector2, distance: num
 }
 
 export class FirstPersonCameraControls extends KeyHandler {
+    moveSpeed: number = 0.25;
+    moveFactor: number = 1;
     
     constructor(setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
 
+
         const moveForward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction, 0.25, camera.map) );
+            return camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.moveFactor, camera.map) );
         })
 
         const moveBackward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.scale(-1), 0.25, camera.map) );
+            return camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.moveFactor, camera.map) );
         })
 
         const moveLeft = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(90)), 0.25, camera.map) );
+            return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(90)), this.moveSpeed * this.moveFactor, camera.map) );
         })
 
         const moveRight = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(-90)), 0.25, camera.map) );
+            return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(-90)), this.moveSpeed * this.moveFactor, camera.map) );
         })
 
 
@@ -71,30 +74,34 @@ export class FirstPersonCameraControls extends KeyHandler {
             new KeyBinding({ key: 'a', onDown: moveLeft, whileDown: moveLeft }),
             new KeyBinding( {key: 's', onDown: moveBackward, whileDown: moveBackward }),
             new KeyBinding( {key: 'd', onDown: moveRight, whileDown: moveRight }),
+            new KeyBinding( {key: 'Shift', onDown: () => this.moveFactor = 2, onUp: () => this.moveFactor = 1})
         ])
     }
 }
 
 export class BirdsEyeCameraControls extends KeyHandler {
+    moveSpeed: number = 0.25;
+    sensitivity: number = 1;
     
     constructor(setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
 
         const moveForward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction, 0.25, camera.map) );
+            return camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) );
         })
 
         const moveBackward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.scale(-1), 0.25, camera.map) );
+            return camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.sensitivity, camera.map) );
         })
 
-        const turnRight = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(-1))));
-        const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(1))));
+        const turnRight = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(-this.sensitivity))));
+        const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(this.sensitivity))));
         
         super([
             new KeyBinding({ key: 'w', onDown: moveForward, whileDown: moveForward }),
             new KeyBinding({ key: 'a', onDown: turnLeft, whileDown: turnLeft }),
             new KeyBinding( {key: 's', onDown: moveBackward, whileDown: moveBackward }),
             new KeyBinding( {key: 'd', onDown: turnRight, whileDown: turnRight }),
+            new KeyBinding( {key: 'Shift', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1})
         ])
     }
 }
