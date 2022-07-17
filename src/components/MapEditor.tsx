@@ -146,7 +146,7 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
   
   function draw(event: PointerEvent<Element>) {
     const hoveredCell = getHoveredCell(event);
-    if (isPointerDown.current && !hoveredCell.equals(lastHoveredCell.current)) {
+    if (isPointerDown.current) {
       console.log(new LineSegment(lastHoveredCell.current, hoveredCell).toCells());
       new LineSegment(lastHoveredCell.current, hoveredCell).toCells().forEach(cell => {
       if (map.inBounds(cell.row, cell.col)) {
@@ -157,15 +157,7 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
 
   function erase(event: PointerEvent<Element>) {
     const hoveredCell = getHoveredCell(event);
-    if (isPointerDown.current && !hoveredCell.equals(lastHoveredCell.current)) {
-      // setMap( (map) => {
-      //   let nextMap = map;
-      //   new LineSegment(lastHoveredCell.current, hoveredCell).toCells().forEach(cell => {
-      //     if (map.inBounds(hoveredCell.row, hoveredCell.col)) {
-      //         setMap((map) => map.placeTile(new EmptyTile(), hoveredCell.row, hoveredCell.col))
-      //     }});
-      //     return nextMap;
-      // } )
+    if (isPointerDown.current) {
       new LineSegment(lastHoveredCell.current, hoveredCell).toCells().forEach(cell => {
       if (map.inBounds(cell.row, cell.col)) {
           setMap((map) => map.placeTile(new EmptyTile(), cell.row, cell.col))
@@ -198,6 +190,10 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
   
   function onPointerDown(event: PointerEvent<Element>) {
     isPointerDown.current = true;
+    switch (editMode) {
+      case EditorEditMode.DRAW: draw(event); break;
+      case EditorEditMode.ERASE: erase(event); break;
+    }
   }
 
   function onPointerUp(event: PointerEvent<Element>) {

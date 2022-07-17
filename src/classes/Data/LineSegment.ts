@@ -15,7 +15,7 @@ export class LineSegment {
     }
 
     toCells(): Vector2[] {
-        if (this.start.equals(this.end)) { return []; }
+        if (this.start.equals(this.end)) { return [this.start.clone()]; }
         const {row: row1, col: col1} = this.start;
         const {row: row2, col: col2} = this.end;
         const intersections: Vector2[] = []
