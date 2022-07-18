@@ -4,12 +4,13 @@ import { Camera } from '../classes/Camera';
 import { BirdsEyeCameraControls } from '../classes/CameraControls';
 import { Dimension } from '../classes/Data/Dimension';
 import { GameMap } from '../classes/GameMap'
-import { useKeyHandler } from '../classes/KeyHandler';
+import { useKeyHandler } from '../classes/KeySystem/KeyHandler';
 import { LineSegment } from '../classes/Data/LineSegment';
 import { Ray } from '../classes/Ray';
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./mapscreen.css";
+import { useResizeObserver } from '../functions/useResizeObserver';
 
 export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera> }) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
@@ -65,9 +66,19 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         // setTimeout(() => mapData[1](mapData[0].placeTile(new WallTile(), Math.floor(Math.random() * mapData[0].Dimensions.rows),  Math.floor(Math.random() * mapData[0].Dimensions.cols) )), 500);
     }, [camera, map])
 
+    function updateCanvasSize() {
+        if (canvasRef.current !== null && canvasRef.current !== undefined) {
+          const canvas: HTMLCanvasElement = canvasRef.current;
+          canvas.width = canvas.clientWidth;
+          canvas.height = canvas.clientHeight;
+        }
+      }
+
+    // useResizeObserver( updateCanvasSize )
+
 
     return (
-    <div ref={containerRef} className="container" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
+    <div ref={containerRef} className="map-container" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
         <canvas ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
 
         <div className='touch-camera-controls'> 

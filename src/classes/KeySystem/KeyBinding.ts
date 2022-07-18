@@ -1,11 +1,12 @@
 import {KeyboardEvent} from 'react';
+import { NakedKeyEvent } from './NakedKeyEvent';
 
 interface KeyAction {
     (event: KeyboardEvent<Element>): void;
 }
 
 export interface BindingInformation {
-    key: string;
+    code: string;
     onDown?: KeyAction;
     onUp?: KeyAction;
     whileDown?: KeyAction;
@@ -15,23 +16,21 @@ export interface BindingInformation {
 }
 
 export class KeyBinding {
-    key: string;
+    details: NakedKeyEvent;
     onDown?: KeyAction;
     onUp?: KeyAction;
     whileDown?: KeyAction;
-    onShift: boolean = false;
-    onControl: boolean = false;
-    onAlt: boolean = false;
 
     constructor(bindingInfo: BindingInformation) {
-        this.key = bindingInfo.key;
         this.onDown = bindingInfo.onDown;
         this.whileDown = bindingInfo.whileDown;
         this.onUp = bindingInfo.onUp
-
-        this.onShift = bindingInfo.key === 'Shift' ? true : (bindingInfo.onShift ?? false);
-        this.onControl = bindingInfo.key === 'Control' ? true : (bindingInfo.onControl ?? false);
-        this.onAlt = bindingInfo.key === 'Alt' ? true : (bindingInfo.onAlt ?? false);
+        this.details = {
+            code: bindingInfo.code,
+            shiftKey: bindingInfo.code.startsWith('Shift') ? true : (bindingInfo.onShift),
+            ctrlKey: bindingInfo.code.startsWith('Control') ? true : (bindingInfo.onControl),
+            altKey: bindingInfo.code.startsWith('Alt') ? true : (bindingInfo.onAlt)
+        }
     }
 
     runWhileDown(event: KeyboardEvent) {
@@ -42,9 +41,10 @@ export class KeyBinding {
   
     testDown(event: KeyboardEvent<Element>)  {
         return this.onDown !== null && this.onDown !== undefined
-        && event.type == 'keydown' && (event.key == this.key || this.key == 'any')
-        && this.onShift == event.shiftKey && this.onControl == event.ctrlKey
-        && this.onAlt == event.altKey
+        && event.type == 'keydown' && (event.code == this.details.code || this.details.code == 'any')
+        && (this.details.shiftKey === event.shiftKey || this.details.shiftKey === undefined)
+        && (this.details.ctrlKey == event.ctrlKey || this.details.ctrlKey === undefined)
+        && (this.details.altKey == event.altKey || this.details.altKey === undefined)
     }
 
     runDown(event: KeyboardEvent<Element>) {
@@ -61,7 +61,7 @@ export class KeyBinding {
 
     testUp(event: KeyboardEvent<Element>) {
         return this.onUp !== null && this.onUp !== undefined
-        && event.type == 'keyup' && (event.key == this.key || this.key == 'any') 
+        && event.type == 'keyup' && (event.code == this.details.code || this.details.code == 'any') 
         //  && (this.onShift ? this.onShift != event.shiftKey : this.onShift == event.shiftKey)
         //  && (this.onControl ? this.onControl != event.ctrlKey : this.onControl == event.ctrlKey)
         //  && (this.onAlt ? this.onAlt != event.altKey : this.onAlt == event.altKey)

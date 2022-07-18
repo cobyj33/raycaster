@@ -20,6 +20,9 @@ export class Camera implements ICamera {
     readonly fieldOfView: Angle = Angle.fromDegrees(70);
     readonly viewDistance: number = 50;
 
+    readonly moveAmount = 0.25;
+    readonly sensitivity = 1;
+
     constructor(map: GameMap, position: Vector2, direction: Vector2, fov: Angle = Angle.fromDegrees(70)) {
         this.map = map;
         this.position = position.clone();

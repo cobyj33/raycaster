@@ -1,5 +1,6 @@
 import { KeyBinding } from "./KeyBinding";
 import { KeyboardEvent, MutableRefObject, useEffect, useRef } from "react";
+import { NakedKeyEvent } from "./NakedKeyEvent";
 
 export class KeyHandler {
     bindings: KeyBinding[];
@@ -17,7 +18,7 @@ export class KeyHandler {
     onKeyDown(event: KeyboardEvent<Element>) {
         // console.log(event);
         console.log('valid events: ' + this.bindings.filter(binding => binding.testDown(event)).length);
-        if (!this.downedKeys.some(key => key.key === event.key)) {
+        if (!this.downedKeys.some(key => key.code === event.code)) {
             this.downedKeys.push(event);
         }
         
@@ -26,8 +27,16 @@ export class KeyHandler {
 
     onKeyUp(event: KeyboardEvent<Element>) {
         console.log(event);
-        this.downedKeys = this.downedKeys.filter(downed => downed.key !== event.key);
+        this.downedKeys = this.downedKeys.filter(downed => downed.code !== event.code);
         this.bindings.filter(binding => binding.testUp(event)).forEach(successfulBinding => successfulBinding.runUp(event));
+    }
+
+    simulateKeyDown(key: string) {
+        
+    }
+
+    simulateKeyUp(key: string) {
+        
     }
 }
 

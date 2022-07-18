@@ -12,6 +12,7 @@ import "./mapeditor.css"
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser } from "react-icons/fa"
 import { hover } from '@testing-library/user-event/dist/hover';
 import { LineSegment } from '../classes/Data/LineSegment';
+import { useResizeObserver } from '../functions/useResizeObserver';
 
 enum EditorEditMode {
   MOVE, ZOOM, DRAW, ERASE
@@ -209,15 +210,26 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
   useEffect(() => {
     setCursor(editorCursors[editMode])
   }, [editMode])
+
+  function updateCanvasSize() {
+    if (canvasRef.current !== null && canvasRef.current !== undefined) {
+      const canvas: HTMLCanvasElement = canvasRef.current;
+      const rect: DOMRect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+  }
+
   useEffect(() => {
     if (canvasRef.current !== null && canvasRef.current !== undefined) {
       const canvas: HTMLCanvasElement = canvasRef.current;
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
+      updateCanvasSize();
       setView((view) => view.withCellSize( Math.trunc( Math.min( canvas.height / map.Dimensions.rows, canvas.width / map.Dimensions.cols  ) ) )
       .withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
     }
   }, [])
+
+  // useResizeObserver(updateCanvasSize)
     
   return (
     <div className='editor-container'>

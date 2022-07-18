@@ -1,4 +1,4 @@
-import React, { RefObject, useEffect, useReducer, useRef, useState } from 'react';
+import React, { ChangeEvent, Children, RefObject, useEffect, useReducer, useRef, useState } from 'react';
 import './App.css';
 import { Camera } from './classes/Camera';
 import { GameMap } from './classes/GameMap';
@@ -7,26 +7,29 @@ import { GameScreen } from './components/GameScreen';
 import { Vector2 } from './classes/Data/Vector2';
 import { MapScreen } from './components/MapScreen';
 import { CyclicalArray } from './classes/Structures/CyclicalArray';
-import { KeyHandler, useKeyHandler } from './classes/KeyHandler';
-import { KeyBinding } from './classes/KeyBinding';
+import { KeyHandler, useKeyHandler } from './classes/KeySystem/KeyHandler';
+import { KeyBinding } from './classes/KeySystem/KeyBinding';
 import { MapEditor } from './components/MapEditor';
+import { Angle } from './classes/Data/Angle';
 
 enum Menu {
-  GAMEMAP, CAMERAVIEW, EDITOR
+  GAMEMAP = "Game Map",
+  CAMERAVIEW = "Camera View",
+  EDITOR = "Editor"
 }
 
 const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITOR]);
 
 function App() {
-  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(50, 50))   );
+  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(20, 20))   );
   const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
   const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
 
   const ref: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
 
   const keyHandler = useKeyHandler(new KeyHandler( [
-    new KeyBinding({ key: 'LeftArrow', onDown: () => setCurrentMenu(menus.back()) }),
-    new KeyBinding({ key: 'RightArrow', onDown: () => setCurrentMenu(menus.forward()) })
+    new KeyBinding({ code: 'ArrowLeft', onDown: () => setCurrentMenu(menus.back()) }),
+    new KeyBinding({ code: 'ArrowRight', onDown: () => setCurrentMenu(menus.forward()) })
   ]  ))
 
   useEffect( () => {
@@ -48,6 +51,12 @@ function App() {
         <button className='menu-switch-button back'  onClick={() => setCurrentMenu(menus.back()) } onFocus={(event) => event.target.blur()}> To: { menus.peekBack().toString() } </button>
         <button className='menu-switch-button forward' onClick={() => setCurrentMenu(menus.forward())} onFocus={(event) => event.target.blur()}> To: { menus.peekForward().toString() } </button>
       </div>
+
+      {/* <input style={{position: 'absolute', right: '0', bottom: '0'}}onChange={ (event: ChangeEvent<HTMLInputElement>) => {
+        if (!isNaN(Number(event.target.value))) {
+          setCamera(camera => camera.setFOV(Angle.fromDegrees(Number(event.target.value))));
+        }
+      }} />  */}
     </div>
   );
 }

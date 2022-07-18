@@ -2,14 +2,14 @@ import React from "react";
 import { Angle } from "./Data/Angle";
 import { Camera } from "./Camera";
 import { GameMap } from "./GameMap";
-import { KeyBinding } from "./KeyBinding";
-import { KeyHandler } from "./KeyHandler";
+import { KeyBinding } from "./KeySystem/KeyBinding";
+import { KeyHandler } from "./KeySystem/KeyHandler";
 import { WallTile } from "./Tiles/WallTile";
 import { Vector2 } from "./Data/Vector2";
 
 const MOVEMENT_CHECKING_DISTANCE = 0.05;
 
-const canMove = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): boolean => {
+export const canMove = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): boolean => {
     const nextPosition = currentPosition.add(currentDirection.toLength(distance));
     const checkingPosition = nextPosition.add(currentDirection.toLength(MOVEMENT_CHECKING_DISTANCE * ( distance < 0 ? -1 : 1 )));
     const nextRowOnMap = Math.floor(checkingPosition.row);
@@ -22,7 +22,7 @@ const canMove = (currentPosition: Vector2, currentDirection: Vector2, distance: 
     return false;
 }
 
-const move = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): Vector2 => {
+export const move = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): Vector2 => {
     const nextPosition = currentPosition.add(currentDirection.toLength(distance));
     if (canMove(currentPosition, currentDirection, distance, map)) {
         return nextPosition;
@@ -70,11 +70,11 @@ export class FirstPersonCameraControls extends KeyHandler {
         const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(1))));
         
         super([
-            new KeyBinding({ key: 'w', onDown: moveForward, whileDown: moveForward }),
-            new KeyBinding({ key: 'a', onDown: moveLeft, whileDown: moveLeft }),
-            new KeyBinding( {key: 's', onDown: moveBackward, whileDown: moveBackward }),
-            new KeyBinding( {key: 'd', onDown: moveRight, whileDown: moveRight }),
-            new KeyBinding( {key: 'Shift', onDown: () => this.moveFactor = 2, onUp: () => this.moveFactor = 1})
+            new KeyBinding({ code: 'KeyW', onDown: moveForward, whileDown: moveForward }),
+            new KeyBinding({ code: 'KeyA', onDown: moveLeft, whileDown: moveLeft }),
+            new KeyBinding( {code: 'KeyS', onDown: moveBackward, whileDown: moveBackward }),
+            new KeyBinding( {code: 'KeyD', onDown: moveRight, whileDown: moveRight }),
+            new KeyBinding( {code: 'ShiftLeft', onDown: () => this.moveFactor = 2, onUp: () => this.moveFactor = 1})
         ])
     }
 }
@@ -97,11 +97,11 @@ export class BirdsEyeCameraControls extends KeyHandler {
         const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(this.sensitivity))));
         
         super([
-            new KeyBinding({ key: 'w', onDown: moveForward, whileDown: moveForward }),
-            new KeyBinding({ key: 'a', onDown: turnLeft, whileDown: turnLeft }),
-            new KeyBinding( {key: 's', onDown: moveBackward, whileDown: moveBackward }),
-            new KeyBinding( {key: 'd', onDown: turnRight, whileDown: turnRight }),
-            new KeyBinding( {key: 'Shift', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1})
+            new KeyBinding({ code: 'KeyW', onDown: moveForward, whileDown: moveForward }),
+            new KeyBinding({ code: 'KeyA', onDown: turnLeft, whileDown: turnLeft }),
+            new KeyBinding( {code: 'KeyS', onDown: moveBackward, whileDown: moveBackward }),
+            new KeyBinding( {code: 'KeyD', onDown: turnRight, whileDown: turnRight }),
+            new KeyBinding( {code: 'ShiftLeft', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1})
         ])
     }
 }
