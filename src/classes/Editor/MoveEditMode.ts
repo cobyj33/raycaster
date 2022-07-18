@@ -3,35 +3,16 @@ import { Vector2 } from "../Data/Vector2";
 import { View } from "../Data/View";
 import { EditMode } from "./EditMode";
 
-export class MoveEditMode implements EditMode{
-    // setView: React.Dispatch<React.SetStateAction<View>>;
-    // isPointerDown: boolean = false;
-
-    // constructor() {
-    //     this.setView = setView;
-    // }
-
-    onModeEnd(): void {
-        
+export class MoveEditMode extends EditMode{
+    cursor() { return 'move' }
+     
+    onPointerMove(event: PointerEvent<Element>) {
+        const [view, setView] = this.data.viewData;
+        if (this.data.isPointerDown === true) {
+            const movementDirection: Vector2 = new Vector2(event.movementY, event.movementX);
+            if (movementDirection.length !== 0) {
+                setView(view => view.withCoordinates( view.coordinates.add(movementDirection.toLength(20 / view.cellSize)) ));
+            }
+        }
     }
-
-    onModeStart(): void {
-        
-    }
-
-    // onPointerDown(event: PointerEvent<Element>) {
-    //     this.isPointerDown = true;
-    // }
-    
-    // onPointerUp(event: PointerEvent<Element>) {
-    //     this.isPointerDown = false;
-    // }
-    
-    // onPointerMove(event: PointerEvent<Element>) {
-    //     if (this.isPointerDown) {
-    //         const movementDirection: Vector2 = new Vector2(event.movementY, event.movementX);
-    //         this.setView(view => view.withCoordinates( view.coordinates.add(movementDirection) ));
-    //     }
-    // }
-
 }

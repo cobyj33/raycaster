@@ -33,7 +33,7 @@ export const HoldButton = ({ onDown, whileDown, onUp, loopRefreshRate = 1000 / 3
     }
 
   return (
-    <button className={className} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={() => setButtonDown(false)} > { children } </button>
+    <button onContextMenu={e => e.preventDefault()} className={className} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={() => setButtonDown(false)} > { children } </button>
   )
 }
 

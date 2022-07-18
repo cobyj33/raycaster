@@ -1,4 +1,4 @@
-import React, { RefObject, useEffect, useRef } from 'react'
+import React, { RefObject, useEffect, useRef, useState } from 'react'
 import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera';
 import { BirdsEyeCameraControls } from '../classes/CameraControls';
@@ -11,9 +11,11 @@ import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./mapscreen.css";
 import { useResizeObserver } from '../functions/useResizeObserver';
+import { TouchControls } from './TouchControls';
 
 export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera> }) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+    const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
     const [camera, setCamera] = cameraData;
     const [map, setMap] = mapData;
     const cameraControls = useKeyHandler(new BirdsEyeCameraControls(setCamera));
@@ -79,15 +81,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
     return (
     <div ref={containerRef} className="map-container" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
-        <canvas ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
+        <canvas onTouchStart={() => setShowTouchControls(true)} ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
 
-        <div className='touch-camera-controls'> 
-            <div className="movement-controls">
-                
-            </div>
-
-
-        </div>
+        {showTouchControls && <TouchControls cameraData={cameraData} />}
     </div>
   )
 }

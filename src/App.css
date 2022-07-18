@@ -8,6 +8,14 @@ html, body, .app, #root {
     background-color: blue;
 }
 
+*:not(input) {
+    user-select: none;
+}
+
+*:not(canvas) {
+    touch-action: none;
+}
+
 .menu-switch-buttons {
     position: absolute;
     width: 100%;

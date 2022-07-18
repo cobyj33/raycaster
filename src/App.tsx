@@ -18,10 +18,12 @@ enum Menu {
   EDITOR = "Editor"
 }
 
+document.addEventListener("touchmove", e => e.preventDefault());
+
 const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITOR]);
 
 function App() {
-  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(20, 20))   );
+  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(50, 50))   );
   const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
   const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
 

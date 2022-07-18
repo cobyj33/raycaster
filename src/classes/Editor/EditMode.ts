@@ -1,15 +1,27 @@
 import { KeyboardEvent, PointerEvent } from "react";
+import { EditorData } from "./EditorData";
 
 export abstract class EditMode {
-    abstract onPointerDown?(event: PointerEvent<Element>): void;
-    abstract onPointerUp?(event: PointerEvent<Element>): void;
-    abstract onPointerMove?(event: PointerEvent<Element>): void;
-    abstract onPointerLeave?(event: PointerEvent<Element>): void;
-    abstract onPointerEnter?(event: PointerEvent<Element>): void;
+    protected data: EditorData;
 
-    abstract onKeyDown?(event: KeyboardEvent<Element>): void;
-    abstract onKeyUp?(event: KeyboardEvent<Element>): void;
+    constructor(data: EditorData) {
+        this.data = data;
+    }
+    
+    setEditorData(data: EditorData) {
+        this.data = data;
+    }
 
-    abstract onModeStart(): void;
-    abstract onModeEnd(): void;
+    onPointerDown?(event: PointerEvent<Element>): void;
+    onPointerUp?(event: PointerEvent<Element>): void;
+    onPointerMove?(event: PointerEvent<Element>): void;
+    onPointerLeave?(event: PointerEvent<Element>): void;
+    onPointerEnter?(event: PointerEvent<Element>): void;
+
+    onKeyDown?(event: KeyboardEvent<Element>): void;
+    onKeyUp?(event: KeyboardEvent<Element>): void;
+
+    // abstract onModeStart(): void;
+    // abstract onModeEnd(): void;
+    abstract cursor(): string;
 }

@@ -21,7 +21,7 @@ export class View {
         return  `{ View: Coordinates: ${this.coordinates.toString()}, CellSize: ${this.cellSize}  }`
     }
 
-    // offset() {
-    //     return new Vector2(coordinates.row % this.cellSize, coordinates.col % this.cellSize);
-    // }
+    offset(): Vector2 {
+        return new Vector2(this.coordinates.row * this.cellSize % this.cellSize, this.coordinates.col * this.cellSize % this.cellSize);
+    }
 }
