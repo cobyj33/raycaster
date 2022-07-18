@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Children, RefObject, useEffect, useReducer, useRef, useState } from 'react';
+import {RefObject, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { Camera } from './classes/Camera';
 import { GameMap } from './classes/GameMap';
@@ -10,7 +10,8 @@ import { CyclicalArray } from './classes/Structures/CyclicalArray';
 import { KeyHandler, useKeyHandler } from './classes/KeySystem/KeyHandler';
 import { KeyBinding } from './classes/KeySystem/KeyBinding';
 import { MapEditor } from './components/MapEditor';
-import { Angle } from './classes/Data/Angle';
+import { Tile } from './interfaces/Tile';
+import { WallTile } from './classes/Tiles/WallTile';
 
 enum Menu {
   GAMEMAP = "Game Map",
@@ -18,11 +19,10 @@ enum Menu {
   EDITOR = "Editor"
 }
 
-document.addEventListener("touchmove", e => e.preventDefault());
-
 const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITOR]);
 
 function App() {
+  const [customTiles, setCustomTiles] = useState<Tile[]>([new WallTile()]);
   const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(50, 50))   );
   const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
   const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
@@ -42,7 +42,7 @@ function App() {
     switch(menu) {
       case Menu.GAMEMAP: return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
       case Menu.CAMERAVIEW: return <GameScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />
-      case Menu.EDITOR: return <MapEditor mapData={[gameMap, setGameMap]} />
+      case Menu.EDITOR: return <MapEditor mapData={[gameMap, setGameMap]} tileData={[customTiles, setCustomTiles]} />
     }
   }
 
@@ -54,11 +54,6 @@ function App() {
         <button className='menu-switch-button forward' onClick={() => setCurrentMenu(menus.forward())} onFocus={(event) => event.target.blur()}> To: { menus.peekForward().toString() } </button>
       </div>
 
-      {/* <input style={{position: 'absolute', right: '0', bottom: '0'}}onChange={ (event: ChangeEvent<HTMLInputElement>) => {
-        if (!isNaN(Number(event.target.value))) {
-          setCamera(camera => camera.setFOV(Angle.fromDegrees(Number(event.target.value))));
-        }
-      }} />  */}
     </div>
   );
 }

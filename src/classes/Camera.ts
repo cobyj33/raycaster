@@ -109,21 +109,32 @@ export class Camera implements ICamera {
             context.lineWidth = 1;
             const centerHeight: number = canvas.height / 2;
             context.beginPath();
+            let lastColor: Color | null = null;
 
             for (let col = 0; col < cameraLineData.length; col++) {
                 const currentLine: CameraLine = cameraLineData[col];
-                context.strokeStyle = 'white';
-                // if (currentLine.hit != null) {
-                //     let color: Color = currentLine.hit.hitObject.color();
-                //     switch(currentLine.hit.side) {
-                //         case Cardinal.WEST: { color = color.darken(50); break; }
-                //         case Cardinal.EAST: { color = color.darken(50); break; }
-                //         case Cardinal.SOUTH: { color = color.darken(100); break; }
-                //     }
-                //     context.strokeStyle = color.toRGBString();
-                // } else {
-                //     context.strokeStyle = 'white';
-                // }
+                if (currentLine.hit != null) {
+                    let color: Color = currentLine.hit.hitObject.color();
+                    switch(currentLine.hit.side) {
+                        case Cardinal.WEST: { color = color.darken(50); break; }
+                        case Cardinal.EAST: { color = color.darken(50); break; }
+                        case Cardinal.SOUTH: { color = color.darken(100); break; }
+                    }
+
+                    if (lastColor !== null) {
+                        context.strokeStyle = lastColor.toRGBString();
+                        // console.log('color change');
+                        if (!color.equals(lastColor)) {
+                            context.stroke();
+                            context.beginPath();
+                        }
+                    }
+                    lastColor = color;
+                } else {
+                    context.strokeStyle = 'white';
+                }
+
+
 
                 const lineHeightInPixels: number = currentLine.lineLengthPercentage * canvas.height;
                 context.moveTo(col, centerHeight - ( lineHeightInPixels / 2));
@@ -144,75 +155,3 @@ export class Camera implements ICamera {
 
 
 }
-
-// public class Camera : IPositionable, IDrawable {\
-//     public void Render() {
-//         cameraLineData = new List<CameraLine>();
-
-        
-//         Vector2Double startingCameraPlaneLocation = position + direction.RotateDegrees(FOV / 2.0).ToLength(0.1);
-//         Vector2Double endingCameraPlaneLocation =  position + direction.RotateDegrees(360 - FOV / 2.0).ToLength(0.1);
-//         Vector2Double middleCameraPlaneLocation = Vector2Double.Midpoint(startingCameraPlaneLocation, endingCameraPlaneLocation);
-
-//         Vector2Double perpendicularDirection = endingCameraPlaneLocation - startingCameraPlaneLocation;
-//         double distanceBetweenStartAndEnd = Vector2Double.Distance(startingCameraPlaneLocation, endingCameraPlaneLocation);
-//         double distanceFromPlaneToCamera = Vector2Double.Distance(this.position, middleCameraPlaneLocation);
-//         Vector2Double currentCameraPlaneLocation = startingCameraPlaneLocation;
-
-
-//         for (int i = 0; i < LineCount; i++) {
-//             currentCameraPlaneLocation += perpendicularDirection.ToLength(distanceBetweenStartAndEnd / LineCount);
-//             if (cameraLineData.Count >= LineCount) {
-//                 break;
-//             }
-
-//             Vector2Double rayDirection = currentCameraPlaneLocation - position;
-//             Ray ray = new Ray(this.position, rayDirection, (hit) => { //changed distance from currentCameraPlaneLocation to position. The actual rendering plane now lies perpendicular to the direction of the camera and through the camera's position
-//                 double distanceFromHitToPlane = Vector2Double.Distance(currentCameraPlaneLocation, hit.Position) * Math.Sin( Vector2Double.AngleBetween( perpendicularDirection, rayDirection  ) );
-//                 cameraLineData.Add( new CameraLine(hit, (1.0d / distanceFromHitToPlane ) ) );
-//             }, () => { cameraLineData.Add( CameraLine.Empty ); }  );
-//             ray.Cast(viewDistance, map);
-//         }
-//     }
-
-//     public char CardinalToChar(Cardinal cardinal) {
-//         switch (cardinal) {
-//             case Cardinal.NORTH: return '$';
-//             case Cardinal.EAST: return '@';
-//             case Cardinal.SOUTH: return '-';
-//             case Cardinal.WEST: return '*';
-//             default: return '%';
-//         }
-//     }
-
-//     public void Display() {
-//         Console.Clear();
-//         int height = Console.BufferHeight;
-//         int centerHeight = height / 2;
-//         int width = cameraLineData.Count;
-//         List<int> lineHeights = cameraLineData.Select(lineData => (int)(lineData.LineLengthPercentage * height)).ToList();
-
-//         StringBuilder builder = new StringBuilder();
-//         for (int row = 0; row < height; row++) {
-//             int distanceFromCenter = Math.Abs(row - centerHeight);
-//             for (int col = 0; col < width; col++) {
-//                 if (lineHeights[col] / 2 > distanceFromCenter) {
-//                     CameraLine currentLine = cameraLineData[col];
-//                     if (currentLine.Hit.HasValue) {
-//                         builder.Append(CardinalToChar(currentLine.Hit.Value.Side));
-//                     }
-//                 } else {
-//                     builder.Append(' ');
-//                 }
-//             }
-//             builder.AppendLine();
-//         }
-
-//         Console.WriteLine(builder.ToString());
-//     }
-
-//     public override string ToString()
-//     {
-//         return $"[Camera] Direction: { direction }, Position: { position } ";
-//     }
-// }

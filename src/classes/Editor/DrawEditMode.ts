@@ -12,7 +12,7 @@ export class DrawEditMode extends EditMode {
         const hoveredCell = this.data.getHoveredCell(event);
         if (this.data.isPointerDown) {
             if (map.inBounds(hoveredCell.row, hoveredCell.col)) {
-                setMap((map) => map.placeTile(new WallTile(), hoveredCell.row, hoveredCell.col))
+                setMap((map) => map.placeTile(this.data.selectedTile.clone(), hoveredCell.row, hoveredCell.col))
             }
         }
     }
@@ -25,7 +25,7 @@ export class DrawEditMode extends EditMode {
             console.log(new LineSegment(lastHoveredCell, hoveredCell).toCells());
             new LineSegment(lastHoveredCell, hoveredCell).toCells().forEach(cell => {
             if (map.inBounds(cell.row, cell.col)) {
-                setMap((map) => map.placeTile(new WallTile(), cell.row, cell.col))
+                setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
             }});
         }
     }

@@ -14,15 +14,7 @@ export class LineEditMode extends EditMode {
     }
 
     onPointerMove(event: PointerEvent<Element>) {
-        // const [map, setMap] = this.data.mapData;
-        // const hoveredCell = this.data.getHoveredCell(event);
-        // if (this.data.isPointerDown && this.start !== undefined) {
-        //     console.log(new LineSegment(lastHoveredCell, hoveredCell).toCells());
-        //     new LineSegment(lastHoveredCell, hoveredCell).toCells().forEach(cell => {
-        //     if (map.inBounds(cell.row, cell.col)) {
-        //         setMap((map) => map.placeTile(new WallTile(), cell.row, cell.col))
-        //     }});
-        // }
+        
     }
 
     onPointerUp(event: PointerEvent<Element>) {
@@ -31,7 +23,7 @@ export class LineEditMode extends EditMode {
         if (this.data.isPointerDown && this.start !== undefined) {
             new LineSegment(this.start, hoveredCell).toCells().forEach(cell => {
             if (map.inBounds(cell.row, cell.col)) {
-                setMap((map) => map.placeTile(new WallTile(), cell.row, cell.col))
+                setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
             }});
         }
     }

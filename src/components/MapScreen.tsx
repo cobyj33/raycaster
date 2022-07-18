@@ -63,10 +63,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         }   
     }
     
-    useEffect( () => {
-        render();
-        // setTimeout(() => mapData[1](mapData[0].placeTile(new WallTile(), Math.floor(Math.random() * mapData[0].Dimensions.rows),  Math.floor(Math.random() * mapData[0].Dimensions.cols) )), 500);
-    }, [camera, map])
+    useEffect(render, [camera, map])
 
     function updateCanvasSize() {
         if (canvasRef.current !== null && canvasRef.current !== undefined) {
@@ -76,7 +73,6 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         }
       }
 
-    // useResizeObserver( updateCanvasSize )
 
 
     return (

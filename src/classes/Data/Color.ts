@@ -1,4 +1,11 @@
-export class Color {
+import { EqualityOperator } from "typescript";
+import { IEquatable } from "../../interfaces/IEquatable";
+
+export class Color implements IEquatable<Color> {
+    public static red: Color = new Color(255, 0, 0, 255);
+    public static green: Color = new Color(0, 255, 0, 255);
+    public static blue: Color = new Color(0, 0, 255, 255);
+
     readonly red: number;
     readonly green: number;
     readonly blue: number;
@@ -25,5 +32,13 @@ export class Color {
 
     toRGBAString(): string {
         return `rgb(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
+    }
+
+    equals(other: Color): boolean {
+        return this.red === other.red && this.green === other.green && this.blue === other.blue && this.alpha === other.alpha;
+    }
+
+    static random(): Color {
+        return new Color(Math.random() * 255, Math.random() * 255, Math.random() * 255, Math.random() * 255);
     }
 }

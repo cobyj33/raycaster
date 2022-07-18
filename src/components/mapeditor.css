@@ -50,3 +50,10 @@
 .edit-button.selected {
     background-color: rgb(50, 50, 50);
 }
+
+.editor-tile-creator {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+}

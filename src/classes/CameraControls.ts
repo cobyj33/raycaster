@@ -61,14 +61,6 @@ export class FirstPersonCameraControls extends KeyHandler {
             return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(-90)), this.moveSpeed * this.moveFactor, camera.map) );
         })
 
-
-        // const moveForward = () => setCamera((camera) => camera.setPosition(camera.position.add(camera.direction.toLength(0.25))));
-        // const moveBackward = () => setCamera((camera) => camera.setPosition(camera.position.add(camera.direction.toLength(-0.25))));
-
-
-        const turnRight = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(-1))));
-        const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(1))));
-        
         super([
             new KeyBinding({ code: 'KeyW', onDown: moveForward, whileDown: moveForward }),
             new KeyBinding({ code: 'KeyA', onDown: moveLeft, whileDown: moveLeft }),
@@ -85,13 +77,8 @@ export class BirdsEyeCameraControls extends KeyHandler {
     
     constructor(setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
 
-        const moveForward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) );
-        })
-
-        const moveBackward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.sensitivity, camera.map) );
-        })
+        const moveForward = () => setCamera( (camera) => camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) ))
+        const moveBackward = () => setCamera( (camera) => camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.sensitivity, camera.map) ))
 
         const turnRight = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(-this.sensitivity))));
         const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(this.sensitivity))));

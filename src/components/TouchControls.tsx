@@ -1,4 +1,3 @@
-import React from 'react'
 import { Camera } from '../classes/Camera'
 import { move } from '../classes/CameraControls'
 import { Angle } from '../classes/Data/Angle'

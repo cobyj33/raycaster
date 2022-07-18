@@ -1,19 +1,12 @@
-import React, { KeyboardEvent, KeyboardEventHandler, MutableRefObject, MouseEvent, RefObject, PointerEvent, TouchEvent, useEffect, useRef, useState } from 'react'
-import { start } from 'repl';
+import { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState } from 'react'
 import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera'
 import {  FirstPersonCameraControls } from '../classes/CameraControls';
 import { GameMap } from '../classes/GameMap';
-import { KeyBinding } from '../classes/KeySystem/KeyBinding';
-import { KeyHandler, useKeyHandler } from '../classes/KeySystem/KeyHandler';
+import { useKeyHandler } from '../classes/KeySystem/KeyHandler';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./gamescreen.css"
-import { collapseTextChangeRangesAcrossMultipleVersions, createLanguageServiceSourceFile } from 'typescript';
 import { PointerLockEvents } from '../classes/PointerLockEvents';
-import { Vector2 } from '../classes/Data/Vector2';
-import { useResizeObserver } from '../functions/useResizeObserver';
-import { HoldButton } from './HoldButton';
-import { move } from '../classes/CameraControls';
 import { TouchControls } from './TouchControls';
 
 

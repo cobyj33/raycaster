@@ -1,28 +1,28 @@
-import React, { useEffect, useRef, useState, KeyboardEvent, MutableRefObject, PointerEvent } from 'react'
+import { useEffect, useRef, useState, MutableRefObject, PointerEvent } from 'react'
 import { Vector2 } from '../classes/Data/Vector2';
 import { View } from '../classes/Data/View';
 import { EditMode } from '../classes/Editor/EditMode';
 import { MoveEditMode } from '../classes/Editor/MoveEditMode';
 import { ZoomEditMode } from '../classes/Editor/ZoomEditMode';
 import { GameMap } from '../classes/GameMap'
-import { EmptyTile } from '../classes/Tiles/EmptyTile';
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./mapeditor.css"
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox } from "react-icons/fa"
-import { hover } from '@testing-library/user-event/dist/hover';
-import { LineSegment } from '../classes/Data/LineSegment';
-import { useResizeObserver } from '../functions/useResizeObserver';
 import { EditorData } from '../classes/Editor/EditorData';
 import { EraseEditMode } from '../classes/Editor/EraseEditMode';
 import { DrawEditMode } from '../classes/Editor/DrawEditMode';
 import { LineEditMode } from '../classes/Editor/LineEditMode';
 import { BoxEditMode } from '../classes/Editor/BoxEditMode';
+import { TileCreator } from './TileCreator';
+import { Tile } from '../interfaces/Tile';
 
 
-export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
+export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMap>, tileData: StatefulData<Tile[]> }) => {
   enum EditorEditMode { MOVE, ZOOM, DRAW, ERASE, LINE, BOX }
   const [map, setMap] = mapData;
+  const [savedTiles, setSavedTiles] = tileData;
+  const [selectedTile, setSelectedTile] = useState<Tile>(new WallTile());
   const [cursor, setCursor] = useState<string>('crosshair');
   const [view, setView] = useState<View>(new View(new Vector2(0.5, 0.5), 10));
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,7 +52,8 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
       isPointerDown: isPointerDown.current,
       mapData: mapData,
       viewData: [view, setView],
-      getHoveredCell: getHoveredCell
+      getHoveredCell: getHoveredCell,
+      selectedTile: selectedTile
     }
   }
   
@@ -66,26 +67,14 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
   }
   const [editMode, setEditMode] = useState<EditorEditMode>(EditorEditMode.DRAW);
 
-  // const center: (position: Vector2) => void = (position: Vector2) => {
-  //   const canvas: HTMLCanvasElement | null = canvasRef.current;
-  //   if (canvas !== null && canvas !== undefined) {
-  //     setView( view.withCoordinates( new Vector2(position.row - (canvas.width / view.cellSize), position.col - (canvas.height / view.cellSize)) )  )
-  //   }
-  // }
+  const center: (position: Vector2) => void = (position: Vector2) => {
+    const canvas: HTMLCanvasElement | null = canvasRef.current;
+    if (canvas !== null && canvas !== undefined) {
+      setView( view.withCoordinates( new Vector2(position.row - (canvas.width / view.cellSize), position.col - (canvas.height / view.cellSize)) )  )
+    }
+  }
 
   function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
-    console.log('offset: ', view.offset());
-    // for (let y = -view.offset().row; y <= canvas.height; y += view.cellSize) {
-    //   for (let x = -view.offset().col; x <= canvas.width; x += view.cellSize) {
-    //       const row = Math.floor(view.coordinates.row + (y / view.cellSize));
-    //       const col = Math.floor(view.coordinates.col + (x / view.cellSize));
-    //       if (map.inBounds(row, col)) {
-    //         context.fillStyle = map.at(row, col).color().toRGBAString();
-    //         context.fillRect(x, y, view.cellSize, view.cellSize)
-    //       }
-    //   }
-    // }
-
     for (let row = 0; row < canvas.height / view.cellSize; row++) {
       for (let col = 0; col < canvas.width / view.cellSize; col++) {
         if (map.inBounds(Math.floor(view.coordinates.row + row), Math.floor(view.coordinates.col + col) )) {
@@ -94,8 +83,6 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
         }
       }
     }
-
-
   }
 
   class Innerclass {
@@ -147,72 +134,9 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
     }
   }
 
-  function drawMouseShadow(event: PointerEvent<Element>) {
-    const canvas: HTMLCanvasElement | null = canvasRef.current;
-    if (canvas !== null && canvas !== undefined) {
-      const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
-      if (context !== null && context !== undefined) {
-        context.globalAlpha = 0.5;
-        context.fillStyle = 'blue';
-        const hoveredCell = getHoveredCell(event);
-        drawCell(canvas, context, hoveredCell.row, hoveredCell.col);
-        context.globalAlpha = 1;
-      }
-    }
-  }
-
-
-  // function move(event: PointerEvent<Element>) {
-  //   if (isPointerDown.current === true) {
-  //     const movementDirection: Vector2 = new Vector2(event.movementY, event.movementX);
-  //     if (movementDirection.length !== 0) {
-  //       setView(view.withCoordinates( view.coordinates.add(movementDirection.toLength(20 / view.cellSize)) ));
-  //     }
-  //   }
-  // }
-  
-  // function draw(event: PointerEvent<Element>) {
-  //   const hoveredCell = getHoveredCell(event);
-  //   if (isPointerDown.current) {
-  //     console.log(new LineSegment(lastHoveredCell.current, hoveredCell).toCells());
-  //     new LineSegment(lastHoveredCell.current, hoveredCell).toCells().forEach(cell => {
-  //     if (map.inBounds(cell.row, cell.col)) {
-  //         setMap((map) => map.placeTile(new WallTile(), cell.row, cell.col))
-  //     }});
-  //   }
-  // }
-
-  // function erase(event: PointerEvent<Element>) {
-  //   const hoveredCell = getHoveredCell(event);
-  //   if (isPointerDown.current) {
-  //     new LineSegment(lastHoveredCell.current, hoveredCell).toCells().forEach(cell => {
-  //     if (map.inBounds(cell.row, cell.col)) {
-  //         setMap((map) => map.placeTile(new EmptyTile(), cell.row, cell.col))
-  //     }});
-  //   }
-  // }
-
-
-  
-  // const zoomDirection = new Vector2(-1, -1);
-  // function zoom(event: PointerEvent<Element>) {
-  //   if (isPointerDown.current === true) {
-  //     const movementVector: Vector2 = new Vector2(event.movementY, event.movementX);
-  //     if (movementVector.length > 0) {
-  //       setView(view.withCellSize( Math.max(2, view.cellSize + Math.trunc(Vector2.dotProduct(zoomDirection, movementVector.normalized()  )) )  ));
-  //       }
-  //   }
-  // }
-
   function onPointerMove(event: PointerEvent<Element>) {
     editorModes[editMode].setEditorData(getEditorData())
     editorModes[editMode].onPointerMove?.(event);
-  //   switch (editMode) {
-  //     case EditorEditMode.MOVE: move(event); break;
-  //     case EditorEditMode.ZOOM: zoom(event); break;
-  //     case EditorEditMode.DRAW: draw(event); break;
-  //     case EditorEditMode.ERASE: erase(event); break;
-  //   }
       lastHoveredCell.current = getHoveredCell(event);
       render();
   }
@@ -222,10 +146,6 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
     editorModes[editMode].setEditorData(getEditorData())
     editorModes[editMode].onPointerDown?.(event);
     lastHoveredCell.current = getHoveredCell(event);
-    // switch (editMode) {
-    //   case EditorEditMode.DRAW: draw(event); break;
-    //   case EditorEditMode.ERASE: erase(event); break;
-    // }
   }
 
   function onPointerUp(event: PointerEvent<Element>) {
@@ -243,8 +163,7 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
   useEffect(render)
 
   useEffect(() => {
-    // setCursor(editorModes[editMode].cursor())
-    setCursor('default');
+    setCursor(editorModes[editMode].cursor())
   }, [editMode])
 
   function updateCanvasSize() {
@@ -278,7 +197,13 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
         <button className={`edit-button ${ editMode === EditorEditMode.BOX ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.BOX)}> <FaBox /> </button>
       </div>
 
+      <div className="tile-picker">
+        { savedTiles.map(tile => <button key={`tile: ${tile.name}`} onClick={() => setSelectedTile(tile)}> {tile.name}</button>)}
+      </div>
+
       <canvas style={{cursor: cursor}} className="editing-canvas" ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave}> Unsupported Web Browser </canvas>
+
+      <TileCreator className='editor-tile-creator' tileData={tileData} />
     </div>
   )
 }
