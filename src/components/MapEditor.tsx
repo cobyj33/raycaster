@@ -224,8 +224,8 @@ export const MapEditor = ( { mapData }: { mapData: StatefulData<GameMap> }) => {
     if (canvasRef.current !== null && canvasRef.current !== undefined) {
       const canvas: HTMLCanvasElement = canvasRef.current;
       updateCanvasSize();
-      setView((view) => view.withCellSize( Math.trunc( Math.min( canvas.height / map.Dimensions.rows, canvas.width / map.Dimensions.cols  ) ) )
-      .withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
+      setView(view => view.withCellSize( Math.trunc( Math.min( canvas.height / map.Dimensions.rows, canvas.width / map.Dimensions.cols  ) ) ))
+      setView(view => view.withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
     }
   }, [])
 
