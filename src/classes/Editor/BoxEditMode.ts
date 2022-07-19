@@ -1,4 +1,5 @@
 import { PointerEvent } from "react";
+import { removeDuplicates } from "../../functions/removeDuplicates";
 import { LineSegment } from "../Data/LineSegment";
 import { Vector2 } from "../Data/Vector2";
 import { WallTile } from "../Tiles/WallTile";
@@ -8,28 +9,53 @@ import { EditorData } from "./EditorData";
 export class BoxEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
     start: Vector2 | undefined;
+    end: Vector2 | undefined;
+    private get currentBox(): LineSegment[] {
+        if (this.start !== undefined && this.end !== undefined) {
+            return this.box(this.start, this.end);
+        }
+        return []
+    };
+
+    private get boxCells(): Vector2[] { return removeDuplicates(this.currentBox.flatMap(line => line.toCells())) ?? [] }
 
     onPointerDown(event: PointerEvent<Element>) {
         this.start = this.data.getHoveredCell(event);
+        this.end = this.start.clone();
     }
 
     onPointerMove(event: PointerEvent<Element>) {
-       
+        if (this.data.isPointerDown && this.start !== undefined && this.end !== undefined) {
+            const hoveredCell = this.data.getHoveredCell(event);
+            if (!this.end.equals(hoveredCell)) {
+                const toRemove = new Set<string>(this.boxCells.map(cell => JSON.stringify(cell)));
+                const [ghostTilePositions, setGhostTilePositions] = this.data.ghostTilePositions;
+                setGhostTilePositions( positions => positions.filter( cell => !toRemove.has(JSON.stringify(cell)) ) )
+                this.end = hoveredCell.clone();
+                setGhostTilePositions( positions => positions.concat( this.boxCells ) )
+            }
+        }
     }
 
     onPointerUp(event: PointerEvent<Element>) {
-        const [map, setMap] = this.data.mapData;
-        const hoveredCell = this.data.getHoveredCell(event);
-        if (this.data.isPointerDown && this.start !== undefined) {
-            const firstCorner = new Vector2(this.start.row, hoveredCell.col);
-            const secondCorner = new Vector2(hoveredCell.row, this.start.col);
-            [new LineSegment(this.start, firstCorner), new LineSegment(firstCorner, hoveredCell), new LineSegment(hoveredCell, secondCorner), new LineSegment(secondCorner, this.start)].forEach(line => {
-                line.toCells().forEach(cell => {
+        console.log(this.start, this.end);
+        if (this.start !== undefined && this.end !== undefined) {
+            const [map, setMap] = this.data.mapData;
+            console.log('box cell count:' + this.boxCells.length);
+            this.boxCells.forEach(cell => {
                 if (map.inBounds(cell.row, cell.col)) {
                     setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
-                }});
+                } 
             })
         }
+        this.start = undefined;
+        this.end = undefined;
+    }
+
+    box(start: Vector2, end: Vector2): LineSegment[] {
+        const firstCorner = new Vector2(start.row, end.col);
+        const secondCorner = new Vector2(end.row, start.col);
+        return [new LineSegment(start, firstCorner), new LineSegment(firstCorner, end), new LineSegment(end, secondCorner), new LineSegment(secondCorner, start)];
     }
 
 }

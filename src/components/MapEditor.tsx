@@ -8,7 +8,7 @@ import { GameMap } from '../classes/GameMap'
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./mapeditor.css"
-import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox } from "react-icons/fa"
+import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH } from "react-icons/fa"
 import { EditorData } from '../classes/Editor/EditorData';
 import { EraseEditMode } from '../classes/Editor/EraseEditMode';
 import { DrawEditMode } from '../classes/Editor/DrawEditMode';
@@ -16,13 +16,15 @@ import { LineEditMode } from '../classes/Editor/LineEditMode';
 import { BoxEditMode } from '../classes/Editor/BoxEditMode';
 import { TileCreator } from './TileCreator';
 import { Tile } from '../interfaces/Tile';
+import { EllipseEditMode } from '../classes/Editor/EllipseEditMode';
 
 
 export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMap>, tileData: StatefulData<Tile[]> }) => {
-  enum EditorEditMode { MOVE, ZOOM, DRAW, ERASE, LINE, BOX }
+  enum EditorEditMode { MOVE, ZOOM, DRAW, ERASE, LINE, BOX, ELLIPSE }
   const [map, setMap] = mapData;
   const [savedTiles, setSavedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(new WallTile());
+  const [ghostTilePositions, setGhostTilePositions] = useState<Vector2[]>([]);
   const [cursor, setCursor] = useState<string>('crosshair');
   const [view, setView] = useState<View>(new View(new Vector2(0.5, 0.5), 10));
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,18 +55,20 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
       mapData: mapData,
       viewData: [view, setView],
       getHoveredCell: getHoveredCell,
-      selectedTile: selectedTile
+      selectedTile: selectedTile,
+      ghostTilePositions: [ghostTilePositions, setGhostTilePositions]
     }
   }
   
-  const editorModes: {[key in EditorEditMode]: EditMode} = { 
+  const editorModes: MutableRefObject<{[key in EditorEditMode]: EditMode}> = useRef({ 
     [EditorEditMode.DRAW]: new DrawEditMode(getEditorData()),
     [EditorEditMode.ZOOM]: new ZoomEditMode(getEditorData()),
     [EditorEditMode.MOVE]: new MoveEditMode(getEditorData()),
     [EditorEditMode.ERASE]: new EraseEditMode(getEditorData()),
     [EditorEditMode.LINE]: new LineEditMode(getEditorData()),
-    [EditorEditMode.BOX]: new BoxEditMode(getEditorData())
-  }
+    [EditorEditMode.BOX]: new BoxEditMode(getEditorData()),
+    [EditorEditMode.ELLIPSE]: new EllipseEditMode(getEditorData())
+  });
   const [editMode, setEditMode] = useState<EditorEditMode>(EditorEditMode.DRAW);
 
   const center: (position: Vector2) => void = (position: Vector2) => {
@@ -83,6 +87,16 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         }
       }
     }
+  }
+
+  function renderGhostTiles(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
+    if (ghostTilePositions.length === 0) return;
+    const oldData = { globalAlpha: context.globalAlpha, fillStyle: context.fillStyle }
+    context.globalAlpha = 0.5;
+    context.fillStyle = selectedTile.color().toRGBString();
+    ghostTilePositions.forEach(pos => drawCell(canvas, context, pos.row, pos.col))
+    context.globalAlpha = oldData.globalAlpha;
+    context.fillStyle = oldData.fillStyle;
   }
 
   class Innerclass {
@@ -111,7 +125,6 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
   }
 
   function drawCell(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, row: number, col: number) {
-    console.log(view);
     context.fillRect((col - view.coordinates.col) * view.cellSize, (row - view.coordinates.row) * view.cellSize, view.cellSize, view.cellSize  );
   }
 
@@ -125,6 +138,7 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         context.fillRect(0, 0, canvas.width, canvas.height);
         renderWalls(canvas, context);
         renderGrid(canvas, context);
+        renderGhostTiles(canvas, context);
 
         context.globalAlpha = 0.5;
         context.fillStyle = 'blue';
@@ -135,35 +149,35 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
   }
 
   function onPointerMove(event: PointerEvent<Element>) {
-    editorModes[editMode].setEditorData(getEditorData())
-    editorModes[editMode].onPointerMove?.(event);
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onPointerMove?.(event);
       lastHoveredCell.current = getHoveredCell(event);
       render();
   }
   
   function onPointerDown(event: PointerEvent<Element>) {
     isPointerDown.current = true;
-    editorModes[editMode].setEditorData(getEditorData())
-    editorModes[editMode].onPointerDown?.(event);
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onPointerDown?.(event);
     lastHoveredCell.current = getHoveredCell(event);
   }
 
   function onPointerUp(event: PointerEvent<Element>) {
-    editorModes[editMode].setEditorData(getEditorData())
-    editorModes[editMode].onPointerUp?.(event);
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onPointerUp?.(event);
     isPointerDown.current = false;
   }
 
   function onPointerLeave(event: PointerEvent<Element>) {
-    editorModes[editMode].setEditorData(getEditorData())
-    editorModes[editMode].onPointerLeave?.(event);
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onPointerLeave?.(event);
     isPointerDown.current = false;
   }
 
   useEffect(render)
 
   useEffect(() => {
-    setCursor(editorModes[editMode].cursor())
+    setCursor(editorModes.current[editMode].cursor())
   }, [editMode])
 
   function updateCanvasSize() {
@@ -195,6 +209,7 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         <button className={`edit-button ${ editMode === EditorEditMode.ERASE ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.ERASE)}> <FaEraser /> </button>
         <button className={`edit-button ${ editMode === EditorEditMode.LINE ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.LINE)}> <FaLine /> </button>
         <button className={`edit-button ${ editMode === EditorEditMode.BOX ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.BOX)}> <FaBox /> </button>
+        <button className={`edit-button ${ editMode === EditorEditMode.ELLIPSE ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.ELLIPSE)}> <FaEllipsisH /> </button>
       </div>
 
       <div className="tile-picker">

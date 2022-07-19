@@ -12,4 +12,5 @@ export interface EditorData {
     isPointerDown: boolean;
     getHoveredCell: (event: PointerEvent<Element>) => Vector2;
     selectedTile: Tile;
+    ghostTilePositions: StatefulData<Vector2[]>
 }
