@@ -8,13 +8,13 @@ html, body, .app, #root {
     background-color: blue;
 }
 
-/* *:not(input) {
+*:not(input) {
     user-select: none;
-} */
+}
 
-/* *:not(canvas, input) {
+*:not(canvas, input, button) {
     touch-action: none;
-} */
+}
 
 .menu-switch-buttons {
     position: absolute;
