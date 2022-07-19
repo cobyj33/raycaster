@@ -6,6 +6,9 @@ export class EmptyTile implements Tile {
     constructor() { }
     color() { return new Color(30, 30, 30, 30); }
     clone() { return new EmptyTile(); }
+    canCollide(): boolean {
+        return false;
+    }
     canHit(): boolean {
         return false;
     }

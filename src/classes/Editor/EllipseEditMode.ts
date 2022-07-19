@@ -1,4 +1,5 @@
-import { PointerEvent } from "react";
+import { hover } from "@testing-library/user-event/dist/hover";
+import { KeyboardEvent, PointerEvent } from "react";
 import { removeDuplicates } from "../../functions/removeDuplicates";
 import { Ellipse } from "../Data/Ellipse";
 import { LineSegment } from "../Data/LineSegment";
@@ -11,6 +12,8 @@ export class EllipseEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
     start: Vector2 | undefined;
     end: Vector2 | undefined;
+    circleLocked: boolean = false;
+
     private ellipse: Ellipse = new Ellipse(new Vector2(0, 0), new Vector2(0, 0));
     private get currentCells(): Vector2[] {
         if (this.start !== undefined && this.end !== undefined) {
@@ -35,7 +38,14 @@ export class EllipseEditMode extends EditMode {
                 const toRemove = new Set<string>(this.currentCells.map(cell => JSON.stringify(cell)));
                 const [ghostTilePositions, setGhostTilePositions] = this.data.ghostTilePositions;
                 setGhostTilePositions( positions => positions.filter( cell => !toRemove.has(JSON.stringify(cell)) ) )
-                this.end = hoveredCell.clone();
+                
+                if (this.circleLocked) {
+                    const sideLength: number = Math.min(Math.abs(hoveredCell.row - this.start.row), Math.abs(hoveredCell.col - this.start.col));
+                    this.end = this.start.add( new Vector2( hoveredCell.row < this.start.row ? -sideLength : sideLength, hoveredCell.col < this.start.col ? -sideLength : sideLength ) )
+                } else {
+                    this.end = hoveredCell.clone();
+                }
+
                 setGhostTilePositions( positions => positions.concat( this.currentCells ) )
             }
         }
@@ -51,9 +61,29 @@ export class EllipseEditMode extends EditMode {
                     setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
                 } 
             })
+            
+            const [ghostTilePositions, setGhostTilePositions] = this.data.ghostTilePositions;
+            const toRemove = new Set<string>(this.currentCells.map(cell => JSON.stringify(cell)));
+            setGhostTilePositions( positions => positions.filter( cell =>  !toRemove.has(JSON.stringify(cell)) ) )
         }
         this.start = undefined;
         this.end = undefined;
     }
+
+    onKeyDown(event: KeyboardEvent<Element>) {
+        console.log('ellipse key down')
+        if (event.code === "ShiftLeft") {
+            console.log('circle locked');
+            this.circleLocked = true;
+        }
+    }
+
+    onKeyUp(event: KeyboardEvent<Element>) {
+        if (event.code === "ShiftLeft") {
+            this.circleLocked = false;
+        }
+    }
+
+
 
 }

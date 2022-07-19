@@ -23,7 +23,7 @@ const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITO
 
 function App() {
   const [customTiles, setCustomTiles] = useState<Tile[]>([new WallTile()]);
-  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(50, 50))   );
+  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(10, 10))   );
   const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
   const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
 
@@ -48,7 +48,7 @@ function App() {
 
   return (
     <div className="app" onKeyDown={(event) => keyHandler.current.onKeyDown(event)} onKeyUp={(event) => keyHandler.current.onKeyUp(event)} tabIndex={0}>
-      { getMenu(currentMenu)}
+      { getMenu(currentMenu) }
       <div className='menu-switch-buttons'>
         <button className='menu-switch-button back'  onClick={() => setCurrentMenu(menus.back()) } onFocus={(event) => event.target.blur()}> To: { menus.peekBack().toString() } </button>
         <button className='menu-switch-button forward' onClick={() => setCurrentMenu(menus.forward())} onFocus={(event) => event.target.blur()}> To: { menus.peekForward().toString() } </button>

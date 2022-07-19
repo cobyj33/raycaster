@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, MutableRefObject, PointerEvent } from 'react'
+import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 import { Vector2 } from '../classes/Data/Vector2';
 import { View } from '../classes/Data/View';
 import { EditMode } from '../classes/Editor/EditMode';
@@ -99,15 +99,6 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
     context.fillStyle = oldData.fillStyle;
   }
 
-  class Innerclass {
-    name: string
-    constructor(name: string) {
-      this.name = name;
-    }
-  }
-
-  console.log(new Innerclass('jacoby').name);
-
   function renderGrid(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
     context.strokeStyle = 'black';
     context.beginPath()
@@ -139,7 +130,6 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         renderWalls(canvas, context);
         renderGrid(canvas, context);
         renderGhostTiles(canvas, context);
-
         context.globalAlpha = 0.5;
         context.fillStyle = 'blue';
         drawCell(canvas, context, lastHoveredCell.current.row, lastHoveredCell.current.col);
@@ -172,6 +162,16 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
     editorModes.current[editMode].setEditorData(getEditorData())
     editorModes.current[editMode].onPointerLeave?.(event);
     isPointerDown.current = false;
+  }
+
+  function onKeyDown(event: KeyboardEvent<Element>) {
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onKeyDown?.(event);
+  }
+
+  function onKeyUp(event: KeyboardEvent<Element>) {
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onKeyUp?.(event);
   }
 
   useEffect(render)
@@ -216,7 +216,7 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         { savedTiles.map(tile => <button key={`tile: ${tile.name}`} onClick={() => setSelectedTile(tile)}> {tile.name}</button>)}
       </div>
 
-      <canvas style={{cursor: cursor}} className="editing-canvas" ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave}> Unsupported Web Browser </canvas>
+      <canvas style={{cursor: cursor}} className="editing-canvas" ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
 
       <TileCreator className='editor-tile-creator' tileData={tileData} />
     </div>

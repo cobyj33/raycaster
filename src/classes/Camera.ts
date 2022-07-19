@@ -12,38 +12,45 @@ import { Vector2 } from "./Data/Vector2";
 
 
 export class Camera implements ICamera {
+    private static standardFOV: Angle = Angle.fromDegrees(70);
     
     readonly map: GameMap;
     readonly position: Vector2;
     readonly direction: Vector2;
 
-    readonly fieldOfView: Angle = Angle.fromDegrees(70);
+    readonly fieldOfView: Angle = Camera.standardFOV;
     readonly viewDistance: number = 50;
 
+    readonly lookingAngle: Angle = Angle.zero;
     readonly moveAmount = 0.25;
     readonly sensitivity = 1;
 
-    constructor(map: GameMap, position: Vector2, direction: Vector2, fov: Angle = Angle.fromDegrees(70)) {
+    constructor(map: GameMap, position: Vector2, direction: Vector2, fov: Angle = Camera.standardFOV, lookingAngle: Angle = Angle.zero) {
         this.map = map;
         this.position = position.clone();
         this.direction = direction.clone();
         this.fieldOfView = fov;
+        this.lookingAngle = lookingAngle;
     }
 
     setDirection(direction: Vector2): Camera {
-        return new Camera(this.map, this.position, direction, this.fieldOfView);
+        return new Camera(this.map, this.position, direction, this.fieldOfView, this.lookingAngle);
     }
 
     setPosition(position: Vector2): Camera {
-        return new Camera(this.map, position, this.direction, this.fieldOfView);
+        return new Camera(this.map, position, this.direction, this.fieldOfView, this.lookingAngle);
     }
 
     setMap(map: GameMap): Camera {
-        return new Camera(map, this.position, this.direction, this.fieldOfView);
+        return new Camera(map, this.position, this.direction, this.fieldOfView, this.lookingAngle);
     }
 
-    setFOV(fov: Angle): Camera {
-        return new Camera(this.map, this.position, this.direction, fov);
+    setFOV(fieldOfView: Angle): Camera {
+        return new Camera(this.map, this.position, this.direction, fieldOfView, this.lookingAngle);
+    }
+
+    setLookingAngle(lookingAngle: Angle): Camera {
+        return new Camera(this.map, this.position, this.direction, this.fieldOfView, lookingAngle);
     }
     
     getCameraPlane(): LineSegment {
@@ -91,7 +98,7 @@ export class Camera implements ICamera {
 
             const rayDirection: Vector2 = intersection.subtract(this.position);
             const ray: Ray = new Ray(this.position, rayDirection, (hit) => {
-                const distanceFromHitToPlane: number = Vector2.distance(intersection, hit.position) * Math.sin( Math.min(Vector2.angleBetween( perpendicularDirection, rayDirection ).radians, Vector2.angleBetween( perpendicularDirection.toLength(-1), rayDirection ).radians ) );
+                const distanceFromHitToPlane: number = Vector2.distance(intersection, hit.position) * Math.sin( Math.min(Vector2.angleBetween( perpendicularDirection, rayDirection ).radians, Vector2.angleBetween( perpendicularDirection.scale(-1), rayDirection ).radians ) );
                 cameraLineData.push(new CameraLine( (1.0 / distanceFromHitToPlane), hit ));
             }, () => { cameraLineData.push(CameraLine.getEmpty()) });
             ray.cast(this.viewDistance, this.map);
@@ -100,16 +107,21 @@ export class Camera implements ICamera {
         return cameraLineData;
     }
 
-    render(canvas: HTMLCanvasElement): void {
+    render(finalCanvas: HTMLCanvasElement): void {
+        const canvas = document.createElement("canvas");
+        canvas.width = finalCanvas.width;
+        canvas.height = finalCanvas.height;
+
         const cameraLineData: CameraLine[] = this.castRays(canvas.width);
         const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
 
         if (context != null) {
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.lineWidth = 1;
-            const centerHeight: number = canvas.height / 2;
+            const centerHeight: number = Math.trunc(canvas.height / 2 + Math.tan(this.lookingAngle.radians) * canvas.height / 2);
             context.beginPath();
             let lastColor: Color | null = null;
+            context.strokeStyle = 'white';
 
             for (let col = 0; col < cameraLineData.length; col++) {
                 const currentLine: CameraLine = cameraLineData[col];
@@ -123,7 +135,6 @@ export class Camera implements ICamera {
 
                     if (lastColor !== null) {
                         context.strokeStyle = lastColor.toRGBString();
-                        // console.log('color change');
                         if (!color.equals(lastColor)) {
                             context.stroke();
                             context.beginPath();
@@ -136,11 +147,17 @@ export class Camera implements ICamera {
 
 
 
-                const lineHeightInPixels: number = currentLine.lineLengthPercentage * canvas.height;
-                context.moveTo(col, centerHeight - ( lineHeightInPixels / 2));
-                context.lineTo(col, centerHeight + ( lineHeightInPixels / 2));
+                const lineHeightInPixels: number = Math.trunc(currentLine.lineLengthPercentage * canvas.height);
+                context.moveTo(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)) );
+                context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
             }
             context.stroke();
+        }
+
+
+        const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
+        if (finalCanvasContext !== null && finalCanvasContext !== undefined) {
+            finalCanvasContext.drawImage(canvas, 0, 0);
         }
     }
 

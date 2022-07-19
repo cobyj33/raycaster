@@ -83,6 +83,10 @@ export class Vector2 implements IClonable<Vector2> {
     int(): Vector2 {
         return new Vector2(Math.trunc(this.row), Math.trunc(this.col));
     }
+
+    round(): Vector2 {
+        return new Vector2(Math.round(this.row), Math.round(this.col));
+    }
     
     static fromAngle(angle: Angle): Vector2 {
         return new Vector2( -Math.sin(angle.radians), Math.cos(angle.radians) );

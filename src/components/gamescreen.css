@@ -11,4 +11,6 @@
 .game-canvas {
     aspect-ratio: 16 / 9;
     width: 100%;
+    background-color: black;
+    image-rendering: pixelated;
 }

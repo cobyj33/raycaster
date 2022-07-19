@@ -1,4 +1,4 @@
-import { PointerEvent } from "react";
+import { KeyboardEvent, PointerEvent } from "react";
 import { removeDuplicates } from "../../functions/removeDuplicates";
 import { LineSegment } from "../Data/LineSegment";
 import { Vector2 } from "../Data/Vector2";
@@ -10,6 +10,7 @@ export class BoxEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
     start: Vector2 | undefined;
     end: Vector2 | undefined;
+    boxLocked: boolean = false;
     private get currentBox(): LineSegment[] {
         if (this.start !== undefined && this.end !== undefined) {
             return this.box(this.start, this.end);
@@ -31,7 +32,14 @@ export class BoxEditMode extends EditMode {
                 const toRemove = new Set<string>(this.boxCells.map(cell => JSON.stringify(cell)));
                 const [ghostTilePositions, setGhostTilePositions] = this.data.ghostTilePositions;
                 setGhostTilePositions( positions => positions.filter( cell => !toRemove.has(JSON.stringify(cell)) ) )
-                this.end = hoveredCell.clone();
+
+                if (this.boxLocked) {
+                    const sideLength: number = Math.min(Math.abs(hoveredCell.row - this.start.row), Math.abs(hoveredCell.col - this.start.col));
+                    this.end = this.start.add( new Vector2( hoveredCell.row < this.start.row ? -sideLength : sideLength, hoveredCell.col < this.start.col ? -sideLength : sideLength ) )
+                } else {
+                    this.end = hoveredCell.clone();
+                }
+
                 setGhostTilePositions( positions => positions.concat( this.boxCells ) )
             }
         }
@@ -47,6 +55,10 @@ export class BoxEditMode extends EditMode {
                     setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
                 } 
             })
+
+            const [ghostTilePositions, setGhostTilePositions] = this.data.ghostTilePositions;
+            const toRemove = new Set<string>(this.boxCells.map(cell => JSON.stringify(cell)));
+            setGhostTilePositions( positions => positions.filter( cell =>  !toRemove.has(JSON.stringify(cell)) ) )
         }
         this.start = undefined;
         this.end = undefined;
@@ -56,6 +68,18 @@ export class BoxEditMode extends EditMode {
         const firstCorner = new Vector2(start.row, end.col);
         const secondCorner = new Vector2(end.row, start.col);
         return [new LineSegment(start, firstCorner), new LineSegment(firstCorner, end), new LineSegment(end, secondCorner), new LineSegment(secondCorner, start)];
+    }
+
+    onKeyDown(event: KeyboardEvent<Element>) {
+        if (event.code === "ShiftLeft") {
+            this.boxLocked = true;
+        }
+    }
+
+    onKeyUp(event: KeyboardEvent<Element>) {
+        if (event.code === "ShiftLeft") {
+            this.boxLocked = false;
+        }
     }
 
 }

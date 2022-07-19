@@ -1,4 +1,4 @@
-import React from "react";
+import React, { KeyboardEvent } from "react";
 import { Angle } from "./Data/Angle";
 import { Camera } from "./Camera";
 import { GameMap } from "./GameMap";
@@ -15,7 +15,7 @@ export const canMove = (currentPosition: Vector2, currentDirection: Vector2, dis
     const nextRowOnMap = Math.floor(checkingPosition.row);
     const nextColOnMap = Math.floor(checkingPosition.col);
     if (map.inBounds(nextRowOnMap, nextColOnMap)) {
-        if (!(map.at(nextRowOnMap, nextColOnMap) instanceof WallTile) ) {
+        if (!(map.at(nextRowOnMap, nextColOnMap).canCollide()) ) {
             return true
         }
     }
@@ -79,16 +79,20 @@ export class BirdsEyeCameraControls extends KeyHandler {
 
         const moveForward = () => setCamera( (camera) => camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) ))
         const moveBackward = () => setCamera( (camera) => camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.sensitivity, camera.map) ))
-
         const turnRight = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(-this.sensitivity))));
         const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(this.sensitivity))));
         
+        const slowDown = (e: KeyboardEvent<Element>) => {
+            this.sensitivity = 0.5;
+        }
+
         super([
             new KeyBinding({ code: 'KeyW', onDown: moveForward, whileDown: moveForward }),
             new KeyBinding({ code: 'KeyA', onDown: turnLeft, whileDown: turnLeft }),
             new KeyBinding( {code: 'KeyS', onDown: moveBackward, whileDown: moveBackward }),
             new KeyBinding( {code: 'KeyD', onDown: turnRight, whileDown: turnRight }),
-            new KeyBinding( {code: 'ShiftLeft', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1})
+            new KeyBinding( {code: 'ShiftLeft', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1}),
+            new KeyBinding( { code: "KeyQ", onDown: slowDown, onUp: () => this.sensitivity = 1})
         ])
     }
 }

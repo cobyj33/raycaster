@@ -21,13 +21,17 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
     const mouseControls = useRef<(event: PointerEvent<Element>) => void>((event: PointerEvent<Element>) => {
         console.log("mouse controlling");
         const xMovement = -event.movementX;
+        const yMovement = Angle.fromRadians(-Math.sin(event.movementY / 10 * Angle.DEGREESTORADIANS));
         setCamera( (camera) => camera.setDirection(camera.direction.rotate( Angle.fromDegrees( xMovement / 40 ) )) );
+        setCamera( (camera) => camera.setLookingAngle( Angle.fromRadians( camera.lookingAngle.radians + yMovement.radians )  ) );
     });
 
     function render() {
         if (canvasRef.current != null) {
             canvasRef.current.width = canvasRef.current.clientWidth;
             canvasRef.current.height = canvasRef.current.clientHeight;
+            // canvasRef.current.width = 16 * 50;
+            // canvasRef.current.height = 9 * 50;
             cameraData[0].render(canvasRef.current);
         }
     }
@@ -63,9 +67,15 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
 
     // useResizeObserver( updateCanvasSize )
 
+    function runPointerLockOnMouse(event: PointerEvent<Element>) {
+        if (event.pointerType === 'mouse') {
+            bindPointerLock()
+        }
+    }
+
   return (
     <div   ref={containerRef} className="container" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
-        <canvas onTouchStart={() => setShowTouchControls(true)} onPointerDown={(event) => {  if (event.pointerType === 'mouse') { bindPointerLock() } }} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} style={{backgroundColor: 'black'}} tabIndex={0}> </canvas>
+        <canvas onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}
     </div>

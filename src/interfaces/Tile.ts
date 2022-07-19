@@ -5,5 +5,6 @@ export interface Tile extends IClonable<Tile> {
     name: string;
     color(): Color;
     canHit(): boolean;
+    canCollide(): boolean;
     toString(): string;
 }

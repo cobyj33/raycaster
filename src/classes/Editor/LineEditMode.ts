@@ -41,6 +41,10 @@ export class LineEditMode extends EditMode {
             if (map.inBounds(cell.row, cell.col)) {
                 setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
             }});
+
+            const [ghostTilePositions, setGhostTilePositions] = this.data.ghostTilePositions;
+            const toRemove = new Set<string>(new LineSegment(this.start, this.end).toCells().map(cell => JSON.stringify(cell)));
+            setGhostTilePositions( positions => positions.filter( cell =>  !toRemove.has(JSON.stringify(cell)) ) )
         }
         this.start = undefined;
         this.end = undefined

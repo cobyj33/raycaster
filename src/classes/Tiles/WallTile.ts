@@ -6,6 +6,7 @@ export class WallTile implements Tile {
     constructor() { }
     color() { return new Color(255, 255, 255, 255); }
     clone() { return new WallTile() }
+    canCollide() { return true; }
     canHit(): boolean {
         return true;
     }

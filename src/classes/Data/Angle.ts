@@ -2,6 +2,12 @@ export class Angle {
     public static readonly RADIANSTODEGREES: number = 180.0 / Math.PI;
     public static readonly DEGREESTORADIANS: number = Math.PI / 180.0;
 
+    public static readonly zero = new Angle(0);
+    public static readonly quarter = new Angle(Math.PI / 2)
+    public static readonly half = new Angle(Math.PI)
+    public static readonly threeQuarters = new Angle(3 * Math.PI / 2)
+
+
     private _radians: number = 0;
     private _degrees: number = 0;
     

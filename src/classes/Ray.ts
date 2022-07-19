@@ -55,20 +55,28 @@ export class Ray {
 
         let currentRowPosition: Vector2 = this.origin.clone();
         if (this.direction.row !== 0) {
-            const rowStepDirection: number = this.direction.row < 0 ? -1 : 1;          
+            const rowStepDirection: number = this.direction.row < 0 ? -1 : 1;
+
             while (firstRowHit == null && Vector2.distance(currentRowPosition, this.origin) < distance && map.inBounds(currentRowPosition.row, currentRowPosition.col)) {
                 const nextRow: number = rowStepDirection > 0 ? Math.floor(currentRowPosition.row + rowStepDirection) : Math.ceil(currentRowPosition.row + rowStepDirection);
                 currentRowPosition = currentRowPosition.add( this.direction.alterToRow(nextRow - currentRowPosition.row) );
+                if (!Number.isInteger(currentRowPosition.row)) {
+                    currentRowPosition = new Vector2(Math.round(currentRowPosition.row), currentRowPosition.col);
+                }
                 const tileToCheck: Vector2 = rowStepDirection > 0 ? currentRowPosition.int() : new Vector2( Math.floor( currentRowPosition.row + rowStepDirection), Math.floor(currentRowPosition.col));
                 if (this.testHit(tileToCheck, map)) {
+                    // console.log('accepted: ', tileToCheck);
                     const tile = map.at(tileToCheck.row, tileToCheck.col);
                     firstRowHit = new RaycastHit(currentRowPosition, this.direction.row <= 0 ? Cardinal.NORTH : Cardinal.SOUTH, tile);
                 }
             }
+
+            // if (firstRowHit == null) {
+            //     console.log('unaccepted: ', currentRowPosition);
+            // }
         }
 
         const rowDistance = Vector2.distance(currentRowPosition, this.origin);
-
         if (this.direction.col !== 0) {
             let currentColPosition: Vector2 = this.origin.clone();
             let distanceTraveled = 0;
@@ -76,11 +84,14 @@ export class Ray {
             while (firstColHit == null && Vector2.distance(currentColPosition, this.origin) < distance && map.inBounds(currentColPosition.row, currentColPosition.col)) {
                 const nextCol: number = colStepDirection > 0 ? Math.floor(currentColPosition.col + colStepDirection) : Math.ceil(currentColPosition.col + colStepDirection);
                 distanceTraveled += nextCol - currentColPosition.col;
-
                 if (distanceTraveled > rowDistance && (firstRowHit !== null && firstRowHit !== undefined)) { break; }
-
                 currentColPosition = currentColPosition.add( this.direction.alterToCol(nextCol - currentColPosition.col) );
-    
+                if (!Number.isInteger(currentColPosition.col)) {
+                    currentColPosition = new Vector2(currentColPosition.row, Math.round(currentColPosition.col));
+                }
+
+
+
                 const tileToCheck: Vector2 = colStepDirection > 0 ? currentColPosition.int() : new Vector2(Math.floor(currentColPosition.row), Math.floor( currentColPosition.col + colStepDirection  ));
                 if (this.testHit(tileToCheck, map)) {
                     const tile = map.at(tileToCheck.row, tileToCheck.col);
