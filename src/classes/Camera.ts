@@ -87,8 +87,8 @@ export class Camera implements ICamera {
 
     private castRays(lineCount: number): CameraLine[] {
         const cameraLineData: CameraLine[] = [];
-        const startingCameraPlaneLocation: Vector2 = this.position.add(this.direction.rotate(Angle.fromDegrees( this.fieldOfView.degrees / 2.0 )));
-        const endingCameraPlaneLocation: Vector2 = this.position.add(this.direction.rotate(Angle.fromDegrees( -this.fieldOfView.degrees / 2.0 )));
+        const startingCameraPlaneLocation: Vector2 = this.position.add(this.direction.rotate(Angle.fromDegrees( this.fieldOfView.degrees / 2.0 )).toLength(0.01)  );
+        const endingCameraPlaneLocation: Vector2 = this.position.add(this.direction.rotate(Angle.fromDegrees( -this.fieldOfView.degrees / 2.0 )).toLength(0.01) );
         const perpendicularDirection: Vector2 = endingCameraPlaneLocation.subtract(startingCameraPlaneLocation);
         const distanceBetweenStartAndEnd: number = Vector2.distance(startingCameraPlaneLocation, endingCameraPlaneLocation);
         let currentCameraPlaneLocation: Vector2 = startingCameraPlaneLocation.clone();
@@ -123,7 +123,7 @@ export class Camera implements ICamera {
 
         if (context != null) {
             context.clearRect(0, 0, canvas.width, canvas.height);
-
+            context.globalCompositeOperation = 'source-over';
             context.lineWidth = 1;
             console.log("looking angle: " + this.lookingAngle);
             const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(this.lookingAngle.radians) * canvas.height / 2));
@@ -132,6 +132,8 @@ export class Camera implements ICamera {
             context.fillStyle = Camera.skyColor.toRGBString();
             context.fillRect(0, 0, canvas.width, centerHeight);
             context.globalAlpha = 1;
+            context.lineWidth = 2;
+            context.lineCap = 'square';
 
             context.beginPath();
             let lastColor: Color | null = null;
@@ -160,9 +162,33 @@ export class Camera implements ICamera {
                 const lineHeightInPixels: number = Math.trunc(currentLine.lineLengthPercentage * canvas.height);
                 context.moveTo(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)) );
                 context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
+                // context.fillStyle = 'white';
+                // context.fillRect(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)), 1, lineHeightInPixels);
+                // context.beginPath();
+                // context.strokeStyle="white";
+                // context.fill(col, centerHeight - 10);
+                // context.lineTo(col, centerHeight + 10);
             }
             context.stroke();
         }
+
+        // if (context !== null && context !== undefined) {
+        //     context.fillStyle = 'white';
+        //     context.strokeStyle = 'white';
+        //     context.globalAlpha = 1;
+        //     context.lineWidth = 2;
+            
+        //     context.beginPath();
+        //     for (let i = 0; i < 100; i++) {
+        //         context.moveTo(i, 0);
+        //         context.lineTo(i, 100);
+        //     }
+        //     context.stroke();
+
+        //     context.fillRect(200, 0, 100, 100);
+
+        // }
+        
 
 
         const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
