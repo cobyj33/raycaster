@@ -1,4 +1,4 @@
-import { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState } from 'react'
+import { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera'
 import {  FirstPersonCameraControls } from '../classes/CameraControls';
@@ -74,9 +74,14 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
         }
     }
 
+    function onWheel(event: WheelEvent<Element>) {
+        console.log(event.deltaY);
+        setCamera(camera => camera.setFOV(camera.fieldOfView.add( Angle.fromDegrees(event.deltaY / 50))));
+    }
+
   return (
     <div   ref={containerRef} className="container screen" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
-        <canvas onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
+        <canvas onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}
     </div>

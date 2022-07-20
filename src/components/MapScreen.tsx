@@ -1,4 +1,4 @@
-import React, { PointerEvent, RefObject, useEffect, useRef, useState } from 'react'
+import React, { PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
 import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera';
 import { BirdsEyeCameraControls } from '../classes/CameraControls';
@@ -217,10 +217,15 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     function onPointerLeave(event: PointerEvent<Element>) { reset(); }
     function onPointerCancel(event: PointerEvent<Element>) { reset(); }
 
+    function onWheel(event: WheelEvent<Element>) {
+        console.log(event.deltaY);
+        setCamera(camera => camera.setFOV(camera.fieldOfView.add( Angle.fromDegrees(event.deltaY / 50))));
+    }
+
 
     return (
     <div ref={containerRef} className="map-container screen" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
-        <canvas style={{cursor: cursor}} className="map-canvas" onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
+        <canvas style={{cursor: cursor}} className="map-canvas" onWheel={onWheel} onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef} width={map.Dimensions.rows * getMapScale()} height={map.Dimensions.rows * getMapScale()}> </canvas>
 
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 

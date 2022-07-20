@@ -13,6 +13,12 @@ import { Vector2 } from "./Data/Vector2";
 
 export class Camera implements ICamera {
     private static standardFOV: Angle = Angle.fromDegrees(70);
+    private static floorColor: Color = new Color(0, 135, 0, 255);
+    private static skyColor: Color = new Color(135, 206, 235, 255);
+    // private static floorColor: Color = new Color(0, 0, 0, 255);
+    // private static skyColor: Color = new Color(0, 0, 0, 255);
+
+
     
     readonly map: GameMap;
     readonly position: Vector2;
@@ -117,12 +123,18 @@ export class Camera implements ICamera {
 
         if (context != null) {
             context.clearRect(0, 0, canvas.width, canvas.height);
+
             context.lineWidth = 1;
             console.log("looking angle: " + this.lookingAngle);
             const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(this.lookingAngle.radians) * canvas.height / 2));
+            context.fillStyle = Camera.floorColor.toRGBString();
+            context.fillRect(0, centerHeight, canvas.width, canvas.height - centerHeight);
+            context.fillStyle = Camera.skyColor.toRGBString();
+            context.fillRect(0, 0, canvas.width, centerHeight);
+            context.globalAlpha = 1;
+
             context.beginPath();
             let lastColor: Color | null = null;
-            context.strokeStyle = 'white';
 
             for (let col = 0; col < cameraLineData.length; col++) {
                 const currentLine: CameraLine = cameraLineData[col];
@@ -145,9 +157,6 @@ export class Camera implements ICamera {
                 } else {
                     context.strokeStyle = 'white';
                 }
-
-
-
                 const lineHeightInPixels: number = Math.trunc(currentLine.lineLengthPercentage * canvas.height);
                 context.moveTo(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)) );
                 context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
