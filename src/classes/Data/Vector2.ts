@@ -66,7 +66,9 @@ export class Vector2 implements IClonable<Vector2> {
         return `Vector2: [ Row: ${this.row}, Col: ${this.col} Angle: ${ this.toAngle().degrees }]`
     }
 
-
+    translate(row: number, col: number): Vector2 {
+        return this.add(new Vector2(row, col));
+    }
 
     add(other: Vector2): Vector2 {
         return new Vector2(this.row + other.row, this.col + other.col);

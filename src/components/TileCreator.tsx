@@ -20,11 +20,11 @@ export const TileCreator = ({ tileData, className }: { tileData: StatefulData<Ti
 
   return (
     <div className={className}>
-        <input onChange={e => setName(e.target.value)  } value={name} />
-        <SketchPicker color={{ r: color.red, g: color.green, b: color.blue, a: color.alpha}} onChange={pickedColor => setColor(new Color(pickedColor.rgb.r, pickedColor.rgb.g, pickedColor.rgb.b, pickedColor.rgb.a ?? 255)) }/> 
-        <button onClick={() => setCanHit(!canHit)}> canHit: {canHit.toString()} </button>
-        <button onClick={() => setCanCollide(!canCollide)}> canCollide: {canCollide.toString()} </button>
-        <button onClick={saveTile}> Save Tile </button>
+        <input className='tile-creator-name-input' onChange={e => setName(e.target.value)  } value={name} />
+        <SketchPicker className='sketch-picker' color={{ r: color.red, g: color.green, b: color.blue, a: color.alpha}} onChange={pickedColor => setColor(new Color(pickedColor.rgb.r, pickedColor.rgb.g, pickedColor.rgb.b, pickedColor.rgb.a ?? 255)) }/> 
+        <button className='tile-creator-button tile-creator-canHit-button' onClick={() => setCanHit(!canHit)}> canHit: <b> {canHit.toString()} </b> </button>
+        <button className='tile-creator-button tile-creator-canCollide-button' onClick={() => setCanCollide(!canCollide)}> canCollide: <b> {canCollide.toString()} </b> </button>
+        <button className='tile-creator-button tile-creator-save-button' onClick={saveTile}> Save Tile </button>
     </div>
   )
 }

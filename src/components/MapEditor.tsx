@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback } from 'react'
 import { Vector2 } from '../classes/Data/Vector2';
 import { View } from '../classes/Data/View';
 import { EditMode } from '../classes/Editor/EditMode';
@@ -8,7 +8,7 @@ import { GameMap } from '../classes/GameMap'
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
 import "./mapeditor.css"
-import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH } from "react-icons/fa"
+import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH, FaUndo, FaRedo, FaHammer } from "react-icons/fa"
 import { EditorData } from '../classes/Editor/EditorData';
 import { EraseEditMode } from '../classes/Editor/EraseEditMode';
 import { DrawEditMode } from '../classes/Editor/DrawEditMode';
@@ -17,19 +17,25 @@ import { BoxEditMode } from '../classes/Editor/BoxEditMode';
 import { TileCreator } from './TileCreator';
 import { Tile } from '../interfaces/Tile';
 import { EllipseEditMode } from '../classes/Editor/EllipseEditMode';
+import { KeyHandler, useKeyHandler } from '../classes/KeySystem/KeyHandler';
+import { KeyBinding } from '../classes/KeySystem/KeyBinding';
+import { HistoryStack } from '../classes/Structures/HistoryStack';
 
 
 export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMap>, tileData: StatefulData<Tile[]> }) => {
-  enum EditorEditMode { MOVE, ZOOM, DRAW, ERASE, LINE, BOX, ELLIPSE }
+  enum EditorEditMode { MOVE = "Move", ZOOM = "Zoom", DRAW = "Draw", ERASE = "Erase", LINE = "Line", BOX = "Box", ELLIPSE = "Ellipse" }
+  const mapHistory = useRef<HistoryStack<GameMap>>(new HistoryStack<GameMap>());
   const [map, setMap] = mapData;
   const [savedTiles, setSavedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(new WallTile());
   const [ghostTilePositions, setGhostTilePositions] = useState<Vector2[]>([]);
   const [cursor, setCursor] = useState<string>('crosshair');
-  const [view, setView] = useState<View>(new View(new Vector2(0.5, 0.5), 10));
+  const [view, setView] = useState<View>(new View(new Vector2(0, 0), 10));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lastHoveredCell: MutableRefObject<Vector2> = useRef<Vector2>(new Vector2(0, 0));
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
+
+  const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
 
   const pointerPositionInCanvas = (event: PointerEvent<Element>): Vector2 => {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
@@ -141,8 +147,8 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
   function onPointerMove(event: PointerEvent<Element>) {
     editorModes.current[editMode].setEditorData(getEditorData())
     editorModes.current[editMode].onPointerMove?.(event);
-      lastHoveredCell.current = getHoveredCell(event);
-      render();
+    lastHoveredCell.current = getHoveredCell(event);
+    render();
   }
   
   function onPointerDown(event: PointerEvent<Element>) {
@@ -151,7 +157,7 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
     editorModes.current[editMode].onPointerDown?.(event);
     lastHoveredCell.current = getHoveredCell(event);
   }
-
+  
   function onPointerUp(event: PointerEvent<Element>) {
     editorModes.current[editMode].setEditorData(getEditorData())
     editorModes.current[editMode].onPointerUp?.(event);
@@ -163,10 +169,43 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
     editorModes.current[editMode].onPointerLeave?.(event);
     isPointerDown.current = false;
   }
+  
+  useEffect(() => {
+    if (mapHistory.current.empty === false) {
+      if (mapHistory.current.peek().equals(map) === false) {
+        mapHistory.current.pushState(map);
+      }
+    } else {
+      mapHistory.current.pushState(map);
+    }
+  }, [map])
+
+  function undo() {
+    console.log(mapHistory.current.length);
+    console.log(mapHistory.current.canGoBack());
+    if (mapHistory.current.canGoBack()) {
+      mapHistory.current.back();
+      setMap(mapHistory.current.state);
+    }
+  }
+
+  function redo() {
+    console.log(mapHistory.current.length);
+    if (mapHistory.current.canGoForward()) {
+      mapHistory.current.forward();
+      setMap(mapHistory.current.state);
+    }
+  }
 
   function onKeyDown(event: KeyboardEvent<Element>) {
     editorModes.current[editMode].setEditorData(getEditorData())
     editorModes.current[editMode].onKeyDown?.(event);
+
+    if (event.code === "KeyZ" && event.shiftKey === true && event.ctrlKey === true) {
+      redo();
+    } else if (event.code === "KeyZ" && event.ctrlKey === true) {
+      undo();
+    }
   }
 
   function onKeyUp(event: KeyboardEvent<Element>) {
@@ -176,32 +215,47 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
 
   useEffect(render)
 
+
   useEffect(() => {
     setCursor(editorModes.current[editMode].cursor())
   }, [editMode])
 
-  function updateCanvasSize() {
-    if (canvasRef.current !== null && canvasRef.current !== undefined) {
-      const canvas: HTMLCanvasElement = canvasRef.current;
-      const rect: DOMRect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-    }
-  }
-
+    
   useEffect(() => {
+    mapHistory.current.pushState(map);
+    function updateCanvasSize() {
+      if (canvasRef.current !== null && canvasRef.current !== undefined) {
+        const canvas: HTMLCanvasElement = canvasRef.current;
+        const rect: DOMRect = canvas.getBoundingClientRect();
+        const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
+
+        if (context !== null && context !== undefined) {
+          const data = context.getImageData(0, 0, canvas.width, canvas.height);
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+          context.putImageData(data, 0, 0);
+        } else {
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+        }
+        setView(view => view.withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
+      }
+    }
+
     if (canvasRef.current !== null && canvasRef.current !== undefined) {
       const canvas: HTMLCanvasElement = canvasRef.current;
       updateCanvasSize();
       setView(view => view.withCellSize( Math.trunc( Math.min( canvas.height / map.Dimensions.rows, canvas.width / map.Dimensions.cols  ) ) ))
       setView(view => view.withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
     }
+    window.addEventListener('resize', updateCanvasSize);
+    return () => window.removeEventListener('resize', updateCanvasSize);
   }, [])
 
-  // useResizeObserver(updateCanvasSize)
-    
+  // useResizeObserver(canvasRef, updateCanvasSize)
+  
   return (
-    <div className='editor-container'>
+    <div className='editor-container screen'>
       <div className="editing-buttons"> 
         <button className={`edit-button ${ editMode === EditorEditMode.DRAW ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.DRAW)}> <FaBrush /> </button>
         <button className={`edit-button ${ editMode === EditorEditMode.MOVE ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.MOVE)}> <FaArrowsAlt /> </button>
@@ -210,6 +264,12 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         <button className={`edit-button ${ editMode === EditorEditMode.LINE ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.LINE)}> <FaLine /> </button>
         <button className={`edit-button ${ editMode === EditorEditMode.BOX ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.BOX)}> <FaBox /> </button>
         <button className={`edit-button ${ editMode === EditorEditMode.ELLIPSE ? 'selected' : '' }`} onClick={() => setEditMode(EditorEditMode.ELLIPSE)}> <FaEllipsisH /> </button>
+        <button className={`edit-button ${ mapHistory.current.canGoBack() === false ? 'disabled' : '' }`} onClick={undo}> <FaUndo /> </button>
+        <button className={`edit-button ${ mapHistory.current.canGoForward() === false ? 'disabled' : '' }`} onClick={redo}> <FaRedo /> </button>
+      </div>
+
+      <div className='side-bar'>
+
       </div>
 
       <div className="tile-picker">
@@ -218,7 +278,11 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
 
       <canvas style={{cursor: cursor}} className="editing-canvas" ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
 
-      <TileCreator className='editor-tile-creator' tileData={tileData} />
+      <div className={`tile-creator-container ${tileCreatorOpened ? 'opened' : ''}`}>
+        <button className='editor-tile-creator-open-button' onClick={() => setTileCreatorOpened(!tileCreatorOpened)}> <FaHammer /> </button>
+          <TileCreator className={`editor-tile-creator`} tileData={tileData} />
+      </div>
+
     </div>
   )
 }

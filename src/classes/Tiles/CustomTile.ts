@@ -1,7 +1,7 @@
 import { Tile } from "../../interfaces/Tile";
 import { Color } from "../Data/Color";
 
-export class CustomTile implements Tile {
+export class CustomTile extends Tile {
     name: string;
     customColor: Color;
     _canHit: boolean;
@@ -13,6 +13,7 @@ export class CustomTile implements Tile {
     }
 
     constructor(name: string, color: Color, canHit: boolean, canCollide: boolean) {
+        super()
         this.name = name;
         this.customColor = color;
         this._canHit = canHit;

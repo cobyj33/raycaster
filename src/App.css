@@ -1,15 +1,22 @@
 html, body, .app, #root {
     margin: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 }
 
 .app {
-    background-color: blue;
+    background-color: black;
+    display: flex;
+    flex-direction: row;
+    z-index: -2;
 }
 
 *:not(input) {
     user-select: none;
+}
+
+.app * {
+    position: relative;
 }
 
 *:not(canvas, input, button) {
@@ -63,4 +70,88 @@ html, body, .app, #root {
 .menu-switch-button.forward:hover {
     transition: transform 0.25s;
     transform: translateX(5px);
+}
+
+.sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 100vh;
+    transition: transform 0.25s;
+    transform: translateX(-100%);
+    z-index: 1;
+}
+
+.sidebar-open-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    transform: translateX(100%);
+    background: none;
+    border: none;
+    color: white;
+    text-shadow: 1px 1px black;
+}
+
+.screen-picking-button {
+    background-color: black;
+    color: white;
+    border: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    font-family: monospace;
+    cursor: pointer;
+    transform: translateX(0);
+}
+
+.screen-picking-button.opened {
+    background: radial-gradient(lightgreen, rgb(185, 238, 155));
+}
+
+.screen-picking-button:hover {
+    transition: padding-bottom 0.25s padding-top 0.25s border-bottom 0.25s border-top 0.25s;
+    border-top: 2px solid white;
+    border-bottom: 2px solid white;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+.screen-picking-button::after {
+    transition: transform 0.25s;
+}
+
+.screen-picking-button:active {
+    transition: transform 0.5s box-shadow 0.5s border-right 0.5s border-left 0.5s;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+    transform: translateY(-5px);
+    box-shadow: 0px 5px 0px white;
+}
+
+.sidebar.opened {
+    transform: translateX(0);
+}
+
+@keyframes screenLoad {
+    0% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.screen {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0px;
+    animation: screenLoad;
+    animation-duration: 0.25s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in-out;
 }

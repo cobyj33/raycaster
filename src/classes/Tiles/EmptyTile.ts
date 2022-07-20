@@ -1,9 +1,9 @@
 import { Color } from "../Data/Color";
 import { Tile } from "../../interfaces/Tile";
 
-export class EmptyTile implements Tile {
+export class EmptyTile extends Tile {
     name: string = 'Empty Tile';
-    constructor() { }
+    constructor() { super() }
     color() { return new Color(30, 30, 30, 30); }
     clone() { return new EmptyTile(); }
     canCollide(): boolean {

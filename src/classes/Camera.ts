@@ -118,7 +118,8 @@ export class Camera implements ICamera {
         if (context != null) {
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.lineWidth = 1;
-            const centerHeight: number = Math.trunc(canvas.height / 2 + Math.tan(this.lookingAngle.radians) * canvas.height / 2);
+            console.log("looking angle: " + this.lookingAngle);
+            const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(this.lookingAngle.radians) * canvas.height / 2));
             context.beginPath();
             let lastColor: Color | null = null;
             context.strokeStyle = 'white';

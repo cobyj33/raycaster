@@ -24,6 +24,10 @@ export class Angle {
         }
     }
 
+    add(other: Angle) {
+        return Angle.fromRadians( this.radians + other.radians );
+    }
+
     static fromDegrees(degrees: number) {
         return new Angle(undefined, degrees); 
     }

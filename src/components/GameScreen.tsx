@@ -22,8 +22,9 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
         console.log("mouse controlling");
         const xMovement = -event.movementX;
         const yMovement = Angle.fromRadians(-Math.sin(event.movementY / 10 * Angle.DEGREESTORADIANS));
+        const newLookingAngle = (camera: Camera) => Angle.fromRadians( Math.max( -Math.PI / 6, Math.min( Math.PI / 6, camera.lookingAngle.add(yMovement).radians ) ) )
         setCamera( (camera) => camera.setDirection(camera.direction.rotate( Angle.fromDegrees( xMovement / 40 ) )) );
-        setCamera( (camera) => camera.setLookingAngle( Angle.fromRadians( camera.lookingAngle.radians + yMovement.radians )  ) );
+        setCamera( (camera) => camera.setLookingAngle(  newLookingAngle(camera) ) );
     });
 
     function render() {
@@ -74,7 +75,7 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
     }
 
   return (
-    <div   ref={containerRef} className="container" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
+    <div   ref={containerRef} className="container screen" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
         <canvas onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}

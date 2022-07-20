@@ -4,10 +4,12 @@ import { EmptyTile } from "./Tiles/EmptyTile";
 import { TimeHTMLAttributes } from "react";
 import { Vector2 } from "./Data/Vector2";
 import { WallTile } from "./Tiles/WallTile";
+import { IEquatable } from "../interfaces/IEquatable";
+import { throws } from "assert";
 
-export class GameMap {
-    private tiles: Tile[][];
-    private dimensions: Dimension;
+export class GameMap implements IEquatable<GameMap> {
+    readonly tiles: Tile[][];
+    readonly dimensions: Dimension;
 
     get Dimensions() { return new Dimension(this.dimensions.rows, this.dimensions.cols) }
 
@@ -120,5 +122,20 @@ export class GameMap {
 
     toString(): string {
         return this.tiles.map(  tileRow => tileRow.map(tile => tile.toString()).join() + "\n" ).join(); 
+    }
+
+    equals(other: GameMap) {
+        if (this.dimensions.equals(other.Dimensions) === false) {
+            return false;
+        }
+
+        for (let row = 0; row < this.dimensions.rows; row++) {
+            for (let col = 0; col < this.dimensions.cols; col++) {
+                if (this.tiles[row][col].equals(other.tiles[row][col]) === false) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
