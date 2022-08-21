@@ -7,7 +7,7 @@ import { ZoomEditMode } from '../classes/Editor/ZoomEditMode';
 import { GameMap } from '../classes/GameMap'
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
-import "./mapeditor.css"
+import "./styles/mapeditor.scss"
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH, FaUndo, FaRedo, FaHammer } from "react-icons/fa"
 import { EditorData } from '../classes/Editor/EditorData';
 import { EraseEditMode } from '../classes/Editor/EraseEditMode';
@@ -20,6 +20,8 @@ import { EllipseEditMode } from '../classes/Editor/EllipseEditMode';
 import { KeyHandler, useKeyHandler } from '../classes/KeySystem/KeyHandler';
 import { KeyBinding } from '../classes/KeySystem/KeyBinding';
 import { HistoryStack } from '../classes/Structures/HistoryStack';
+import { Dimension } from '../classes/Data/Dimension';
+import { drawCell, renderGhostTiles, renderWalls, renderGrid } from '../functions/boardRenderingFunctions';
 
 
 export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMap>, tileData: StatefulData<Tile[]> }) => {
@@ -84,46 +86,6 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
     }
   }
 
-  function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
-    for (let row = 0; row < canvas.height / view.cellSize; row++) {
-      for (let col = 0; col < canvas.width / view.cellSize; col++) {
-        if (map.inBounds(Math.floor(view.coordinates.row + row), Math.floor(view.coordinates.col + col) )) {
-          context.fillStyle = map.at(Math.floor(view.coordinates.row + row), Math.floor(view.coordinates.col + col)).color().toRGBString();
-          context.fillRect(-view.offset().col + col * view.cellSize, -view.offset().row + row * view.cellSize, view.cellSize, view.cellSize);
-        }
-      }
-    }
-  }
-
-  function renderGhostTiles(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
-    if (ghostTilePositions.length === 0) return;
-    const oldData = { globalAlpha: context.globalAlpha, fillStyle: context.fillStyle }
-    context.globalAlpha = 0.5;
-    context.fillStyle = selectedTile.color().toRGBString();
-    ghostTilePositions.forEach(pos => drawCell(canvas, context, pos.row, pos.col))
-    context.globalAlpha = oldData.globalAlpha;
-    context.fillStyle = oldData.fillStyle;
-  }
-
-  function renderGrid(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
-    context.strokeStyle = 'black';
-    context.beginPath()
-    for (let y = -view.offset().row; y <= canvas.height; y += view.cellSize) {
-      context.moveTo(0, y);
-      context.lineTo(canvas.width, y);
-    }
-    
-    for (let x = -view.offset().col; x <= canvas.width; x += view.cellSize) {
-      context.moveTo(x, 0);
-      context.lineTo(x, canvas.height);
-    }
-
-    context.stroke();
-  }
-
-  function drawCell(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, row: number, col: number) {
-    context.fillRect((col - view.coordinates.col) * view.cellSize, (row - view.coordinates.row) * view.cellSize, view.cellSize, view.cellSize  );
-  }
 
   function render() {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
@@ -133,12 +95,14 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = 'black';
         context.fillRect(0, 0, canvas.width, canvas.height);
-        renderWalls(canvas, context);
-        renderGrid(canvas, context);
-        renderGhostTiles(canvas, context);
+        renderWalls(canvas, context, view, map);
+        renderGrid(canvas, context, view);
+        renderGhostTiles(context, view, ghostTilePositions, selectedTile);
+
+
         context.globalAlpha = 0.5;
-        context.fillStyle = 'blue';
-        drawCell(canvas, context, lastHoveredCell.current.row, lastHoveredCell.current.col);
+        context.fillStyle = map.inBounds(lastHoveredCell.current.row, lastHoveredCell.current.col) ? 'blue' : 'red';
+        drawCell(context, view, lastHoveredCell.current.row, lastHoveredCell.current.col);
         context.globalAlpha = 1;
       }
     }
@@ -170,6 +134,29 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
     isPointerDown.current = false;
   }
   
+  
+  function onKeyDown(event: KeyboardEvent<Element>) {
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onKeyDown?.(event);
+
+    if (event.code === "KeyZ" && event.shiftKey === true && event.ctrlKey === true) {
+      redo();
+    } else if (event.code === "KeyZ" && event.ctrlKey === true) {
+      undo();
+    }
+  }
+
+  function onKeyUp(event: KeyboardEvent<Element>) {
+    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].onKeyUp?.(event);
+  }
+  
+  useEffect(render)
+  
+  useEffect(() => {
+    setCursor(editorModes.current[editMode].cursor())
+  }, [editMode])
+  
   useEffect(() => {
     if (mapHistory.current.empty === false) {
       if (mapHistory.current.peek().equals(map) === false) {
@@ -196,30 +183,6 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
       setMap(mapHistory.current.state);
     }
   }
-
-  function onKeyDown(event: KeyboardEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
-    editorModes.current[editMode].onKeyDown?.(event);
-
-    if (event.code === "KeyZ" && event.shiftKey === true && event.ctrlKey === true) {
-      redo();
-    } else if (event.code === "KeyZ" && event.ctrlKey === true) {
-      undo();
-    }
-  }
-
-  function onKeyUp(event: KeyboardEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
-    editorModes.current[editMode].onKeyUp?.(event);
-  }
-
-  useEffect(render)
-
-
-  useEffect(() => {
-    setCursor(editorModes.current[editMode].cursor())
-  }, [editMode])
-
     
   useEffect(() => {
     mapHistory.current.pushState(map);
@@ -253,6 +216,8 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
   }, [])
 
   // useResizeObserver(canvasRef, updateCanvasSize)
+
+  const [newMapDimension, setNewMapDimension] = useState<Dimension>(new Dimension(10, 10));
   
   return (
     <div className='editor-container screen'>
@@ -281,6 +246,15 @@ export const MapEditor = ( { mapData, tileData }: { mapData: StatefulData<GameMa
       <div className={`tile-creator-container ${tileCreatorOpened ? 'opened' : ''}`}>
         <button className='editor-tile-creator-open-button' onClick={() => setTileCreatorOpened(!tileCreatorOpened)}> <FaHammer /> </button>
           <TileCreator className={`editor-tile-creator`} tileData={tileData} />
+      </div>
+
+      <div className="map-generator">
+        <div className="map-dimensions-input">
+          <input type="number" onChange={(e) => setNewMapDimension(new Dimension(e.target.valueAsNumber, newMapDimension.cols))} value={newMapDimension.rows} />
+          <input type="number" onChange={(e) => setNewMapDimension(new Dimension(newMapDimension.rows, e.target.valueAsNumber))} value={newMapDimension.cols} />
+        </div>
+
+        <button className='map-generate-button' onClick={() => setMap(map => GameMap.filledEdges(newMapDimension))}> Generate </button>
       </div>
 
     </div>

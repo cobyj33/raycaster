@@ -4,7 +4,7 @@ import { Angle } from '../classes/Data/Angle'
 import { StatefulData } from '../interfaces/StatefulData'
 import { HoldButton } from './HoldButton'
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaRegArrowAltCircleLeft, FaRegArrowAltCircleRight } from 'react-icons/fa';
-import "./touchcontrols.css"
+import "./styles/touchcontrols.scss"
 
 export const TouchControls = ({ cameraData }: { cameraData: StatefulData<Camera> }) => {
     const [camera, setCamera] = cameraData;

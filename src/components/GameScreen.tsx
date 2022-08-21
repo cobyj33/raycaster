@@ -5,7 +5,7 @@ import {  FirstPersonCameraControls } from '../classes/CameraControls';
 import { GameMap } from '../classes/GameMap';
 import { useKeyHandler } from '../classes/KeySystem/KeyHandler';
 import { StatefulData } from '../interfaces/StatefulData'
-import "./gamescreen.css"
+import "./styles/gamescreen.scss"
 import { PointerLockEvents } from '../classes/PointerLockEvents';
 import { TouchControls } from './TouchControls';
 
@@ -19,7 +19,6 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
 
     const keyHandlerRef = useKeyHandler(new FirstPersonCameraControls(setCamera));
     const mouseControls = useRef<(event: PointerEvent<Element>) => void>((event: PointerEvent<Element>) => {
-        console.log("mouse controlling");
         const xMovement = -event.movementX;
         const yMovement = Angle.fromRadians(-Math.sin(event.movementY / 10 * Angle.DEGREESTORADIANS));
         const newLookingAngle = (camera: Camera) => Angle.fromRadians( Math.max( -Math.PI / 6, Math.min( Math.PI / 6, camera.lookingAngle.add(yMovement).radians ) ) )
@@ -31,8 +30,6 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
         if (canvasRef.current != null) {
             canvasRef.current.width = canvasRef.current.clientWidth;
             canvasRef.current.height = canvasRef.current.clientHeight;
-            // canvasRef.current.width = 16 * 50;
-            // canvasRef.current.height = 9 * 50;
             cameraData[0].render(canvasRef.current);
         }
     }
@@ -79,11 +76,34 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
         setCamera(camera => camera.setFOV(camera.fieldOfView.add( Angle.fromDegrees(event.deltaY / 50))));
     }
 
+    const [showFOVIndicator, setShowFOVIndicator] = useState<boolean>(false);
+    const lastCameraFOV = useRef<Angle>(camera.fieldOfView);
+    const lastFOVShowTime = useRef<number>(0);
+    const timetoShowFOVIndicator = 3000;
+    useEffect(() => {
+        if (lastCameraFOV.current !== camera.fieldOfView) {
+            setShowFOVIndicator(true);
+            lastFOVShowTime.current = Date.now();
+            lastCameraFOV.current = camera.fieldOfView;
+            setTimeout(() => {
+                if (Date.now() - lastFOVShowTime.current >= timetoShowFOVIndicator) {
+                    setShowFOVIndicator(false);
+                }
+            }, timetoShowFOVIndicator);
+        }
+    }, [camera])
+
+
+
   return (
     <div   ref={containerRef} className="container screen" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
         <canvas onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}
+
+        <div className="camera-indicators">
+            { showFOVIndicator && <span className="camera-indicator"> {`FOV: ${camera.fieldOfView.degrees.toPrecision(3)}`} </span> }
+        </div>
     </div>
   )
 }

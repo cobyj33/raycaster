@@ -14,7 +14,7 @@ export const TileCreator = ({ tileData, className }: { tileData: StatefulData<Ti
 
     function saveTile() {
         if (!savedTiles.some(tile => tile.name === name)) {
-            setSavedTiles(tiles => tiles.concat(new CustomTile(name, color, canHit, canCollide)));
+            setSavedTiles(tiles => tiles.concat(new CustomTile(name, new Color(color.red, color.green, color.blue, Math.trunc(color.alpha * 255)), canHit, canCollide)));
         }
     }
 

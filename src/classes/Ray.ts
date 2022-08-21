@@ -20,25 +20,6 @@ export class Ray {
         this.onNoHit = onNoHit;
     }
 
-    // castOptimized(distance: number, map: GameMap) {
-    //     let hit: RaycastHit | null = null;
-    //     let traveledDistance = 0;
-    //     let currentPosition = this.origin.clone();
-
-    //     const rowStepDirection = this.direction.row < 0 ? -1 : 1;
-    //     const colStepDirection = this.direction.col < 0 ? -1 : 1;
-
-    //     while (hit == null && traveledDistance < 0 && map.inBounds(currentPosition.row, currentPosition.col)) {
-
-    //     }
-
-    //     if (hit !== null && hit !== undefined) {
-    //         this.onHit(hit);
-    //     } else {
-    //         this.onNoHit?.();
-    //     }
-    // }
-
     testHit(tileToCheck: Vector2, map: GameMap): boolean {
         if (map.inBounds(tileToCheck.row, tileToCheck.col)) {
             const tile: Tile = map.at(tileToCheck.row, tileToCheck.col);
@@ -77,6 +58,7 @@ export class Ray {
         }
 
         const rowDistance = Vector2.distance(currentRowPosition, this.origin);
+        
         if (this.direction.col !== 0) {
             let currentColPosition: Vector2 = this.origin.clone();
             let distanceTraveled = 0;

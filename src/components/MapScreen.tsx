@@ -1,4 +1,6 @@
 import React, { PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
+import { GenerationMenu } from "../components/GenerationMenu"
+import { GenerationAlgorithm } from "../classes/Generation/GenerationAlgorithm"
 import { Angle } from '../classes/Data/Angle';
 import { Camera } from '../classes/Camera';
 import { BirdsEyeCameraControls } from '../classes/CameraControls';
@@ -9,12 +11,19 @@ import { LineSegment } from '../classes/Data/LineSegment';
 import { Ray } from '../classes/Ray';
 import { WallTile } from '../classes/Tiles/WallTile';
 import { StatefulData } from '../interfaces/StatefulData'
-import "./mapscreen.css";
-import { useResizeObserver } from '../functions/useResizeObserver';
+import "./styles/mapscreen.scss";
+import { useResizeObserver } from '../functions/hooks';
 import { TouchControls } from './TouchControls';
 import { Vector2 } from '../classes/Data/Vector2';
 import cam from "../assets/Camera.png"
-import { useWindowEvent } from '../functions/useWindowEvent';
+import { useWindowEvent } from '../functions/hooks';
+import { BinaryTree } from '../classes/Generation/BinaryTree';
+import { RecursiveBackTracker } from '../classes/Generation/RecursiveBacktracker';
+import { Kruskal } from '../classes/Generation/Kruskal';
+import { Conway } from '../classes/Generation/Conway';
+import { MazeAutomata } from '../classes/Generation/MazeAutomata';
+import { MazecetricAutomata } from '../classes/Generation/MazecetricAutomata';
+import { MenuSelector, MenuSelection } from "./MenuSelector"
 
 const cameraImage = new Image();
 let cameraLoaded = false;
@@ -222,6 +231,8 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         setCamera(camera => camera.setFOV(camera.fieldOfView.add( Angle.fromDegrees(event.deltaY / 50))));
     }
 
+	
+	const generationAlgorithms = useRef<GenerationAlgorithm[]>([new BinaryTree(), new Kruskal(), new Conway(), new MazeAutomata(), new MazecetricAutomata()]);
 
     return (
     <div ref={containerRef} className="map-container screen" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
@@ -229,9 +240,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 
-        <div className="camera-manipulation">
-
-        </div>
+	<MenuSelector>
+		{ generationAlgorithms.current.map( algo => ( <MenuSelection name={algo.name} key={`algorithmSelection ${algo.name}` } > <GenerationMenu algo={algo} /> <button onClick={() => setMap(map => algo.generateMap(map.Dimensions))}> {algo.name} </button> </MenuSelection> )  ) } 
+	</MenuSelector>
     </div>
   )
 }

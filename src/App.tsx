@@ -1,5 +1,5 @@
 import {RefObject, useEffect, useRef, useState } from 'react';
-import './App.css';
+import './App.scss';
 import { Camera } from './classes/Camera';
 import { GameMap } from './classes/GameMap';
 import { Dimension } from './classes/Data/Dimension';
@@ -14,6 +14,8 @@ import { Tile } from './interfaces/Tile';
 import { WallTile } from './classes/Tiles/WallTile';
 import { FaBars } from 'react-icons/fa';
 import { ToolTip } from './components/ToolTip/ToolTip';
+import { BinaryTree } from './classes/Generation/BinaryTree';
+import { RecursiveBackTracker } from './classes/Generation/RecursiveBacktracker';
 
 enum Menu {
   GAMEMAP = "Game Map",
@@ -25,7 +27,7 @@ const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITO
 
 function App() {
   const [customTiles, setCustomTiles] = useState<Tile[]>([new WallTile()]);
-  const [gameMap, setGameMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(10, 10))   );
+  const [gameMap, setGameMap] = useState<GameMap>(new RecursiveBackTracker().generateMap(new Dimension(50, 50)));
   const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
   const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
   const [currentSecondMenu, setCurrentSecondMenu] = useState<Menu | null>(null);

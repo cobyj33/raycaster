@@ -1,6 +1,6 @@
 import { hover } from "@testing-library/user-event/dist/hover";
 import { KeyboardEvent, PointerEvent } from "react";
-import { removeDuplicates } from "../../functions/removeDuplicates";
+import { removeDuplicates } from "../../functions/utilityFunctions";
 import { Ellipse } from "../Data/Ellipse";
 import { LineSegment } from "../Data/LineSegment";
 import { Vector2 } from "../Data/Vector2";

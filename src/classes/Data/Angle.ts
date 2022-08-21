@@ -1,4 +1,6 @@
-export class Angle {
+import { IClonable } from "../../interfaces/IClonable";
+
+export class Angle implements IClonable<Angle> {
     public static readonly RADIANSTODEGREES: number = 180.0 / Math.PI;
     public static readonly DEGREESTORADIANS: number = Math.PI / 180.0;
 
@@ -38,5 +40,9 @@ export class Angle {
 
     toString(): string {
         return `Angle(radians: ${this._radians.toPrecision(3)}, degrees: ${this._degrees})`;
+    }
+
+    clone(): Angle {
+        return Angle.fromRadians(this.radians);
     }
 }

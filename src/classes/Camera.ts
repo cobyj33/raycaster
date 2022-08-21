@@ -117,6 +117,7 @@ export class Camera implements ICamera {
         const canvas = document.createElement("canvas");
         canvas.width = finalCanvas.width;
         canvas.height = finalCanvas.height;
+        // const viewDistance = Math.sqrt(this.map.Dimensions.rows * this.map.Dimensions.rows + this.map.Dimensions.cols * this.map.Dimensions.cols)
 
         const cameraLineData: CameraLine[] = this.castRays(canvas.width);
         const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -125,7 +126,6 @@ export class Camera implements ICamera {
             context.clearRect(0, 0, canvas.width, canvas.height);
             context.globalCompositeOperation = 'source-over';
             context.lineWidth = 1;
-            console.log("looking angle: " + this.lookingAngle);
             const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(this.lookingAngle.radians) * canvas.height / 2));
             context.fillStyle = Camera.floorColor.toRGBString();
             context.fillRect(0, centerHeight, canvas.width, canvas.height - centerHeight);
@@ -149,9 +149,12 @@ export class Camera implements ICamera {
                     }
 
                     if (lastColor !== null) {
-                        context.strokeStyle = lastColor.toRGBString();
+                        context.strokeStyle = lastColor.toRGBAString();
                         if (!color.equals(lastColor)) {
+                            const lastAlpha: number = context.globalAlpha;
+                            context.globalAlpha = lastColor.alpha / 255;
                             context.stroke();
+                            context.globalAlpha = lastAlpha;
                             context.beginPath();
                         }
                     }

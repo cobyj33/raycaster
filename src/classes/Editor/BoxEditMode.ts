@@ -1,5 +1,5 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { removeDuplicates } from "../../functions/removeDuplicates";
+import { removeDuplicates } from "../../functions/utilityFunctions";
 import { LineSegment } from "../Data/LineSegment";
 import { Vector2 } from "../Data/Vector2";
 import { WallTile } from "../Tiles/WallTile";

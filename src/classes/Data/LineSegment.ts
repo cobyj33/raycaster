@@ -1,4 +1,4 @@
-import { removeDuplicates } from "../../functions/removeDuplicates";
+import { removeDuplicates } from "../../functions/utilityFunctions";
 import { Vector2 } from "./Vector2";
 
 export class LineSegment {

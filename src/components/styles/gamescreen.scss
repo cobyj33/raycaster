@@ -1,0 +1,56 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+}
+
+* { color: white; } 
+
+.game-canvas {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    background-color: blue;
+    image-rendering: optimizeSpeed;
+}
+
+.camera-indicators {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes slight-bounce {
+    0% {
+        transform: translateY(-5px);
+    }
+    50% {
+        transform: translateY(5px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.camera-indicator {
+    animation: slight-bounce;
+    animation-duration: 0.5s;
+    animation-iteration-count: 1;
+    font-size: 15px;
+    font-family: monospace;
+    font-weight: bold;
+    background-color: black;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    border: 1px solid white;
+}

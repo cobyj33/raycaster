@@ -4,7 +4,7 @@ import { Tile } from "../../interfaces/Tile";
 export class EmptyTile extends Tile {
     name: string = 'Empty Tile';
     constructor() { super() }
-    color() { return new Color(30, 30, 30, 30); }
+    color() { return new Color(60, 60, 60, 255); }
     clone() { return new EmptyTile(); }
     canCollide(): boolean {
         return false;

@@ -21,7 +21,7 @@ html, body, .app, #root {
 }
 
 *:not(canvas, input, button) {
-    touch-action: none;
+    touch-action: pinch-zoom;
 }
 
 .menu-switch-buttons {
@@ -82,6 +82,16 @@ html, body, .app, #root {
     transition: transform 0.25s;
     transform: translateX(-100%);
     z-index: 1;
+}
+
+.sidebar, .sidebar div {
+    touch-action: none;
+    pointer-events: none;
+}
+
+.sidebar *:not(div) {
+    touch-action: auto;
+    pointer-events: auto;
 }
 
 .sidebar-open-button {
