@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/web_raycaster/static/css/main.131fd712.css",
-    "main.js": "/web_raycaster/static/js/main.01712e00.js",
-    "static/js/787.81e48b36.chunk.js": "/web_raycaster/static/js/787.81e48b36.chunk.js",
-    "index.html": "/web_raycaster/index.html",
-    "main.131fd712.css.map": "/web_raycaster/static/css/main.131fd712.css.map",
-    "main.01712e00.js.map": "/web_raycaster/static/js/main.01712e00.js.map",
-    "787.81e48b36.chunk.js.map": "/web_raycaster/static/js/787.81e48b36.chunk.js.map"
+    "main.css": "/raycaster/static/css/main.cc2d59b5.css",
+    "main.js": "/raycaster/static/js/main.205de119.js",
+    "static/js/787.81e48b36.chunk.js": "/raycaster/static/js/787.81e48b36.chunk.js",
+    "index.html": "/raycaster/index.html",
+    "main.cc2d59b5.css.map": "/raycaster/static/css/main.cc2d59b5.css.map",
+    "main.205de119.js.map": "/raycaster/static/js/main.205de119.js.map",
+    "787.81e48b36.chunk.js.map": "/raycaster/static/js/787.81e48b36.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.131fd712.css",
-    "static/js/main.01712e00.js"
+    "static/css/main.cc2d59b5.css",
+    "static/js/main.205de119.js"
   ]
 }
