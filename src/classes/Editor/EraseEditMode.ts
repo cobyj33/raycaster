@@ -1,32 +1,34 @@
+import {getLine} from "raycaster/functions";
+import { Tile, getDefaultTile, GameMap, gameMapInBounds, Vector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
-import { LineSegment } from "../Data/LineSegment";
-import { EmptyTile } from "../Tiles/EmptyTile";
 import { EditMode } from "./EditMode";
 
 export class EraseEditMode extends EditMode {
-    cursor() { return 'url("https://img.icons8.com/material-rounded/24/00000/eraser.png"), crosshair' }
-    
-    onPointerDown(event: PointerEvent<Element>) {
+    cursor() { return "url('https://img.icons8.com/material-rounded/24/00000/eraser.png'), crosshair" }
+
+    private tryPlaceCell({row, col}: Vector2) {
         const [map, setMap] = this.data.mapData;
+        if (gameMapInBounds(map, row, col)) {
+            const tiles: Tile[][] = [...map.tiles];
+            tiles[row][col] = getDefaultTile("Empty Tile") 
+            setMap((map: GameMap) => ({ ...map, tiles: tiles}));
+        }
+    }
+
+    onPointerDown(event: PointerEvent<Element>) {
         const hoveredCell = this.data.getHoveredCell(event);
         if (this.data.isPointerDown) {
-            if (map.inBounds(hoveredCell.row, hoveredCell.col)) {
-                setMap((map) => map.placeTile(new EmptyTile(), hoveredCell.row, hoveredCell.col))
-            }
+            this.tryPlaceCell(hoveredCell);
         }
     }
 
     onPointerMove(event: PointerEvent<Element>) {
-        const [map, setMap] = this.data.mapData;
         const hoveredCell = this.data.getHoveredCell(event);
         const lastHoveredCell = this.data.lastHoveredCell;
         if (this.data.isPointerDown) {
-            console.log(new LineSegment(lastHoveredCell, hoveredCell).toCells());
-            new LineSegment(lastHoveredCell, hoveredCell).toCells().forEach(cell => {
-            if (map.inBounds(cell.row, cell.col)) {
-                setMap((map) => map.placeTile(new EmptyTile(), cell.row, cell.col))
-            }});
+            getLine(lastHoveredCell, hoveredCell).forEach(cell => {
+                this.tryPlaceCell(cell);
+            });
         }
     }
-
 }

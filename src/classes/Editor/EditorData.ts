@@ -1,10 +1,6 @@
-import { throws } from "assert";
-import { StatefulData } from "../../interfaces/StatefulData";
-import { Vector2 } from "../Data/Vector2";
-import { View } from "../Data/View";
-import { GameMap } from "../GameMap";
 import { PointerEvent } from "react";
-import { Tile } from "../../interfaces/Tile";
+import { Tile, StatefulData, View, GameMap, Vector2 } from "raycaster/interfaces"
+
 export interface EditorData {
     mapData: StatefulData<GameMap>;
     viewData: StatefulData<View>;

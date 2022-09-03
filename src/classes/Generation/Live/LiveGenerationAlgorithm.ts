@@ -1,4 +1,4 @@
-import { GameMap } from "../../GameMap"
+import { GameMap } from "raycaster/interfaces"
 
 export interface LiveGenerationAlgorithm {
 	get name(): string;

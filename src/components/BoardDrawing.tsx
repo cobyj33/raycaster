@@ -1,15 +1,10 @@
 import { RefObject, useEffect, useRef } from 'react'
-import { Vector2 } from '../classes/Data/Vector2';
-import { View } from '../classes/Data/View'
-import { renderWalls, renderGrid, renderGhostTiles, drawCell } from '../functions/boardRenderingFunctions';
-import { useCanvasUpdater } from '../functions/hooks';
-import { GameMap } from "../classes/GameMap"
-import { StatefulData } from "../interfaces/StatefulData"
-// import "./styles/boarddrawing.scss"
+import { View, GameMap, StatefulData } from "raycaster/interfaces" 
+import { renderWalls, renderGrid, useCanvas2DUpdater } from 'raycaster/functions';
 
 export const BoardDrawing = ({ mapData, view, className }: { mapData: StatefulData<GameMap>, view: View, className?: string }) => {
   const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
-    const [map, setMap] = mapData;
+    const [map,] = mapData;
   function render() {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     if (canvas !== null && canvas !== undefined) {
@@ -24,7 +19,7 @@ export const BoardDrawing = ({ mapData, view, className }: { mapData: StatefulDa
   }
 
   useEffect(render);
-  useCanvasUpdater(canvasRef);
+  useCanvas2DUpdater(canvasRef);
   
   return <canvas className={className ?? "board-drawing"} ref={canvasRef}></canvas>
 }
