@@ -1,38 +1,37 @@
-import React, { KeyboardEvent } from "react";
-import { Angle } from "./Data/Angle";
-import { Camera } from "./Camera";
-import { GameMap } from "./GameMap";
-import { KeyBinding } from "./KeySystem/KeyBinding";
-import { KeyHandler } from "./KeySystem/KeyHandler";
-import { WallTile } from "./Tiles/WallTile";
-import { Vector2 } from "./Data/Vector2";
+import { Camera, GameMap, Vector2, addVector2, vector2ToLength, gameMapInBounds, rotateVector2, scaleVector2 } from "raycaster/interfaces"
+import { KeyBinding, KeyHandler } from "raycaster/keysystem"
 
 const MOVEMENT_CHECKING_DISTANCE = 0.05;
 
-export const canMove = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): boolean => {
-    const nextPosition = currentPosition.add(currentDirection.toLength(distance));
-    const checkingPosition = nextPosition.add(currentDirection.toLength(MOVEMENT_CHECKING_DISTANCE * ( distance < 0 ? -1 : 1 )));
+export const canMoveCameraPosition = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): boolean => {
+    // const nextPosition = currentPosition.add(currentDirection.toLength(distance));
+    const nextPosition = addVector2(currentPosition, vector2ToLength(currentDirection, distance))
+    // const checkingPosition = nextPosition.add(currentDirection.toLength(MOVEMENT_CHECKING_DISTANCE * ( distance < 0 ? -1 : 1 )));
+    const checkingPosition = addVector2(nextPosition, vector2ToLength(currentDirection, MOVEMENT_CHECKING_DISTANCE * (distance < 0 ? -1 : 1)));
     const nextRowOnMap = Math.floor(checkingPosition.row);
     const nextColOnMap = Math.floor(checkingPosition.col);
-    if (map.inBounds(nextRowOnMap, nextColOnMap)) {
-        if (!(map.at(nextRowOnMap, nextColOnMap).canCollide()) ) {
+    if (gameMapInBounds(map, nextRowOnMap, nextColOnMap)) {
+        if (map.tiles[nextRowOnMap][nextColOnMap].canCollide === false) {
             return true
         }
     }
     return false;
 }
 
-export const move = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): Vector2 => {
-    const nextPosition = currentPosition.add(currentDirection.toLength(distance));
-    if (canMove(currentPosition, currentDirection, distance, map)) {
+export const getMovedCameraPosition = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): Vector2 => {
+    // const nextPosition = currentPosition.add(currentDirection.toLength(distance));
+    const nextPosition = addVector2(currentPosition, vector2ToLength(currentDirection, distance))
+    if (canMoveCameraPosition(currentPosition, currentDirection, distance, map)) {
         return nextPosition;
     } else {
-        const rowDirection: Vector2 = currentDirection.toLength(distance).getRowComponent();
-        const colDirection: Vector2 = currentDirection.toLength(distance).getColComponent();
-        if (canMove(currentPosition, rowDirection, distance, map)) {
-            return currentPosition.add(rowDirection);
-        } else if (canMove(currentPosition, colDirection, distance, map)) {
-            return currentPosition.add(colDirection);
+        // const rowDirection: Vector2 = currentDirection.toLength(distance).getRowComponent();
+        const rowDirection: Vector2 = { row: vector2ToLength(currentDirection, distance).row, col: 0 };
+        // const colDirection: Vector2 = currentDirection.toLength(distance).getColComponent();
+        const colDirection: Vector2 = { row: 0, col: vector2ToLength(currentDirection, distance).col } ;
+        if (canMoveCameraPosition(currentPosition, rowDirection, distance, map)) {
+            return addVector2(currentPosition, rowDirection);
+        } else if (canMoveCameraPosition(currentPosition, colDirection, distance, map)) {
+            return addVector2(currentPosition, colDirection);
         }
     }
     return currentPosition;
@@ -46,19 +45,19 @@ export class FirstPersonCameraControls extends KeyHandler {
 
 
         const moveForward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.moveFactor, camera.map) );
+            return { ...camera, position: getMovedCameraPosition(camera.position, camera.direction, this.moveSpeed * this.moveFactor, camera.map) };
         })
 
         const moveBackward = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.moveFactor, camera.map) );
+            return { ...camera, position: getMovedCameraPosition(camera.position, scaleVector2(camera.direction, -1), this.moveSpeed * this.moveFactor, camera.map) };
         })
 
         const moveLeft = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(90)), this.moveSpeed * this.moveFactor, camera.map) );
+            return { ...camera, position: getMovedCameraPosition(camera.position, rotateVector2(camera.direction, Math.PI / 2), this.moveSpeed * this.moveFactor, camera.map) };
         })
 
         const moveRight = () => setCamera( (camera) => {
-            return camera.setPosition( move(camera.position, camera.direction.rotate(Angle.fromDegrees(-90)), this.moveSpeed * this.moveFactor, camera.map) );
+            return { ...camera, position: getMovedCameraPosition(camera.position, rotateVector2(camera.direction, -Math.PI / 2), this.moveSpeed * this.moveFactor, camera.map) };
         })
 
         super([
@@ -77,12 +76,12 @@ export class BirdsEyeCameraControls extends KeyHandler {
     
     constructor(setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
 
-        const moveForward = () => setCamera( (camera) => camera.setPosition( move(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) ))
-        const moveBackward = () => setCamera( (camera) => camera.setPosition( move(camera.position, camera.direction.scale(-1), this.moveSpeed * this.sensitivity, camera.map) ))
-        const turnRight = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(-this.sensitivity))));
-        const turnLeft = () => setCamera((camera) => camera.setDirection(camera.direction.rotate(Angle.fromDegrees(this.sensitivity))));
+        const moveForward = () => setCamera(camera => ({ ...camera, position: getMovedCameraPosition(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) }) )
+        const moveBackward = () => setCamera(camera => ({ ...camera, position: getMovedCameraPosition(camera.position, scaleVector2(camera.direction, -1), this.moveSpeed * this.sensitivity, camera.map) }) )
+        const turnRight = () => setCamera(camera => ({ ...camera, direction: rotateVector2(camera.direction, -this.sensitivity * Math.PI / 180) }));
+        const turnLeft = () => setCamera(camera => ({ ...camera, direction: rotateVector2(camera.direction, this.sensitivity * Math.PI / 180) }));
         
-        const slowDown = (e: KeyboardEvent<Element>) => {
+        const slowDown = () => {
             this.sensitivity = 0.5;
         }
 

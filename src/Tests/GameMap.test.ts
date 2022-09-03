@@ -1,8 +1,7 @@
-import { Dimension } from "../classes/Data/Dimension"
-import { GameMap } from "../classes/GameMap"
+import { GameMap, getDefaultTile, getEmptyMap, getFilledMapEdges, areGameMapsEqual} from "raycaster/interfaces"
 
 test("equal maps", () => {
-    const firstMap = GameMap.filledEdges(new Dimension(10, 10));
-    const secondMap = GameMap.filledEdges(new Dimension(10, 10));
-    expect(firstMap.equals(secondMap)).toBe(true);
+    const firstMap: GameMap = getFilledMapEdges(getEmptyMap({row: 10, col: 10}), getDefaultTile("Wall Tile"))
+    const secondMap: GameMap = getFilledMapEdges(getEmptyMap({row: 10, col: 10}), getDefaultTile("Wall Tile"))
+    expect(areGameMapsEqual(firstMap, secondMap)).toBe(true);
 })

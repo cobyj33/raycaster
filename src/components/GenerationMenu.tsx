@@ -1,15 +1,16 @@
-import { useState, useRef, PointerEvent, KeyboardEvent } from "react"
+// import { useState } from "react"
 import { GenerationAlgorithm } from "../classes/Generation/GenerationAlgorithm"
-import { BoardDrawing } from "./BoardDrawing"
-import { GameMap } from "../classes/GameMap"
-import { Dimension } from '../classes/Data/Dimension';
-import {View} from "../classes/Data/View";
-import { Vector2 } from "../classes/Data/Vector2"
+// import { BoardDrawing } from "./BoardDrawing"
+// import { View, GameMap, getEmptyMap, getFilledMapEdges } from "raycaster/interfaces";
 
 
 export const GenerationMenu = ( { algo }: { algo: GenerationAlgorithm } ) => {
-	const [map, setMap] = useState<GameMap>(GameMap.filledEdges(new Dimension(50, 50)));
-    const [view, setView] = useState<View>(new View(new Vector2(0, 0), 10))
+	// const [map, setMap] = useState<GameMap>(getFilledMapEdges( getEmptyMap({ row: 50, col: 50 })   ) );
+    // const [view, setView] = useState<View>({
+        // row: 0,
+        // col: 0,
+        // cellSize: 5
+    // });
 
 	return (
 	<div className="GenerationMenu">

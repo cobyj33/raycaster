@@ -1,33 +1,34 @@
+import {getLine} from "raycaster/functions";
+import { Tile, GameMap, gameMapInBounds, Vector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
-import { LineSegment } from "../Data/LineSegment";
-import { WallTile } from "../Tiles/WallTile";
 import { EditMode } from "./EditMode";
-import { EditorData } from "./EditorData";
 
 export class DrawEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
 
-    onPointerDown(event: PointerEvent<Element>) {
+    private tryPlaceCell({row, col}: Vector2) {
         const [map, setMap] = this.data.mapData;
+        if (gameMapInBounds(map, row, col)) {
+            const tiles: Tile[][] = [...map.tiles];
+            tiles[row][col] = {...this.data.selectedTile}
+            setMap((map: GameMap) => ({ ...map, tiles: tiles}));
+        }
+    }
+
+    onPointerDown(event: PointerEvent<Element>) {
         const hoveredCell = this.data.getHoveredCell(event);
         if (this.data.isPointerDown) {
-            if (map.inBounds(hoveredCell.row, hoveredCell.col)) {
-                setMap((map) => map.placeTile(this.data.selectedTile.clone(), hoveredCell.row, hoveredCell.col))
-            }
+            this.tryPlaceCell(hoveredCell);
         }
     }
 
     onPointerMove(event: PointerEvent<Element>) {
-        const [map, setMap] = this.data.mapData;
         const hoveredCell = this.data.getHoveredCell(event);
         const lastHoveredCell = this.data.lastHoveredCell;
         if (this.data.isPointerDown) {
-            console.log(new LineSegment(lastHoveredCell, hoveredCell).toCells());
-            new LineSegment(lastHoveredCell, hoveredCell).toCells().forEach(cell => {
-            if (map.inBounds(cell.row, cell.col)) {
-                setMap((map) => map.placeTile(this.data.selectedTile.clone(), cell.row, cell.col))
-            }});
+            getLine(lastHoveredCell, hoveredCell).forEach(cell => {
+                this.tryPlaceCell(cell);
+            });
         }
     }
-
 }

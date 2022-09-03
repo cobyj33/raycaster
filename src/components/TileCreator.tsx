@@ -1,29 +1,40 @@
 import { useState } from 'react'
-import { Color } from '../classes/Data/Color';
-import { StatefulData } from '../interfaces/StatefulData'
-import { Tile } from '../interfaces/Tile'
+import { Tile, getFillerTile, StatefulData  } from "raycaster/interfaces" 
 import { SketchPicker } from "react-color"
-import { CustomTile } from '../classes/Tiles/CustomTile';
 
-export const TileCreator = ({ tileData, className }: { tileData: StatefulData<Tile[]>, className: string }) => {
-    const [savedTiles, setSavedTiles] = tileData;
+export const TileCreator = ({ tileData, className }: { tileData: StatefulData<{ [key: string]: Tile }>, className: string }) => {
+    const [, setSavedTiles] = tileData;
     const [name, setName] = useState<string>("");
-    const [color, setColor] = useState<Color>(new Color(0, 0, 0, 0));
-    const [canHit, setCanHit] = useState<boolean>(true);
-    const [canCollide, setCanCollide] = useState<boolean>(true);
-
+    const [tile, setTile] = useState<Tile>(getFillerTile());
     function saveTile() {
-        if (!savedTiles.some(tile => tile.name === name)) {
-            setSavedTiles(tiles => tiles.concat(new CustomTile(name, new Color(color.red, color.green, color.blue, Math.trunc(color.alpha * 255)), canHit, canCollide)));
-        }
+        setSavedTiles( savedTiles => ({...savedTiles,
+            name: {...tile,
+                color: {
+                    ...tile.color
+                } 
+            }
+        }) );
     }
 
   return (
     <div className={className}>
-        <input className='tile-creator-name-input' onChange={e => setName(e.target.value)  } value={name} />
-        <SketchPicker className='sketch-picker' color={{ r: color.red, g: color.green, b: color.blue, a: color.alpha}} onChange={pickedColor => setColor(new Color(pickedColor.rgb.r, pickedColor.rgb.g, pickedColor.rgb.b, pickedColor.rgb.a ?? 255)) }/> 
-        <button className='tile-creator-button tile-creator-canHit-button' onClick={() => setCanHit(!canHit)}> canHit: <b> {canHit.toString()} </b> </button>
-        <button className='tile-creator-button tile-creator-canCollide-button' onClick={() => setCanCollide(!canCollide)}> canCollide: <b> {canCollide.toString()} </b> </button>
+        <input className='tile-creator-name-input' onChange={e => setName(e.target.value) } value={name} />
+      <SketchPicker
+      className='sketch-picker'
+      color={{ r: tile.color.red, g: tile.color.green, b: tile.color.blue, a: tile.color.alpha}}
+      onChange={pickedColor => setTile( tile => (
+          {...tile,
+            color: {
+                    red: pickedColor.rgb.r,
+                    green: pickedColor.rgb.g,
+                    blue: pickedColor.rgb.b,
+                    alpha: pickedColor.rgb.a !== null && pickedColor.rgb.a !== undefined ? Math.trunc(pickedColor.rgb.a * 255) : 255
+                } 
+            })
+      )} /> 
+
+        <button className='tile-creator-button tile-creator-canHit-button' onClick={() => setTile( (tile: Tile) => ({ ...tile, canHit: !tile.canHit })  )  }> canHit: <b> {tile.canHit.toString()} </b> </button>
+        <button className='tile-creator-button tile-creator-canCollide-button' onClick={() => setTile( (tile: Tile) => ({ ...tile, canCollide: !tile.canCollide })  )  }> canCollide: <b> {tile.canCollide.toString()} </b> </button>
         <button className='tile-creator-button tile-creator-save-button' onClick={saveTile}> Save Tile </button>
     </div>
   )

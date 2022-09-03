@@ -16,9 +16,9 @@ html, body, .app, #root {
     user-select: none;
 }
 
-.app * {
-    position: relative;
-}
+// *:not(body, html) {
+//     position: relative;
+// }
 
 *:not(canvas, input, button) {
     touch-action: pinch-zoom;

@@ -1,62 +1,54 @@
-import {RefObject, useEffect, useRef, useState } from 'react';
-import './App.scss';
-import { Camera } from './classes/Camera';
-import { GameMap } from './classes/GameMap';
-import { Dimension } from './classes/Data/Dimension';
-import { GameScreen } from './components/GameScreen';
-import { Vector2 } from './classes/Data/Vector2';
-import { MapScreen } from './components/MapScreen';
-import { CyclicalArray } from './classes/Structures/CyclicalArray';
-import { KeyHandler, useKeyHandler } from './classes/KeySystem/KeyHandler';
-import { KeyBinding } from './classes/KeySystem/KeyBinding';
-import { MapEditor } from './components/MapEditor';
-import { Tile } from './interfaces/Tile';
-import { WallTile } from './classes/Tiles/WallTile';
+import {useEffect, useRef, useState } from 'react';
+import { Camera, GameMap, Tile, getDefaultCamera, getFilledMapEdges, getEmptyMap, scaleVector2, TileTypeArray, getDefaultTile } from "raycaster/interfaces"
+import { MapScreen, GameScreen, MapEditor, ToolTip } from 'raycaster/components';
 import { FaBars } from 'react-icons/fa';
-import { ToolTip } from './components/ToolTip/ToolTip';
-import { BinaryTree } from './classes/Generation/BinaryTree';
-import { RecursiveBackTracker } from './classes/Generation/RecursiveBacktracker';
+import './App.scss';
+import {initRaycaster} from 'loader';
 
-enum Menu {
-  GAMEMAP = "Game Map",
-  CAMERAVIEW = "Camera View",
-  EDITOR = "Editor"
-}
 
-const menus = new CyclicalArray<Menu>([Menu.GAMEMAP, Menu.CAMERAVIEW, Menu.EDITOR]);
+const acceptedMenus = ["Game Map", "Camera View", "Editor"] as const;
+type Menus = typeof acceptedMenus[number];
+
+const STARTING_MAP_DIMENSIONS = { row: 50, col: 50 }
 
 function App() {
-  const [customTiles, setCustomTiles] = useState<Tile[]>([new WallTile()]);
-  const [gameMap, setGameMap] = useState<GameMap>(new RecursiveBackTracker().generateMap(new Dimension(50, 50)));
-  const [camera, setCamera] = useState<Camera>(new Camera(gameMap, gameMap.center, Vector2.right));
-  const [currentMenu, setCurrentMenu] = useState<Menu>(Menu.CAMERAVIEW);
-  const [currentSecondMenu, setCurrentSecondMenu] = useState<Menu | null>(null);
-
+  const [savedTiles, setSavedTiles] = useState<{ [key: string]: Tile }>({});
+  // const [gameMap, setGameMap] = useState<GameMap>(getGenerationAlgorithm("Recursive Backtracker").generateMap(({ row: 50, col: 50 })) );
+  const [gameMap, setGameMap] = useState<GameMap>(getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS)));
+  const [camera, setCamera] = useState<Camera>({ ...getDefaultCamera(gameMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  } );
+  const [currentMenu, setCurrentMenu] = useState<Menus>("Camera View");
+  // const [currentSecondMenu, setCurrentSecondMenu] = useState<Menus | null>(null);
   const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
 
-  const ref: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
-
-  const keyHandler = useKeyHandler(new KeyHandler( [
-    new KeyBinding({ code: 'ArrowLeft', onDown: () => setCurrentMenu(menus.back()) }),
-    new KeyBinding({ code: 'ArrowRight', onDown: () => setCurrentMenu(menus.forward()) })
-  ]  ))
+    useEffect( () => {
+        initRaycaster().then( () => { 
+            const newMap = getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS));
+            setGameMap(newMap)
+            setCamera({ ...getDefaultCamera(newMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  })
+            
+            const customTiles: { [key: string]: Tile } = {};
+            TileTypeArray.forEach(tileName => customTiles[tileName] = getDefaultTile(tileName));
+            delete customTiles["Empty Tile"];
+            setSavedTiles(customTiles);
+        })
+    }, [])
 
   useEffect( () => {
-    setCamera(camera.setMap(gameMap));
+    setCamera((camera: Camera) => ({ ...camera, map: gameMap }));
   }, [gameMap])
 
-  function getMenu(menu: Menu) {
+  function getMenu(menu: Menus) {
     switch(menu) {
-      case Menu.GAMEMAP: return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
-      case Menu.CAMERAVIEW: return <GameScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />
-      case Menu.EDITOR: return <MapEditor mapData={[gameMap, setGameMap]} tileData={[customTiles, setCustomTiles]} />
+      case "Game Map": return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
+      case "Camera View": return <GameScreen cameraData={[camera, setCamera]} />
+      case "Editor": return <MapEditor cameraData={[camera, setCamera]} mapData={[gameMap, setGameMap]} tileData={[savedTiles, setSavedTiles]} />
     }
   }
 
 
   const sidebarOpenReference = useRef<HTMLButtonElement>(null);
   return (
-    <div className="app" onKeyDown={(event) => keyHandler.current.onKeyDown(event)} onKeyUp={(event) => keyHandler.current.onKeyUp(event)} tabIndex={0}>
+    <div className="app" tabIndex={0} >
       <div className={`sidebar ${sidebarOpened ? 'opened' : ''}`}>
         <button ref={sidebarOpenReference} className="sidebar-open-button" onClick={() => setSidebarOpened(!sidebarOpened)}>
           <ToolTip target={sidebarOpenReference}> SideBar </ToolTip>
@@ -64,7 +56,7 @@ function App() {
           </button>
 
         <div className='sidebar-content-area'>
-          { Object.keys(Menu).map(menu => <button className={`screen-picking-button ${currentMenu.toString() === menu ? 'opened' : ''}`} key={menu} onClick={() => setCurrentMenu(Menu[menu as keyof typeof Menu])}> { menu } </button> )}
+          { acceptedMenus.map(menu => <button className={`screen-picking-button ${currentMenu.toString() === menu ? 'opened' : ''}`} key={menu} onClick={() => setCurrentMenu(menu)}> { menu } </button> )}
           {/* <button className={`screen-picking-button ${currentMenu === Menu.CAMERAVIEW ? 'opened' : ''}`} onPointerDown={() => setCurrentMenu(Menu.CAMERAVIEW)}> Camera View </button>
           <button className={`screen-picking-button ${currentMenu === Menu.EDITOR ? 'opened' : ''}`} onClick={() => setCurrentMenu(Menu.EDITOR)}> Editor </button>
           <button className={`screen-picking-button ${currentMenu === Menu.GAMEMAP ? 'opened' : ''}`} onClick={() => setCurrentMenu(Menu.GAMEMAP)}> Game Map </button> */}
@@ -79,7 +71,7 @@ function App() {
       </div>
 
       { getMenu(currentMenu) }
-      { currentSecondMenu !== null ? getMenu(currentSecondMenu) : '' }
+      { /* currentSecondMenu !== null ? getMenu(currentSecondMenu) : '' */ }
 
       {/* <div className='menu-switch-buttons'>
         <button className='menu-switch-button back'  onClick={() => setCurrentMenu(menus.back()) } onFocus={(event) => event.target.blur()}> To: { menus.peekBack().toString() } </button>

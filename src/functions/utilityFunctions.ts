@@ -1,5 +1,4 @@
-import { IEqualityComparer } from "../interfaces/IEqualityComparer";
-import { IHasher } from "../interfaces/IHasher";
+import { IHasher } from "raycaster/interfaces";
 
 export function removeDuplicates<T>(list: T[]): T[] {
     const tracker = new Set<string>([])

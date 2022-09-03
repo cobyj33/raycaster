@@ -1,17 +1,17 @@
-import React, { PointerEvent } from "react";
-import { Vector2 } from "../Data/Vector2";
-import { View } from "../Data/View";
-import { EditMode } from "./EditMode";
+import { PointerEvent } from "react";
+import { Vector2, addVector2, vector2ToLength, getVectorLength } from "raycaster/interfaces"
+import { EditMode } from "raycaster/editor";
 
+const MOVE_SPEED = 20;
 export class MoveEditMode extends EditMode{
     cursor() { return 'move' }
      
     onPointerMove(event: PointerEvent<Element>) {
-        const [view, setView] = this.data.viewData;
+        const [, setView] = this.data.viewData;
         if (this.data.isPointerDown === true) {
-            const movementDirection: Vector2 = new Vector2(event.movementY, event.movementX);
-            if (movementDirection.length !== 0) {
-                setView(view => view.withCoordinates( view.coordinates.add(movementDirection.toLength(20 / view.cellSize)) ));
+            const movementVector: Vector2 = { row: event.movementY, col: event.movementX };
+            if (getVectorLength(movementVector) !== 0) {
+                setView(view => ({ ...view, ...addVector2(view, vector2ToLength(movementVector, MOVE_SPEED / view.cellSize))}));
             }
         }
     }

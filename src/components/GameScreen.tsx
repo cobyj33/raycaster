@@ -1,42 +1,40 @@
 import { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
-import { Angle } from '../classes/Data/Angle';
-import { Camera } from '../classes/Camera'
-import {  FirstPersonCameraControls } from '../classes/CameraControls';
-import { GameMap } from '../classes/GameMap';
-import { useKeyHandler } from '../classes/KeySystem/KeyHandler';
-import { StatefulData } from '../interfaces/StatefulData'
+import { useKeyHandler } from "raycaster/keysystem";
+import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
+import { TouchControls } from "raycaster/components"
+import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/interfaces";
 import "./styles/gamescreen.scss"
-import { PointerLockEvents } from '../classes/PointerLockEvents';
-import { TouchControls } from './TouchControls';
 
 
-export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap> }  ) => {
+export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> }  ) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
     const containerRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const [camera, setCamera] = cameraData;
     const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
-    const [map, setMap] = mapData;
+    // const [map, setMap] = mapData;
 
     const keyHandlerRef = useKeyHandler(new FirstPersonCameraControls(setCamera));
     const mouseControls = useRef<(event: PointerEvent<Element>) => void>((event: PointerEvent<Element>) => {
         const xMovement = -event.movementX;
-        const yMovement = Angle.fromRadians(-Math.sin(event.movementY / 10 * Angle.DEGREESTORADIANS));
-        const newLookingAngle = (camera: Camera) => Angle.fromRadians( Math.max( -Math.PI / 6, Math.min( Math.PI / 6, camera.lookingAngle.add(yMovement).radians ) ) )
-        setCamera( (camera) => camera.setDirection(camera.direction.rotate( Angle.fromDegrees( xMovement / 40 ) )) );
-        setCamera( (camera) => camera.setLookingAngle(  newLookingAngle(camera) ) );
+        const yMovement = -Math.sin(event.movementY / 10 * (Math.PI / 180.0));
+        const newLookingAngle =  Math.max( -Math.PI / 6, Math.min( Math.PI / 6, camera.lookingAngle + yMovement ) ) 
+        console.log(newLookingAngle * 180 / Math.PI);
+        setCamera( (camera) => ({...camera, direction: rotateVector2(camera.direction,  xMovement / 40 * (Math.PI / 180.0) ) }) );
+        setCamera( (camera) => ( { ...camera, lookingAngle: newLookingAngle } ) );
     });
 
     function render() {
         if (canvasRef.current != null) {
             canvasRef.current.width = canvasRef.current.clientWidth;
             canvasRef.current.height = canvasRef.current.clientHeight;
-            cameraData[0].render(canvasRef.current);
+            renderCamera(camera, canvasRef.current);
         }
     }
 
     useEffect(render, [camera]);
     
     const pointerLockEvents: MutableRefObject<PointerLockEvents | null> = useRef<PointerLockEvents | null>(null);
+
     useEffect( () => {
         if (canvasRef.current !== null && canvasRef.current !== undefined) {
             pointerLockEvents.current = new PointerLockEvents( [ ['mousemove', mouseControls.current] ], canvasRef.current )
@@ -55,15 +53,6 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
         }
     }
 
-    function updateCanvasSize() {
-        if (canvasRef.current !== null && canvasRef.current !== undefined) {
-          const canvas: HTMLCanvasElement = canvasRef.current;
-          canvas.width = canvas.clientWidth;
-          canvas.height = canvas.clientHeight;
-        }
-      }
-
-    // useResizeObserver( updateCanvasSize )
 
     function runPointerLockOnMouse(event: PointerEvent<Element>) {
         if (event.pointerType === 'mouse') {
@@ -72,12 +61,14 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
     }
 
     function onWheel(event: WheelEvent<Element>) {
-        console.log(event.deltaY);
-        setCamera(camera => camera.setFOV(camera.fieldOfView.add( Angle.fromDegrees(event.deltaY / 50))));
+        setCamera( camera => ({
+            ...camera,
+            fieldOfView: camera.fieldOfView + (event.deltaY / 50 * Math.PI / 180.0)
+        }) )
     }
 
     const [showFOVIndicator, setShowFOVIndicator] = useState<boolean>(false);
-    const lastCameraFOV = useRef<Angle>(camera.fieldOfView);
+    const lastCameraFOV = useRef<number>(camera.fieldOfView);
     const lastFOVShowTime = useRef<number>(0);
     const timetoShowFOVIndicator = 3000;
     useEffect(() => {
@@ -101,9 +92,17 @@ export const GameScreen = ( { cameraData, mapData  }: { cameraData: StatefulData
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 
+      {
+        /*
+        
         <div className="camera-indicators">
-            { showFOVIndicator && <span className="camera-indicator"> {`FOV: ${camera.fieldOfView.degrees.toPrecision(3)}`} </span> }
+            { showFOVIndicator && <span className="camera-indicator"> {`FOV: ${(camera.fieldOfView * 180.0/Math.PI).toPrecision(3)}`} </span> }
         </div>
+
+
+        */
+
+      }
     </div>
   )
 }
