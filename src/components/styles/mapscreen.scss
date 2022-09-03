@@ -15,3 +15,34 @@
     image-rendering: crisp-edges;
     cursor:pointer;
 }
+
+.algorithm-generation-button, .algorithm-menu-selection  {
+    color: white;
+    background-color: rgb(10, 10, 10);
+    border: 1px solid rgb(30, 30, 30);
+    border-radius: 2px;
+    
+
+    &:hover {
+        transition: border 0.1s background-color 0.25s;
+        background-color: rgb(30, 30, 30);
+        border: 1px solid white;
+    }
+
+    &:active {
+        transition: border 0.1s background-color 0.1s transform 0.1s;
+        background-color: rgb(60, 60, 60);
+        transform: translateY(3px);
+        border: 1px solid white;
+        border-bottom: 3px solid white;
+    }
+
+    &.selected {
+        transition: color 0.1s border 0.1s background-color 0.1s transform 0.1s;
+        color: black;
+        background-color: white;
+        transform: translateY(2px);
+        border: 1px solid green;
+    }
+
+}
