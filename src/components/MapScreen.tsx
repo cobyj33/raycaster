@@ -217,7 +217,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         }) )
     }
 
-	
+
+	const [generationMenuIndex, setGenerationMenuIndex] = useState<number>(0);
+
 	const generationAlgorithms = useRef<GenerationAlgorithm[]>([getGenerationAlgorithm("Recursive Backtracker"), getGenerationAlgorithm("Kruskal")]);
 
     return (
@@ -226,8 +228,12 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 
-	<MenuSelector>
-		{ generationAlgorithms.current.map( algo => ( <MenuSelection name={algo.name} key={`algorithmSelection ${algo.name}` } > <GenerationMenu algo={algo} /> <button onClick={() => setMap(map => algo.generateMap(map.dimensions))}> {algo.name} </button> </MenuSelection> )  ) } 
+	<MenuSelector sendMenuIndex={(index) => setGenerationMenuIndex(index)}>
+		{ generationAlgorithms.current.map( (algo, index) => (
+            <MenuSelection className={`algorithm-menu-selection ${generationMenuIndex === index ? "selected" : "unselected"}`} name={algo.name} key={`algorithmSelection ${algo.name}` }>
+            { /* <GenerationMenu algo={algo} /> */ }
+                <button className="algorithm-generation-button" onClick={() => setMap(map => algo.generateMap(map.dimensions))}> Generate {algo.name} </button>
+            </MenuSelection> )  ) } 
 	</MenuSelector>
     </div>
   )
