@@ -5,13 +5,15 @@ import { HistoryStack } from "raycaster/structures"
 type EventAction = (event: Event) => void;
 type Action = () => void;
 type Check = () => boolean
-export function useWindowEvent(event: string, callback: EventAction) {
-    const callbackRef = useRef<EventAction>(callback);
+export function useWindowEvent(event: string, callback: Action | EventAction, deps?: any[]) {
+    const callbackRef = useRef<Action | EventAction>(callback);
 
     useEffect(() => {
+        window.removeEventListener(event, callbackRef.current);
+        callbackRef.current = callback;
         window.addEventListener(event, callbackRef.current);
         return () => window.removeEventListener(event, callbackRef.current);
-    }, [])
+    }, deps)
 }
 
 export function useTimedFlag(dependencies: any[] = [], checks: Check[] = [], timeInMS: number): MutableRefObject<boolean> {

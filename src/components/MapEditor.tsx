@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback } from 'react'
 import { vector2Int, StatefulData, Vector2, View, GameMap, getFilledMapEdges, getDefaultTile, Tile, gameMapInBounds, areGameMapsEqual, getEmptyMap, tryPlaceCamera, Camera, areEqualTiles } from "raycaster/interfaces";
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH, FaUndo, FaRedo, FaHammer } from "react-icons/fa"
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "raycaster/editor"
 import { TileCreator } from "raycaster/components";
 import { HistoryStack } from "raycaster/structures";
-import { drawCell, renderGhostTiles, renderWalls, renderGrid, useHistory } from "raycaster/functions";
+import { drawCell, renderGhostTiles, renderWalls, renderGrid, useHistory, useWindowEvent, useResizeObserver } from "raycaster/functions";
 import "./styles/mapeditor.scss"
 
 
@@ -23,6 +23,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
         cellSize: 10
     });
   const canvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasHolderRef = useRef<HTMLDivElement>(null);
     const lastHoveredCell: MutableRefObject<Vector2> = useRef<Vector2>({
         row: 0,
         col: 0
@@ -35,7 +36,6 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (canvas !== null && canvas !== undefined) {
           const canvasBounds: DOMRect = canvas.getBoundingClientRect();
-          // return new Vector2(event.clientY - canvasBounds.y, event.clientX - canvasBounds.x).int();
             return {
                 row: Math.trunc(event.clientY - canvasBounds.y),
                 col: Math.trunc(event.clientX - canvasBounds.x)
@@ -80,34 +80,34 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   });
   const [editMode, setEditMode] = useState<EditorEditMode>(EditorEditMode.DRAW);
 
-  const centerView: (position: Vector2) => void = (position: Vector2) => {
-    const canvas: HTMLCanvasElement | null = canvasRef.current;
-    if (canvas !== null && canvas !== undefined) {
-      // setView( view.withCoordinates( new Vector2(position.row - (canvas.width / view.cellSize), position.col - (canvas.height / view.cellSize)) )  )
-        setView( view => ({...view, ...{ row: position.row - (canvas.width / view.cellSize), col: position.col - (canvas.height / view.cellSize)  }   }) )
-    }
-  }
+  // const centerView: (position: Vector2) => void = (position: Vector2) => {
+  //   const canvas: HTMLCanvasElement | null = canvasRef.current;
+  //   if (canvas !== null && canvas !== undefined) {
+  //     // setView( view.withCoordinates( new Vector2(position.row - (canvas.width / view.cellSize), position.col - (canvas.height / view.cellSize)) )  )
+  //       setView( view => ({...view, ...{ row: position.row - (canvas.width / view.cellSize), col: position.col - (canvas.height / view.cellSize)  }   }) )
+  //   }
+  // }
 
 
   function render() {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
-    if (canvas !== null && canvas !== undefined) {
-      const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
-      if (context !== null && context !== undefined) {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = 'black';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        renderWalls(canvas, context, view, map);
-        renderGrid(canvas, context, view);
-        renderGhostTiles(context, view, ghostTilePositions, selectedTile);
+    if (canvas === null || canvas === undefined) return;
+    const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
+    if (context === null || context === undefined) return;
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    renderWalls(canvas, context, view, map);
+    renderGrid(canvas, context, view);
+    renderGhostTiles(context, view, ghostTilePositions, selectedTile);
 
 
-        context.globalAlpha = 0.5;
-        context.fillStyle = gameMapInBounds(map, lastHoveredCell.current.row, lastHoveredCell.current.col) ? 'blue' : 'red';
-        drawCell(context, view, lastHoveredCell.current.row, lastHoveredCell.current.col);
-        context.globalAlpha = 1;
-      }
-    }
+    context.globalAlpha = 0.5;
+    context.fillStyle = gameMapInBounds(map, lastHoveredCell.current.row, lastHoveredCell.current.col) ? 'blue' : 'red';
+    drawCell(context, view, lastHoveredCell.current.row + 1, lastHoveredCell.current.col + 1);
+    context.globalAlpha = 1;
   }
 
   function onPointerMove(event: PointerEvent<Element>) {
@@ -188,11 +188,12 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   // }
     
     //TODO: CHECK DEPENDENCIES IN THIS USE EFFECT
-  useEffect(() => {
-    function updateCanvasSize() {
+
+    const updateCanvasSize = useCallback(() => {
       if (canvasRef.current !== null && canvasRef.current !== undefined) {
         const canvas: HTMLCanvasElement = canvasRef.current;
         const rect: DOMRect = canvas.getBoundingClientRect();
+          console.log(rect);
         const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
         if (context !== null && context !== undefined) {
@@ -204,7 +205,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
           canvas.width = rect.width;
           canvas.height = rect.height;
         }
-        // setView(view => view.withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
+
         const mapCenter: Vector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
         const adjustedCoordinates: Vector2 = vector2Int({ 
             row: mapCenter.row - (canvas.height / view.cellSize / 2),
@@ -213,10 +214,15 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
 
         setView(view => ({...view, ...adjustedCoordinates}));
       }
-    }
+    }, [map, view])
 
-    if (canvasRef.current !== null && canvasRef.current !== undefined) {
-      const canvas: HTMLCanvasElement = canvasRef.current;
+    useWindowEvent('resize', updateCanvasSize, [map, view]);
+    useResizeObserver(canvasHolderRef, updateCanvasSize);
+    
+  useEffect(() => {
+      const canvas: HTMLCanvasElement | null = canvasRef.current;
+      if (canvas === null || canvas === undefined) return;
+
       updateCanvasSize();
         const mapCenter: Vector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
         const startingCellSize: number =  Math.trunc( Math.min( canvas.height / map.dimensions.row, canvas.width / map.dimensions.col  ) ); 
@@ -226,14 +232,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
         } 
 
         setView({ cellSize: startingCellSize, ...startingCoordinates });
-      // setView(view => view.withCellSize( Math.trunc( Math.min( canvas.height / map.Dimensions.rows, canvas.width / map.Dimensions.cols  ) ) ))
-      // setView(view => view.withCoordinates( new Vector2(map.center.row - (canvas.height / view.cellSize / 2), map.center.col - (canvas.width / view.cellSize / 2)).int() ));
-    }
-    window.addEventListener('resize', updateCanvasSize);
-    return () => window.removeEventListener('resize', updateCanvasSize);
   }, [])
-
-  // useResizeObserver(canvasRef, updateCanvasSize)
 
   const [newMapDimension, setNewMapDimension] = useState<Vector2>({row: 10, col: 10});
   
@@ -259,7 +258,9 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
         { Object.keys(savedTiles).map(tileName => <button className={`saved-tile-selection-button ${areEqualTiles(selectedTile, savedTiles[tileName]) ? "selected" : "unselected"}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
       </div>
 
-      <canvas style={{cursor: cursor}} className="editing-canvas" ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
+      <div className="editing-canvas-holder" ref={canvasHolderRef}>
+          <canvas style={{cursor: cursor}} className="editing-canvas" ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
+      </div>
 
       <div className={`tile-creator-container ${tileCreatorOpened ? 'opened' : ''}`}>
         <button className='editor-tile-creator-open-button' onClick={() => setTileCreatorOpened(!tileCreatorOpened)}> <FaHammer /> </button>
@@ -268,8 +269,10 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
 
       <div className="map-generator">
         <div className="map-dimensions-input">
-          <input type="number" min={1} onChange={(e) => setNewMapDimension(({...newMapDimension, row: e.target.valueAsNumber }))} value={newMapDimension.row} />
-          <input type="number" min={1} onChange={(e) => setNewMapDimension({ ...newMapDimension, col: e.target.valueAsNumber })} value={newMapDimension.col} />
+      <p> Rows: </p>
+          <input type="number" min={4} onChange={(e) => setNewMapDimension(({...newMapDimension, row: e.target.valueAsNumber }))} value={newMapDimension.row} />
+      <p> Cols: </p>
+          <input type="number" min={4} onChange={(e) => setNewMapDimension({ ...newMapDimension, col: e.target.valueAsNumber })} value={newMapDimension.col} />
         </div>
 
       <button className='map-generate-button' onClick={() => {
@@ -278,7 +281,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
               row: camera.position.row / map.dimensions.row * newMapDimension.row,
               col: camera.position.col / map.dimensions.col * newMapDimension.col
           })}) )
-      }}> Generate </button>
+      }}> Generate {newMapDimension.row} x {newMapDimension.col} Map </button>
       </div>
 
     </div>

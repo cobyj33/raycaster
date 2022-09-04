@@ -24,64 +24,24 @@ html, body, .app, #root {
     touch-action: pinch-zoom;
 }
 
-.menu-switch-buttons {
-    position: absolute;
-    width: 100%;
-    height: 100px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-}
-
-.menu-switch-button {
-    width: 50px;
-    height: 50px;
-    font-size: 10px;
-    background-color: black;
-    border: none;
-    border-radius: 10px;
-    margin-right: 10px;
-    margin-left: 10px;
-    font-family: monospace;
-    color: white;
-    pointer-events: auto;
-}
-
-.menu-switch-button:hover {
-    transition: background-color 0.25s color 0.25s border-radius 0.25s;
-    background-color: white;
-    color: black;
-    border-radius: 0;
-}
-
-.menu-switch-button:active {
-    transition: transform 0.25s;
-    transform: translateY(-5px);
-}
-
-.menu-switch-button.back:hover {
-    transition: transform 0.25s;
-    transform: translateX(-5px);
-}
-
-.menu-switch-button.forward:hover {
-    transition: transform 0.25s;
-    transform: translateX(5px);
-}
 
 .sidebar {
     position: absolute;
-    left: 0;
     top: 0;
     width: 100px;
     height: 100vh;
     transition: transform 0.25s;
-    transform: translateX(-100%);
     z-index: 1;
+}
+
+.sidebar.left {
+    left: 0;
+    transform: translateX(-100%);
+}
+
+.sidebar.right {
+    right: 0;
+    transform: translateX(100%);
 }
 
 .sidebar, .sidebar div {
@@ -94,19 +54,50 @@ html, body, .app, #root {
     pointer-events: auto;
 }
 
+.sidebar-content-area {
+    display: flex;
+    flex-direction: column;
+}
+
 .sidebar-open-button {
     position: absolute;
-    right: 0;
     top: 0;
     width: 50px;
     height: 50px;
     font-size: 30px;
-    transform: translateX(100%);
     background: none;
     border: none;
     color: white;
     text-shadow: 1px 1px black;
+
+
+    &:active {
+        transition: border-botton 0.1s fill 0.1s;
+        fill: black;
+        border-bottom: 3px solid white;
+    }
 }
+
+.sidebar.left .sidebar-open-button {
+    right: 0;
+    transform: translateX(100%);
+    &:hover {
+        transition: fill 0.25s transform 0.25s;
+        fill: rgb(200, 200, 200);
+        transform: translateX(100%) translateY(5px);
+    }
+}
+
+.sidebar.right .sidebar-open-button {
+    left: 0;
+    transform: translateX(-100%);
+    &:hover {
+        transition: color 0.25s transform 0.25s;
+        color: rgb(200, 200, 200);
+        transform: translateX(-100%) translateY(5px);
+    }
+}
+
 
 .screen-picking-button {
     background-color: black;
@@ -159,10 +150,18 @@ html, body, .app, #root {
 
 .screen {
     flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 0px;
     animation: screenLoad;
     animation-duration: 0.25s;
     animation-iteration-count: 1;
     animation-timing-function: ease-in-out;
+}
+
+.screen::before {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
 }

@@ -6,8 +6,11 @@ import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/int
 import "./styles/gamescreen.scss"
 
 
+const Y_MOVEMENT_TOLERANCE = 500;
+
 export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> }  ) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+    const canvasHolderRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const containerRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const [camera, setCamera] = cameraData;
     const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
@@ -16,11 +19,12 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
     const keyHandlerRef = useKeyHandler(new FirstPersonCameraControls(setCamera));
     const mouseControls = useRef<(event: PointerEvent<Element>) => void>((event: PointerEvent<Element>) => {
         const xMovement = -event.movementX;
-        const yMovement = -Math.sin(event.movementY / 10 * (Math.PI / 180.0));
-        const newLookingAngle =  Math.max( -Math.PI / 6, Math.min( Math.PI / 6, camera.lookingAngle + yMovement ) ) 
-        console.log(newLookingAngle * 180 / Math.PI);
-        setCamera( (camera) => ({...camera, direction: rotateVector2(camera.direction,  xMovement / 40 * (Math.PI / 180.0) ) }) );
-        setCamera( (camera) => ( { ...camera, lookingAngle: newLookingAngle } ) );
+        // const yMovement = -Math.sin(event.movementY / 10 * (Math.PI / 180.0));
+        const yMovement = -Math.atan2(event.movementY, Y_MOVEMENT_TOLERANCE);
+        setCamera( (camera: Camera) => {
+            const newLookingAngle =  Math.max( -Math.PI / 4, Math.min( Math.PI / 4, camera.lookingAngle + yMovement ) ) 
+            return ({...camera, direction: rotateVector2(camera.direction,  xMovement / 40 * (Math.PI / 180.0) ), lookingAngle: newLookingAngle });
+        });
     });
 
     function render() {
@@ -85,10 +89,12 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
     }, [camera])
 
 
-
   return (
-    <div   ref={containerRef} className="container screen" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
-        <canvas onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
+    <div ref={containerRef} className="game-container screen" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
+
+        <div className="game-canvas-holder" ref={canvasHolderRef}>
+            <canvas onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
+        </div>
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 

@@ -1,8 +1,9 @@
 import {
     Vector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2AlterToRow, vector2AlterToCol,
-    RaycastHit, RaycastNoHit,
+    Tile,
     GameMap,
 } from "raycaster/interfaces";
+import { Cardinal } from "raycaster/types";
 
 export interface Ray {
     readonly origin: Vector2;
@@ -10,6 +11,18 @@ export interface Ray {
     readonly onHit?: (hit: RaycastHit) => void;
     readonly onNoHit?: (noHit: RaycastNoHit) => void;
 }
+
+export interface RaycastNoHit {
+    readonly end: Vector2;
+    readonly distance: number;
+    readonly originalRay: Ray;
+}
+
+export interface RaycastHit extends RaycastNoHit {
+    readonly side: Cardinal;
+    readonly hitObject: Tile;
+}
+
 
 export function inDimensionBounds({row, col}: Vector2, {row: rows, col: cols}: Vector2) {
     return row >= 0 && col >= 0 && row < rows && col < cols;
@@ -42,10 +55,11 @@ export function castRay(ray: Ray, map: GameMap, distance: number): void {
             if (inDimensionBounds(tileToCheck, map.dimensions)) {
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
                     firstRowHit = {
-                        position: currentRowPosition,
+                        end: currentRowPosition,
                         side: ray.direction.row <= 0 ? "north" : "south",
                         hitObject: map.tiles[tileToCheck.row][tileToCheck.col],
-                        originalRay: ray
+                        originalRay: ray,
+                        distance: distanceBetweenVector2(currentRowPosition, ray.origin)
                     }
                     // new RaycastHit(currentRowPosition, this.direction.row <= 0 ? "north" : "south", tile);
                 }
@@ -81,10 +95,11 @@ export function castRay(ray: Ray, map: GameMap, distance: number): void {
             if (inDimensionBounds(tileToCheck, map.dimensions)) {
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
                     firstColHit = {
-                        position: currentColPosition,
+                        end: currentColPosition,
                         hitObject: map.tiles[tileToCheck.row][tileToCheck.col],
                         side: ray.direction.col < 0 ? "east" : "west",
-                        originalRay: ray
+                        originalRay: ray,
+                        distance: distanceBetweenVector2(currentColPosition, ray.origin)
                     }
                 }
             }
@@ -110,7 +125,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): void {
         }
     } else if (firstRowHit != null && firstColHit != null) {
         if (ray.onHit !== null && ray.onHit !== undefined) {
-            if (distanceBetweenVector2( ray.origin, firstRowHit.position ) <= distanceBetweenVector2( ray.origin, firstColHit.position ) ) {
+            if (distanceBetweenVector2( ray.origin, firstRowHit.end ) <= distanceBetweenVector2( ray.origin, firstColHit.end ) ) {
                 ray.onHit(firstRowHit);
             } else {
                 ray.onHit(firstColHit);

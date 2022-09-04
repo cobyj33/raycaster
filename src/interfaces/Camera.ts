@@ -2,17 +2,44 @@ import {
     Vector2, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2,
     GameMap,
     Ray, RaycastHit, RaycastNoHit, castRay, 
-    Color, darkenColor, colorToRGBString, colorToRGBAString, areEqualColors, gameMapInBounds, vector2Int
+    Color, darkenColor, colorToRGBString, colorToRGBAString, areEqualColors, gameMapInBounds, vector2Int,
+    StatefulData,
+    areGameMapsEqual,
+    vector2Equals
 } from "raycaster/interfaces";
 
-export interface Camera {
+
+interface CameraData {
     readonly map: GameMap;
     readonly position: Vector2;
     readonly direction: Vector2;
     readonly fieldOfView: number;
     readonly viewDistance: number;
-
     readonly lookingAngle: number;
+}
+
+interface CameraCache {
+    lastState: CameraData;
+    lines: CameraLine[];
+    rayHits: Array<RaycastHit | RaycastNoHit>;
+}
+
+export function areEqualCameraDatas(first: CameraData, second: CameraData): boolean {
+    return vector2Equals(first.position, second.position) && vector2Equals(first.direction, second.direction) && first.fieldOfView === second.fieldOfView && first.viewDistance === second.viewDistance && first.lookingAngle === second.lookingAngle && areGameMapsEqual(first.map, second.map);
+}
+
+export function isCameraCacheUpdated(camera: Camera): boolean {
+    return areEqualCameraDatas(camera, camera.cache.lastState);
+}
+
+export function clearCameraCache(camera: Camera): void {
+    camera.cache.lastState = camera;
+    camera.cache.rayHits = [];
+    camera.cache.lines = [];
+}
+
+export interface Camera extends CameraData {
+    readonly cache: CameraCache;
     readonly moveAmount: number;
     readonly sensitivity: number;
 }
@@ -33,19 +60,32 @@ export const getDefaultCamera = (() => {
     const standardCameraDirection = { row: 0, col: 1 };
     const standardMoveAmount: number = 0.25;
     const standardLookingAngle: number = 0;
-    const standardViewDistance: number = 50;
+    const standardViewDistance: number = 1000;
     const standardSensitivity: number = 1;
 
-return (map: GameMap): Camera => ({
-        map: map,
-        position: standardCameraPosition,
-        direction: standardCameraDirection,
-        fieldOfView: standardCameraFOV,
-        viewDistance: standardViewDistance,
-        lookingAngle: standardLookingAngle,
-        moveAmount: standardMoveAmount,
-        sensitivity: standardSensitivity        
-    })
+    return (map: GameMap): Camera => {
+        const cameraData: CameraData = {
+            map: map,
+            position: standardCameraPosition,
+            direction: standardCameraDirection,
+            fieldOfView: standardCameraFOV,
+            viewDistance: standardViewDistance,
+            lookingAngle: standardLookingAngle,
+        }       
+
+        const cameraCache: CameraCache = {
+            lastState: {...cameraData},
+            lines: [],
+            rayHits: []
+        }
+
+        return {
+            ...cameraData,
+            cache: cameraCache,
+            moveAmount: standardMoveAmount,
+            sensitivity: standardSensitivity,
+        }
+    }
 })();
 
 export function getCameraPlane(camera: Camera): LineSegment {
@@ -65,7 +105,6 @@ export function getCameraRays(camera: Camera, lineCount: number, onRayHit?: (hit
     const distanceBetweenStartAndEnd: number = distanceBetweenVector2(startingCameraPlaneLocation, endingCameraPlaneLocation);
     let currentCameraPlaneLocation: Vector2 = { ...startingCameraPlaneLocation };
 
-    
     for (let i = 0; i < lineCount; i++) {
         currentCameraPlaneLocation = addVector2(currentCameraPlaneLocation, vector2ToLength(perpendicularDirection, distanceBetweenStartAndEnd / lineCount));
         const rayDirection: Vector2 = subtractVector2(currentCameraPlaneLocation, camera.position);
@@ -78,7 +117,7 @@ export function getCameraRays(camera: Camera, lineCount: number, onRayHit?: (hit
         // new Ray(camera.position, rayDirection, () => { onHit?.() }, () => { onNoHit?.() }));
     }
 
-    return rays;
+   return rays;
 }
 
 
@@ -86,29 +125,40 @@ export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] 
     const cameraLineData: CameraLine[] = [];
     const {start: cameraPlaneStart, end: cameraPlaneEnd} = getCameraPlane(camera);
     const perpendicularDirection = subtractVector2(cameraPlaneEnd, cameraPlaneStart);
+    const shouldUpdateCameraCache = !isCameraCacheUpdated(camera);
+
+    if (shouldUpdateCameraCache) {
+        clearCameraCache(camera);
+    }
     
     const onCameraRayHit = (hit: RaycastHit) => {
             const rayPlaneIntersection: Vector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
 
-            const distanceFromHitToPlane: number = distanceBetweenVector2(rayPlaneIntersection, hit.position) * Math.sin( Math.min(angleBetweenVector2( perpendicularDirection, hit.originalRay.direction ), angleBetweenVector2( scaleVector2(perpendicularDirection, -1), hit.originalRay.direction ) ) );
+            const distanceFromHitToPlane: number = distanceBetweenVector2(rayPlaneIntersection, hit.end) * Math.sin( Math.min(angleBetweenVector2( perpendicularDirection, hit.originalRay.direction ), angleBetweenVector2( scaleVector2(perpendicularDirection, -1), hit.originalRay.direction ) ) );
 
-        cameraLineData.push( {
+        const cameraLine: CameraLine = {
             lineLengthPercentage: 1.0 / distanceFromHitToPlane,
             hit: hit
-        });
+        }
 
+        cameraLineData.push( cameraLine );
+
+        if (shouldUpdateCameraCache) {
+            camera.cache.rayHits.push(hit);
+            camera.cache.lines.push( cameraLine )
+        }
     };
 
-    const onCameraRayNoHit = () => cameraLineData.push(emptyCameraLine);
+    const onCameraRayNoHit = (noHit: RaycastNoHit) => { 
+        cameraLineData.push(emptyCameraLine)
+        if (shouldUpdateCameraCache) {
+            camera.cache.rayHits.push(noHit);
+            camera.cache.lines.push(emptyCameraLine);
+        }
+    };
+
     const rays: Ray[] = getCameraRays(camera, lineCount, onCameraRayHit, onCameraRayNoHit );
-
     rays.forEach(ray => castRay(ray, camera.map, camera.viewDistance));
-
-    // for (let i = 0; i < lineCount; i++) {
-    //     const ray: Ray = new Ray(camera.position, rayDirection, (hit) => {
-    //     }, () => { cameraLineData.push(CameraLine.getEmpty()) });
-    //     ray.cast(camera.viewDistance, camera.map);
-    // }
 
     return cameraLineData;
 }
@@ -151,16 +201,16 @@ export function tryPlaceCamera(camera: Camera, targetCell: Vector2): Vector2 {
     }
 }
 
-export function renderCamera(camera: Camera, finalCanvas: HTMLCanvasElement): void {
+export const renderCamera: (camera: Camera, finalCanvas: HTMLCanvasElement) => void = ( () => {
     const canvas = document.createElement("canvas");
-    canvas.width = finalCanvas.width;
-    canvas.height = finalCanvas.height;
-    // const viewDistance = Math.sqrt(camera.map.Dimensions.rows * camera.map.Dimensions.rows + camera.map.Dimensions.cols * camera.map.Dimensions.cols)
-
-    const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
     const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
 
-    if (context != null) {
+    return (camera: Camera, finalCanvas: HTMLCanvasElement) => {
+        canvas.width = finalCanvas.width;
+        canvas.height = finalCanvas.height;
+        const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
+
+        if (context === null) return;
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.globalCompositeOperation = 'source-over';
         context.lineWidth = 1;
@@ -205,15 +255,13 @@ export function renderCamera(camera: Camera, finalCanvas: HTMLCanvasElement): vo
             context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
         }
         context.stroke();
+        
+        const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
+        if (finalCanvasContext !== null && finalCanvasContext !== undefined) {
+            finalCanvasContext.drawImage(canvas, 0, 0);
+        }
     }
-    
-
-
-    const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
-    if (finalCanvasContext !== null && finalCanvasContext !== undefined) {
-        finalCanvasContext.drawImage(canvas, 0, 0);
-    }
-}
+})();
 
 export function cameraToString(camera: Camera): string {
     return ` [Camera: {

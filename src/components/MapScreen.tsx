@@ -1,5 +1,5 @@
-import { PointerEvent, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays } from "raycaster/interfaces";
+import { PointerEvent, Ref, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
+import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, isCameraCacheUpdated, clearCameraCache } from "raycaster/interfaces";
 import { Vector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
 import { GenerationMenu, MenuSelector, MenuSelection } from "raycaster/components"
@@ -8,7 +8,7 @@ import { BirdsEyeCameraControls } from "raycaster/controls";
 import "./styles/mapscreen.scss";
 import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
-import { useWindowEvent } from "raycaster/functions";
+import { useResizeObserver, useWindowEvent } from "raycaster/functions";
 
 const cameraImage = new Image();
 let cameraLoaded = false;
@@ -17,6 +17,7 @@ cameraImage.src = cam;
 
 export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera> }) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
+    const canvasHolderRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
     const [camera, setCamera] = cameraData;
     const [cursor, setCursor] = useState<string>("pointer");
@@ -25,13 +26,17 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     const lastPointerPosition = useRef<Vector2>({row: 0, col: 0});
     const [map, setMap] = mapData;
     const cameraControls = useKeyHandler(new BirdsEyeCameraControls(setCamera));
-    const containerRef = useRef<HTMLDivElement>(null);
-    const getMapScale: () => number = useCallback(() => containerRef.current !== null && containerRef !== undefined ? Math.min( containerRef.current.clientWidth / map.dimensions.row, containerRef.current.clientHeight / map.dimensions.col ) : 1, [map]);
+    // const containerRef = useRef<HTMLDivElement>(null);
+
+    const getMapScale: () => number = useCallback(() => {
+        return canvasRef.current !== null && canvasRef.current !== undefined ? Math.min( canvasRef.current.clientWidth / map.dimensions.row, canvasRef.current.clientHeight / map.dimensions.col ) : 1;
+    }, [map]);
 
     const pointerPositionInCanvas = (event: PointerEvent<Element>): Vector2 => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (canvas !== null && canvas !== undefined) {
           const canvasBounds: DOMRect = canvas.getBoundingClientRect();
+            // console.log(canvasBounds);
           // return new Vector2(event.clientY - canvasBounds.y, event.clientX - canvasBounds.x).int();
             return {
                 row: Math.trunc(event.clientY - canvasBounds.y),
@@ -95,17 +100,30 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.save();
         context.beginPath();
         context.strokeStyle = 'green';
-        const rays: Ray[] = getCameraRays(camera, 200, (hit) => {
+
+
+        if (isCameraCacheUpdated(camera) && camera.cache.rayHits.length > 0) {
+            camera.cache.rayHits.forEach((hit) => {
                 context.moveTo(hit.originalRay.origin.col * getMapScale(), hit.originalRay.origin.row * getMapScale());
-                context.lineTo(hit.position.col * getMapScale(), hit.position.row * getMapScale());
-        }, (noHit) => {
-                context.moveTo(noHit.originalRay.origin.col * getMapScale(), noHit.originalRay.origin.row * getMapScale());
-                context.lineTo(noHit.end.col * getMapScale(), noHit.end.row * getMapScale());
-            }
-);
-        rays.forEach(ray => {
-            castRay(ray, camera.map, camera.viewDistance);
-        })
+                context.lineTo(hit.end.col * getMapScale(), hit.end.row * getMapScale());
+            })
+        } else {
+            clearCameraCache(camera);
+            const rays: Ray[] = getCameraRays(camera, 200, (hit) => {
+                    context.moveTo(hit.originalRay.origin.col * getMapScale(), hit.originalRay.origin.row * getMapScale());
+                    context.lineTo(hit.end.col * getMapScale(), hit.end.row * getMapScale());
+                    camera.cache.rayHits.push(hit);
+            }, (noHit) => {
+                    context.moveTo(noHit.originalRay.origin.col * getMapScale(), noHit.originalRay.origin.row * getMapScale());
+                    context.lineTo(noHit.end.col * getMapScale(), noHit.end.row * getMapScale());
+                    camera.cache.rayHits.push(noHit);
+                }
+    );
+            rays.forEach(ray => {
+                castRay(ray, camera.map, camera.viewDistance);
+            })
+        }
+
 
         context.stroke();
         context.restore();
@@ -127,6 +145,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             const canvas: HTMLCanvasElement = canvasRef.current;
             const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
             if (context !== null && context !== undefined) {
+                context.clearRect(0, 0, canvas.width, canvas.height);
                 renderMap(context);
                 renderCamera(context);
                 renderRays(context);
@@ -137,18 +156,29 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     }, [renderCamera, renderMap, renderRays, renderCameraPlane, renderPointerLine]);
     
 
-    
-    
     useEffect(render, [render])
-    useWindowEvent('resize', updateCanvasSize);
+    useResizeObserver(canvasHolderRef, updateCanvasSize);
 
     function updateCanvasSize() {
-        if (canvasRef.current !== null && canvasRef.current !== undefined) {
-          const canvas: HTMLCanvasElement = canvasRef.current;
-          canvas.width = canvas.clientWidth;
-          canvas.height = canvas.clientHeight;
-          render();
+        const canvas: HTMLCanvasElement | null = canvasRef.current;
+        const canvasHolder: HTMLDivElement | null = canvasHolderRef.current;
+        if (canvas === null || canvas === undefined) return;
+        if (canvasHolder === null || canvasHolder === undefined) return;
+        const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
+        if (context === null || context === undefined) return;
+
+        const rect: DOMRect = canvas.getBoundingClientRect();
+        if (rect.width !== canvas.width || rect.height !== canvas.height) {
+            const imageData: ImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            context.putImageData(imageData, 0, 0);
+        } else {
+            canvas.width = rect.width;
+            canvas.height = rect.height;
         }
+
+        render();
       }
 
     function faceCameraToPointer(event: PointerEvent<Element>) {
@@ -182,10 +212,10 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     }
 
     function onPointerDown(event: PointerEvent<Element>) {
-        
         isPointerDown.current = true;
         const hoveredCell = getHoveredCell(event);
-        if (distanceBetweenVector2(vector2Int(hoveredCell), vector2Int(camera.position)) <= 1.5) {
+        console.log(getMapScale());
+        if (distanceBetweenVector2(vector2Int(hoveredCell), vector2Int(camera.position)) <= 10 / getMapScale()) {
             isCameraGrabbed.current = true;
             setCursor('move');
         } else {
@@ -223,8 +253,11 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 	const generationAlgorithms = useRef<GenerationAlgorithm[]>([getGenerationAlgorithm("Recursive Backtracker"), getGenerationAlgorithm("Kruskal")]);
 
     return (
-    <div ref={containerRef} className="map-container screen" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
+    <div className="map-container screen" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
+
+        <div className="map-canvas-holder" ref={canvasHolderRef}>
         <canvas style={{cursor: cursor}} className="map-canvas" onWheel={onWheel} onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef} width={map.dimensions.row * getMapScale()} height={map.dimensions.row * getMapScale()}> </canvas>
+        </div>
 
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 

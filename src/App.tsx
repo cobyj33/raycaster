@@ -12,13 +12,12 @@ type Menus = typeof acceptedMenus[number];
 const STARTING_MAP_DIMENSIONS = { row: 50, col: 50 }
 
 function App() {
-  const [savedTiles, setSavedTiles] = useState<{ [key: string]: Tile }>({});
-  // const [gameMap, setGameMap] = useState<GameMap>(getGenerationAlgorithm("Recursive Backtracker").generateMap(({ row: 50, col: 50 })) );
-  const [gameMap, setGameMap] = useState<GameMap>(getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS)));
-  const [camera, setCamera] = useState<Camera>({ ...getDefaultCamera(gameMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  } );
-  const [currentMenu, setCurrentMenu] = useState<Menus>("Camera View");
-  // const [currentSecondMenu, setCurrentSecondMenu] = useState<Menus | null>(null);
-  const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
+    const [savedTiles, setSavedTiles] = useState<{ [key: string]: Tile }>({});
+    const [gameMap, setGameMap] = useState<GameMap>(getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS)));
+    const [camera, setCamera] = useState<Camera>({ ...getDefaultCamera(gameMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  } );
+    const [currentMenus, setCurrentMenus] = useState<[Menus, Menus | undefined]>(["Camera View", "Game Map"]);
+    const [leftSidebarOpened, setLeftSidebarOpened] = useState<boolean>(false);
+    const [rightSidebarOpened, setRightSidebarOpened] = useState<boolean>(false);
 
     useEffect( () => {
         initRaycaster().then( () => { 
@@ -46,38 +45,32 @@ function App() {
   }
 
 
-  const sidebarOpenReference = useRef<HTMLButtonElement>(null);
   return (
     <div className="app" tabIndex={0} >
-      <div className={`sidebar ${sidebarOpened ? 'opened' : ''}`}>
-        <button ref={sidebarOpenReference} className="sidebar-open-button" onClick={() => setSidebarOpened(!sidebarOpened)}>
-          <ToolTip target={sidebarOpenReference}> SideBar </ToolTip>
+
+      <div className={`sidebar left ${leftSidebarOpened ? 'opened' : ''}`}>
+        <button className="sidebar-open-button" onClick={() => setLeftSidebarOpened(!leftSidebarOpened)}>
             <FaBars />
           </button>
 
         <div className='sidebar-content-area'>
-          { acceptedMenus.map(menu => <button className={`screen-picking-button ${currentMenu.toString() === menu ? 'opened' : ''}`} key={menu} onClick={() => setCurrentMenu(menu)}> { menu } </button> )}
-          {/* <button className={`screen-picking-button ${currentMenu === Menu.CAMERAVIEW ? 'opened' : ''}`} onPointerDown={() => setCurrentMenu(Menu.CAMERAVIEW)}> Camera View </button>
-          <button className={`screen-picking-button ${currentMenu === Menu.EDITOR ? 'opened' : ''}`} onClick={() => setCurrentMenu(Menu.EDITOR)}> Editor </button>
-          <button className={`screen-picking-button ${currentMenu === Menu.GAMEMAP ? 'opened' : ''}`} onClick={() => setCurrentMenu(Menu.GAMEMAP)}> Game Map </button> */}
-
-          {/* <div className='open-other-screen-container'>
-          <button className='open-extra-screen-button'> </button> 
-            <div className='open-extra-screen-options'>
-              { Object.keys(Menu).map(menu => <button className={`screen-picking-button ${currentSecondMenu?.toString?.() === menu ? 'opened' : ''}`} key={menu} onClick={() => { currentSecondMenu === Menu[menu as keyof typeof Menu] ?  setCurrentSecondMenu(null) : setCurrentSecondMenu(Menu[menu as keyof typeof Menu]) }  }> { menu } </button> )}
-            </div>
-          </div> */}
+          { acceptedMenus.map(menu => <button className={`screen-picking-button ${currentMenus[0] === menu ? 'opened' : ''}`} key={menu} onClick={() => setCurrentMenus([menu, currentMenus[1]])}> { menu } </button> )}
         </div>
       </div>
 
-      { getMenu(currentMenu) }
-      { /* currentSecondMenu !== null ? getMenu(currentSecondMenu) : '' */ }
+      <div className={`sidebar right ${rightSidebarOpened ? 'opened' : ''}`}>
+        <button className="sidebar-open-button" onClick={() => setRightSidebarOpened(!rightSidebarOpened)}>
+            <FaBars />
+          </button>
 
-      {/* <div className='menu-switch-buttons'>
-        <button className='menu-switch-button back'  onClick={() => setCurrentMenu(menus.back()) } onFocus={(event) => event.target.blur()}> To: { menus.peekBack().toString() } </button>
-        <button className='menu-switch-button forward' onClick={() => setCurrentMenu(menus.forward())} onFocus={(event) => event.target.blur()}> To: { menus.peekForward().toString() } </button>
-      </div> */}
+        <div className='sidebar-content-area'>
+          { acceptedMenus.map(menu => <button className={`screen-picking-button ${currentMenus[1] === menu ? 'opened' : ''}`} key={menu} onClick={() => setCurrentMenus([currentMenus[0], menu])}> { menu } </button> )}
+            <button className={`screen-picking-button ${currentMenus[1] === undefined ? 'opened' : ''}`} onClick={() => setCurrentMenus([currentMenus[0], undefined])}> Close Extra Menu </button>
+        </div>
+      </div>
 
+      { getMenu(currentMenus[0]) }
+      { currentMenus[1] !== null && currentMenus[1] !== undefined ? getMenu(currentMenus[1]) : '' }
 
     </div>
   );
