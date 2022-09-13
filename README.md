@@ -1,9 +1,9 @@
  
  # [Raycaster](https://cobyj33.github.io/raycaster)
 
-A Raycaster made from scratch with React and Typescript
-View Page: https://cobyj33.github.io/raycaster
-
+A Raycaster made from scratch with React and Typescript  
+View Page At https://cobyj33.github.io/raycaster
+ 
 ![Spin](public/spin.gif)
 ## Description
 
