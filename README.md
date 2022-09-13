@@ -4,7 +4,7 @@
 A Raycaster made from scratch with React and Typescript
 View Page: https://cobyj33.github.io/raycaster
 
-![Spin](public/raycaster_dual.GIF)
+![Spin](public/spin.gif)
 ## Description
 
 An (as of now) simple web raycaster to edit and view into a psuedo-3D world. In the App, users can visualize how the rays are casted to create the camera view, as well as edit the map with in the Map Editor.
