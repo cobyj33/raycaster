@@ -6,7 +6,6 @@ export interface Tile {
     canCollide: boolean;
 }
 
-
 export const getFillerTile = (function() {
     const basicTile: Tile = {
         color: {

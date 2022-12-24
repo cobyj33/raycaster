@@ -1,14 +1,14 @@
 import { PointerEvent, Ref, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, isCameraCacheUpdated, clearCameraCache } from "raycaster/interfaces";
+import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, isCameraCacheUpdated, clearCameraCache, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
 import { Vector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
-import { GenerationMenu, MenuSelector, MenuSelection } from "raycaster/components"
+import { MenuSelector, MenuSelection } from "raycaster/components"
 import { GenerationAlgorithm, getGenerationAlgorithm } from "raycaster/generation"
 import { BirdsEyeCameraControls } from "raycaster/controls";
 import "./styles/mapscreen.scss";
 import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
-import { useResizeObserver, useWindowEvent } from "raycaster/functions";
+import { useResizeObserver } from "raycaster/functions";
 
 const cameraImage = new Image();
 let cameraLoaded = false;
@@ -36,8 +36,6 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (canvas !== null && canvas !== undefined) {
           const canvasBounds: DOMRect = canvas.getBoundingClientRect();
-            // console.log(canvasBounds);
-          // return new Vector2(event.clientY - canvasBounds.y, event.clientX - canvasBounds.x).int();
             return {
                 row: Math.trunc(event.clientY - canvasBounds.y),
                 col: Math.trunc(event.clientX - canvasBounds.x)
@@ -81,6 +79,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         }
     }, [camera, getMapScale]);
 
+
     const renderCamera = useCallback((context: CanvasRenderingContext2D) => {
         context.save();
         if (cameraLoaded) {
@@ -109,19 +108,22 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             })
         } else {
             clearCameraCache(camera);
-            const rays: Ray[] = getCameraRays(camera, 200, (hit) => {
+            const rays: Ray[] = getCameraRays(camera, 200);
+            rays.forEach(ray => {
+                const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance);
+                if ("hitObject" in result) { // is a RaycastHit object
+                    const hit = result as RaycastHit
                     context.moveTo(hit.originalRay.origin.col * getMapScale(), hit.originalRay.origin.row * getMapScale());
                     context.lineTo(hit.end.col * getMapScale(), hit.end.row * getMapScale());
                     camera.cache.rayHits.push(hit);
-            }, (noHit) => {
+                } else {
+                    const noHit = result as RaycastNoHit
                     context.moveTo(noHit.originalRay.origin.col * getMapScale(), noHit.originalRay.origin.row * getMapScale());
                     context.lineTo(noHit.end.col * getMapScale(), noHit.end.row * getMapScale());
                     camera.cache.rayHits.push(noHit);
                 }
-    );
-            rays.forEach(ray => {
-                castRay(ray, camera.map, camera.viewDistance);
             })
+
         }
 
 

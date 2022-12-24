@@ -98,7 +98,7 @@ export function getCameraPlane(camera: Camera): LineSegment {
     }
 }
 
-export function getCameraRays(camera: Camera, lineCount: number, onRayHit?: (hit: RaycastHit) => void, onRayNoHit?: (hit: RaycastNoHit) => void): Ray[] {
+export function getCameraRays(camera: Camera, lineCount: number): Ray[] {
     const rays: Ray[] = [];
     const {start: startingCameraPlaneLocation, end: endingCameraPlaneLocation} = getCameraPlane(camera);
     const perpendicularDirection: Vector2 = subtractVector2(endingCameraPlaneLocation, startingCameraPlaneLocation);
@@ -110,9 +110,7 @@ export function getCameraRays(camera: Camera, lineCount: number, onRayHit?: (hit
         const rayDirection: Vector2 = subtractVector2(currentCameraPlaneLocation, camera.position);
         rays.push( {
             origin: camera.position,
-            direction: rayDirection,
-            onHit: onRayHit,
-            onNoHit: onRayNoHit
+            direction: rayDirection
         });
         // new Ray(camera.position, rayDirection, () => { onHit?.() }, () => { onNoHit?.() }));
     }
@@ -130,35 +128,35 @@ export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] 
     if (shouldUpdateCameraCache) {
         clearCameraCache(camera);
     }
-    
-    const onCameraRayHit = (hit: RaycastHit) => {
-            const rayPlaneIntersection: Vector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
 
+    const rays: Ray[] = getCameraRays(camera, lineCount);
+    rays.forEach(ray => {
+        const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance)
+        if ("hitObject" in result) {
+            const hit = result as RaycastHit
+            const rayPlaneIntersection: Vector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
             const distanceFromHitToPlane: number = distanceBetweenVector2(rayPlaneIntersection, hit.end) * Math.sin( Math.min(angleBetweenVector2( perpendicularDirection, hit.originalRay.direction ), angleBetweenVector2( scaleVector2(perpendicularDirection, -1), hit.originalRay.direction ) ) );
 
-        const cameraLine: CameraLine = {
-            lineLengthPercentage: 1.0 / distanceFromHitToPlane,
-            hit: hit
+            const cameraLine: CameraLine = {
+                lineLengthPercentage: 1.0 / distanceFromHitToPlane,
+                hit: hit
+            }
+
+            cameraLineData.push( cameraLine );
+
+            if (shouldUpdateCameraCache) {
+                camera.cache.rayHits.push(hit);
+                camera.cache.lines.push( cameraLine )
+            }
+        } else {
+            const noHit = result as RaycastNoHit
+            cameraLineData.push(emptyCameraLine)
+            if (shouldUpdateCameraCache) {
+                camera.cache.rayHits.push(noHit);
+                camera.cache.lines.push(emptyCameraLine);
+            }
         }
-
-        cameraLineData.push( cameraLine );
-
-        if (shouldUpdateCameraCache) {
-            camera.cache.rayHits.push(hit);
-            camera.cache.lines.push( cameraLine )
-        }
-    };
-
-    const onCameraRayNoHit = (noHit: RaycastNoHit) => { 
-        cameraLineData.push(emptyCameraLine)
-        if (shouldUpdateCameraCache) {
-            camera.cache.rayHits.push(noHit);
-            camera.cache.lines.push(emptyCameraLine);
-        }
-    };
-
-    const rays: Ray[] = getCameraRays(camera, lineCount, onCameraRayHit, onCameraRayNoHit );
-    rays.forEach(ray => castRay(ray, camera.map, camera.viewDistance));
+    });
 
     return cameraLineData;
 }

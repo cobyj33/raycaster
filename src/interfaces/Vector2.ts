@@ -9,7 +9,7 @@ export interface LineSegment {
 }
 
 
-export function getVectorLength(vector2: Vector2) {
+export function getVectorLength(vector2: Vector2): number {
     return Math.sqrt(vector2.row * vector2.row + vector2.col * vector2.col);
 }
 

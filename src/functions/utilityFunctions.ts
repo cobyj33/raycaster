@@ -29,7 +29,7 @@ export function removeDuplicatesWithHasher<T>(list: T[], hasher: IHasher<T>): T[
   }
 
 
-export function getImage(url: string) {
+export async function getImage(url: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
         const image = new Image();
         image.onload = () => {

@@ -4,6 +4,7 @@ import {
     GameMap,
 } from "raycaster/interfaces";
 import { Cardinal } from "raycaster/types";
+import { NumberLiteralType } from "typescript";
 
 export interface Ray {
     readonly origin: Vector2;
@@ -28,17 +29,18 @@ export function inDimensionBounds({row, col}: Vector2, {row: rows, col: cols}: V
     return row >= 0 && col >= 0 && row < rows && col < cols;
 }
 
-export function castRay(ray: Ray, map: GameMap, distance: number): void {
-        
-        if ( (ray.onHit === null || ray.onHit === undefined) && (ray.onNoHit === null || ray.onNoHit === undefined) ) {
-            return;
-        }
+export function castRayAlongAxis(ray: Ray, map: GameMap, distance: number): void {
+    
+}
 
-        let firstRowHit: RaycastHit | null = null;
-        let firstColHit: RaycastHit | null = null;
+export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | RaycastNoHit {
+
+    let firstRowHit: RaycastHit | null = null;
+    let firstColHit: RaycastHit | null = null;
 
 
-        let currentRowPosition: Vector2 = {...ray.origin};
+    let currentRowPosition: Vector2 = {...ray.origin};
+    
     if (ray.direction.row !== 0) {
         const rowStepDirection: number = ray.direction.row < 0 ? -1 : 1;
 
@@ -61,7 +63,6 @@ export function castRay(ray: Ray, map: GameMap, distance: number): void {
                         originalRay: ray,
                         distance: distanceBetweenVector2(currentRowPosition, ray.origin)
                     }
-                    // new RaycastHit(currentRowPosition, this.direction.row <= 0 ? "north" : "south", tile);
                 }
             }
 
@@ -107,30 +108,21 @@ export function castRay(ray: Ray, map: GameMap, distance: number): void {
         }
     }
 
-    if (firstRowHit === null && firstColHit === null) {
-        if (ray.onNoHit !== null && ray.onNoHit !== undefined) {
-            ray.onNoHit({
-                originalRay: ray,
-                end: addVector2(ray.origin, vector2ToLength(ray.direction, distance)),
-                distance: distance
-            });
-        }
-    } else if (firstRowHit !== null && firstColHit === null) {
-        if (ray.onHit !== null && ray.onHit !== undefined) {
-            ray.onHit(firstRowHit);
-        }
+    if (firstRowHit !== null && firstColHit === null) {
+        return firstRowHit
     } else if (firstRowHit === null && firstColHit !== null) {
-        if (ray.onHit !== null && ray.onHit !== undefined) {
-            ray.onHit(firstColHit);
-        }
+        return firstColHit;
     } else if (firstRowHit != null && firstColHit != null) {
-        if (ray.onHit !== null && ray.onHit !== undefined) {
-            if (distanceBetweenVector2( ray.origin, firstRowHit.end ) <= distanceBetweenVector2( ray.origin, firstColHit.end ) ) {
-                ray.onHit(firstRowHit);
-            } else {
-                ray.onHit(firstColHit);
-            }
+        if (distanceBetweenVector2( ray.origin, firstRowHit.end ) <= distanceBetweenVector2( ray.origin, firstColHit.end ) ) {
+            return firstRowHit
         }
+        return firstColHit
+    }
+    
+    return {
+        originalRay: ray,
+        end: addVector2(ray.origin, vector2ToLength(ray.direction, distance)),
+        distance: distance
     }
 }
 

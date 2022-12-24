@@ -25,7 +25,6 @@ export const getColorFromCSS = (function() {
         } 
         return {...fillerColor};
     }
-    
 })();
 
 export function isColorObject(obj: any): boolean {
