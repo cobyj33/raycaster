@@ -69,8 +69,10 @@ function App() {
         </div>
       </div>
 
-      { getMenu(currentMenus[0]) }
-      { currentMenus[1] !== null && currentMenus[1] !== undefined ? getMenu(currentMenus[1]) : '' }
+      <div className="viewing-area">
+        { getMenu(currentMenus[0]) }
+        { currentMenus[1] !== null && currentMenus[1] !== undefined ? getMenu(currentMenus[1]) : '' }
+      </div>
 
     </div>
   );
