@@ -82,7 +82,7 @@ export function distanceBetweenVector2(first: Vector2, second: Vector2): number 
 }
 
 export function midPointBetweenVector2(first: Vector2, second: Vector2): Vector2 {
-   return { row: ( first.row + second.row ) / 2, col:  (first.col + second.col) / 2 }
+    return { row: ( first.row + second.row ) / 2, col:  (first.col + second.col) / 2 }
 } 
 
 export function angleBetweenVector2(first: Vector2, second: Vector2): number {

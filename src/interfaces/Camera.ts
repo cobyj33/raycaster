@@ -199,6 +199,12 @@ export function tryPlaceCamera(camera: Camera, targetCell: Vector2): Vector2 {
     }
 }
 
+/**
+ * Renders the output of the camera's visuals onto the final canvas
+ * 
+ * 
+ */
+
 export const renderCamera: (camera: Camera, finalCanvas: HTMLCanvasElement) => void = ( () => {
     const canvas = document.createElement("canvas");
     const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
