@@ -1,27 +1,116 @@
-
-
-export interface Vector2 {
+export interface IVector2 {
     readonly row: number;
     readonly col: number;
 }
 
+export class Vector2 implements IVector2 {
+    readonly row: number
+    readonly col: number
+
+    constructor(row: number, col: number) {
+        this.row = row;
+        this.col = col;
+    }
+
+    static fromIVector2(vector: IVector2) {
+        return new Vector2(vector.row, vector.col)
+    }
+
+    get length(): number {
+        return getVectorLength(this)
+    }
+
+    get angle(): number {
+        return vector2ToAngle(this)
+    }
+
+    rotate(angle: number): Vector2 {
+        return Vector2.fromIVector2(rotateVector2(this, angle))
+    }
+
+    toLength(length: number): Vector2 {
+        return Vector2.fromIVector2(vector2ToLength(this, length))
+    }
+
+    scale(amount: number): Vector2 {
+        return Vector2.fromIVector2(scaleVector2(this, amount))
+    }
+
+    alterToCol(col: number): Vector2 {
+        return Vector2.fromIVector2(vector2AlterToCol(this, col))
+    }
+
+    alterToRow(row: number): Vector2 {
+        return Vector2.fromIVector2(vector2AlterToRow(this, row));
+    }
+
+    normalize(): Vector2 {
+        return Vector2.fromIVector2(vector2Normalized(this))
+    }
+
+    toString(): string {
+        return vector2ToString(this)
+    }
+
+    translate(row: number, col: number): Vector2 {
+        return Vector2.fromIVector2(translateVector2(this, row, col))
+    }
+
+    int(): Vector2 {
+        return Vector2.fromIVector2(vector2Int(this))
+    }
+
+    subtract(other: IVector2): Vector2 {
+        return Vector2.fromIVector2(subtractVector2(this, other))
+    }
+
+    round(): Vector2 {
+        return Vector2.fromIVector2(roundVector2(this))
+    }
+
+    distance(other: IVector2): number {
+        return distanceBetweenVector2(this, other)
+    }
+
+    midpoint(other: IVector2): Vector2 {
+        return Vector2.fromIVector2(midPointBetweenVector2(this, other))
+    }
+
+    angleBetween(other: IVector2): number {
+        return angleBetweenVector2(this, other)
+    }
+
+    dot(other: IVector2): number {
+        return dotProductVector2(this, other)
+    }
+
+    equals(other: any): boolean {
+        if (typeof(other) === "object") {
+            if ("row" in other && "col" in other) {
+                return vector2Equals(this, other)
+            }
+        }
+        return false
+    }
+}
+
 export interface LineSegment {
-    start: Vector2;
-    end: Vector2;
+    start: IVector2;
+    end: IVector2;
 }
 
 
-export function getVectorLength(vector2: Vector2): number {
+export function getVectorLength(vector2: IVector2): number {
     return Math.sqrt(vector2.row * vector2.row + vector2.col * vector2.col);
 }
 
-export function rotateVector2(vector: Vector2, angleInRadians: number): Vector2 {
+export function rotateVector2(vector: IVector2, angleInRadians: number): IVector2 {
     const newCol: number = vector.col * Math.cos(angleInRadians) + vector.row * Math.sin(angleInRadians);
     const newRow: number = -vector.col * Math.sin(angleInRadians) + vector.row * Math.cos(angleInRadians);
     return { row: newRow, col: newCol  };
 }
 
-export function vector2ToLength(vector: Vector2, length: number): Vector2 {
+export function vector2ToLength(vector: IVector2, length: number): IVector2 {
     if (vector.row === 0 && vector.col === 0) {
         console.error('cannot change length of 0 length vector');
     }
@@ -29,75 +118,73 @@ export function vector2ToLength(vector: Vector2, length: number): Vector2 {
     return scaleVector2(vector,  length /  getVectorLength(vector));
 }
 
-export function vector2ToAngle(vector: Vector2): number {
+export function vector2ToAngle(vector: IVector2): number {
     return Math.atan2(-vector.row, vector.col);
 }
 
-export function vector2AlterToCol(vector: Vector2, col: number): Vector2 {
+export function vector2AlterToCol(vector: IVector2, col: number): IVector2 {
     const factor: number = col / vector.col;
     return scaleVector2(vector, factor);
 }
 
-export function vector2AlterToRow(vector: Vector2, row: number): Vector2 {
+export function vector2AlterToRow(vector: IVector2, row: number): IVector2 {
     const factor: number = row / vector.row;
     return scaleVector2(vector, factor);
 }
 
-export function vector2Normalized(vector: Vector2): Vector2 {
+export function vector2Normalized(vector: IVector2): IVector2 {
     return vector2ToLength(vector, 1);
 }
 
-export function toString(vector: Vector2): string {
-    return `Vector2: [ Row: ${vector.row}, Col: ${vector.col} Angle: ${ vector2ToAngle(vector) * 180.0 / Math.PI }]`
+export function vector2ToString(vector: IVector2): string {
+    return `IVector2: [ Row: ${vector.row}, Col: ${vector.col} Angle: ${ vector2ToAngle(vector) * 180.0 / Math.PI }]`
 }
 
-export function translateVector2(vector: Vector2, row: number, col: number): Vector2 { 
+export function translateVector2(vector: IVector2, row: number, col: number): IVector2 { 
     return { row: vector.row + row, col: vector.col + col };
 }
 
-export function addVector2(vector: Vector2, other: Vector2): Vector2 {
+export function addVector2(vector: IVector2, other: IVector2): IVector2 {
     return { row: vector.row + other.row, col: vector.col + other.col }
 }
 
-export function vector2Int(vector: Vector2): Vector2 {
+export function vector2Int(vector: IVector2): IVector2 {
     return { row: Math.trunc(vector.row), col: Math.trunc(vector.col) }
 }
 
-export function subtractVector2(vector: Vector2, other: Vector2): Vector2 {
+export function subtractVector2(vector: IVector2, other: IVector2): IVector2 {
     return { row: vector.row - other.row, col: vector.col - other.col }
 }
 
-export function scaleVector2(vector: Vector2, scale: number): Vector2 {
+export function scaleVector2(vector: IVector2, scale: number): IVector2 {
     return { row: vector.row * scale, col: vector.col * scale }
 }
 
-export function roundVector2(vector: Vector2): Vector2 {
+export function roundVector2(vector: IVector2): IVector2 {
     return { row: Math.round(vector.row), col: Math.round(vector.col) }
 }
 
-export function vector2FromAngle(angleInRadians: number): Vector2 {
+export function vector2FromAngle(angleInRadians: number): IVector2 {
     return { row: -Math.sin(angleInRadians), col: Math.cos(angleInRadians) };
 }
 
-export function distanceBetweenVector2(first: Vector2, second: Vector2): number {
+export function distanceBetweenVector2(first: IVector2, second: IVector2): number {
     return Math.sqrt( ( first.row - second.row ) * ( first.row - second.row ) + ( first.col - second.col ) * (first.col - second.col) );
 }
 
-export function midPointBetweenVector2(first: Vector2, second: Vector2): Vector2 {
-    return { row: ( first.row + second.row ) / 2, col:  (first.col + second.col) / 2 }
+export function midPointBetweenVector2(first: IVector2, second: IVector2): IVector2 {
+   return { row: ( first.row + second.row ) / 2, col:  (first.col + second.col) / 2 }
 } 
 
-export function angleBetweenVector2(first: Vector2, second: Vector2): number {
+export function angleBetweenVector2(first: IVector2, second: IVector2): number {
     return Math.abs( vector2ToAngle(first) - vector2ToAngle(second));
 }
 
-export function dotProductVector2(first: Vector2, second: Vector2): number {
+export function dotProductVector2(first: IVector2, second: IVector2): number {
     const angle: number = angleBetweenVector2(first, second);
     return getVectorLength(first) * getVectorLength(second) * Math.cos(angle);
 }
 
-export function vector2Equals(vector: Vector2, other: Vector2): boolean {
+export function vector2Equals(vector: IVector2, other: IVector2): boolean {
     return vector.row == other.row && vector.col === other.col
 }
-
-export default Vector2

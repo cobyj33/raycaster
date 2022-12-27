@@ -1,12 +1,12 @@
 import {getLine} from "raycaster/functions";
-import { Tile, getDefaultTile, GameMap, gameMapInBounds, Vector2 } from "raycaster/interfaces";
+import { Tile, getDefaultTile, GameMap, gameMapInBounds, IVector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
 import { EditMode } from "./EditMode";
 
 export class EraseEditMode extends EditMode {
     cursor() { return "url('https://img.icons8.com/material-rounded/24/00000/eraser.png'), crosshair" }
 
-    private tryPlaceCell({row, col}: Vector2) {
+    private tryPlaceCell({row, col}: IVector2) {
         const [map, setMap] = this.data.mapData;
         if (gameMapInBounds(map, row, col)) {
             const tiles: Tile[][] = [...map.tiles];

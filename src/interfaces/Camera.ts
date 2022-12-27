@@ -3,7 +3,7 @@ import { StatefulData } from "interfaces/utilityInterfaces"
 import { GameMap, areGameMapsEqual, gameMapInBounds } from "interfaces/GameMap"
 import { Ray, RaycastHit, RaycastNoHit, castRay } from "interfaces/Ray"
 import { Color, darkenColor, colorToRGBString, colorToRGBAString, areEqualColors } from "interfaces/Color"
-import { Vector2, vector2Int, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
+import { IVector2, vector2Int, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
 import React from "react"
 
 import WebGLUtils from "functions/webgl"
@@ -12,8 +12,8 @@ import cameraFragmentShaderSource from "shaders/camera.frag?raw"
 
 interface CameraData {
     readonly map: GameMap;
-    readonly position: Vector2;
-    readonly direction: Vector2;
+    readonly position: IVector2;
+    readonly direction: IVector2;
     readonly fieldOfView: number;
     readonly viewDistance: number;
     readonly lookingAngle: number;
@@ -67,8 +67,8 @@ export const getDefaultCamera = (() => {
 })();
 
 export function getCameraPlane(camera: Camera): LineSegment {
-    const startingCameraPlaneLocation: Vector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / 2.0)) );
-    const endingCameraPlaneLocation: Vector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / -2.0)) );
+    const startingCameraPlaneLocation: IVector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / 2.0)) );
+    const endingCameraPlaneLocation: IVector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / -2.0)) );
 
     return {
         start: startingCameraPlaneLocation,
@@ -79,13 +79,13 @@ export function getCameraPlane(camera: Camera): LineSegment {
 export function getCameraRays(camera: Camera, lineCount: number): Ray[] {
     const rays: Ray[] = [];
     const {start: startingCameraPlaneLocation, end: endingCameraPlaneLocation} = getCameraPlane(camera);
-    const perpendicularDirection: Vector2 = subtractVector2(endingCameraPlaneLocation, startingCameraPlaneLocation);
+    const perpendicularDirection: IVector2 = subtractVector2(endingCameraPlaneLocation, startingCameraPlaneLocation);
     const distanceBetweenStartAndEnd: number = distanceBetweenVector2(startingCameraPlaneLocation, endingCameraPlaneLocation);
-    let currentCameraPlaneLocation: Vector2 = { ...startingCameraPlaneLocation };
+    let currentCameraPlaneLocation: IVector2 = { ...startingCameraPlaneLocation };
 
     for (let i = 0; i < lineCount; i++) {
         currentCameraPlaneLocation = addVector2(currentCameraPlaneLocation, vector2ToLength(perpendicularDirection, distanceBetweenStartAndEnd / lineCount));
-        const rayDirection: Vector2 = subtractVector2(currentCameraPlaneLocation, camera.position);
+        const rayDirection: IVector2 = subtractVector2(currentCameraPlaneLocation, camera.position);
         rays.push( {
             origin: camera.position,
             direction: rayDirection
@@ -107,7 +107,7 @@ export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] 
         const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance)
         if ("hitObject" in result) {
             const hit = result as RaycastHit
-            const rayPlaneIntersection: Vector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
+            const rayPlaneIntersection: IVector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
             const distanceFromHitToPlane: number = distanceBetweenVector2(rayPlaneIntersection, hit.end) * Math.sin( Math.min(angleBetweenVector2( perpendicularDirection, hit.originalRay.direction ), angleBetweenVector2( scaleVector2(perpendicularDirection, -1), hit.originalRay.direction ) ) );
 
             const cameraLine: CameraLine = {
@@ -126,17 +126,17 @@ export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] 
     return cameraLineData;
 }
 
-export function tryPlaceCamera(camera: Camera, targetCell: Vector2): Vector2 {
+export function tryPlaceCamera(camera: Camera, targetCell: IVector2): IVector2 {
 
     if (gameMapInBounds(camera.map, targetCell.row, targetCell.col)) {
         targetCell = vector2Int(targetCell);
         if (camera.map.tiles[targetCell.row][targetCell.col].canCollide) {
             let found = false;
-            const searchQueue: Vector2[] = [];
+            const searchQueue: IVector2[] = [];
             const visited: Set<string> = new Set<string>();
             searchQueue.push(targetCell);
             visited.add(JSON.stringify(targetCell));
-            let current: Vector2 = targetCell;
+            let current: IVector2 = targetCell;
             while (searchQueue.length > 0 && !found && visited.size < camera.map.dimensions.row * camera.map.dimensions.col) {
                 current = searchQueue.splice(0, 1)[0];
                 if (current.row >= 0 && current.col >= 0 && current.row < camera.map.tiles.length && current.col < camera.map.tiles[0].length) {
@@ -146,7 +146,7 @@ export function tryPlaceCamera(camera: Camera, targetCell: Vector2): Vector2 {
                     }
                 }
 
-                const neighbors: Vector2[] = [translateVector2(current, 1, 0), translateVector2(current, 0, 1), translateVector2(current, -1, 0), translateVector2(current, 0, -1)].filter(cell => !visited.has(JSON.stringify(cell)));
+                const neighbors: IVector2[] = [translateVector2(current, 1, 0), translateVector2(current, 0, 1), translateVector2(current, -1, 0), translateVector2(current, 0, -1)].filter(cell => !visited.has(JSON.stringify(cell)));
 
                 neighbors.forEach(cell => {
                     visited.add(JSON.stringify(cell));

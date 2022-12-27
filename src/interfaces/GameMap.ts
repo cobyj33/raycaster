@@ -1,12 +1,12 @@
 import {
     Tile, areEqualTiles, TileJSON, getDefaultTile,
-    Vector2,
+    IVector2,
     Color
 } from "raycaster/interfaces"
 
 export interface GameMap {
     readonly tiles: Tile[][];
-    readonly dimensions: Vector2;
+    readonly dimensions: IVector2;
     readonly skyBox: SkyBox;
 }
 
@@ -34,7 +34,7 @@ export function gameMapInBounds(map: GameMap, row: number, col: number): boolean
     return row >= 0 && col >= 0 && row < map.tiles.length && col < map.tiles[0].length;
 }
 
-export function getTileMap(dimensions: Vector2, defaultValue: Tile = getDefaultTile("Empty Tile")) {
+export function getTileMap(dimensions: IVector2, defaultValue: Tile = getDefaultTile("Empty Tile")) {
     const tiles: Tile[][] = [];
     for (let row = 0; row < dimensions.row; row++) {
         tiles.push(new Array<Tile>());
@@ -47,7 +47,7 @@ export function getTileMap(dimensions: Vector2, defaultValue: Tile = getDefaultT
 }
 
 
-export function getEmptyMap(dimensions: Vector2): GameMap {
+export function getEmptyMap(dimensions: IVector2): GameMap {
     return {
         tiles: getEmptyTileMatrix(dimensions),
         dimensions: {...dimensions},
@@ -55,7 +55,7 @@ export function getEmptyMap(dimensions: Vector2): GameMap {
     }
 }
 
-export function getEmptyTileMatrix(dimensions: Vector2): Tile[][] {
+export function getEmptyTileMatrix(dimensions: IVector2): Tile[][] {
     const tileArray: Tile[][] = new Array<Array<Tile>>();
     for (let row = 0; row < dimensions.row; row++) {
         tileArray.push(new Array<Tile>());

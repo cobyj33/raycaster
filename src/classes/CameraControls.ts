@@ -1,9 +1,9 @@
-import { Camera, GameMap, Vector2, addVector2, vector2ToLength, gameMapInBounds, rotateVector2, scaleVector2 } from "raycaster/interfaces"
+import { Camera, GameMap, IVector2, addVector2, vector2ToLength, gameMapInBounds, rotateVector2, scaleVector2 } from "raycaster/interfaces"
 import { KeyBinding, KeyHandler } from "raycaster/keysystem"
 
 const MOVEMENT_CHECKING_DISTANCE = 0.05;
 
-export const canMoveCameraPosition = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): boolean => {
+export const canMoveCameraPosition = (currentPosition: IVector2, currentDirection: IVector2, distance: number, map: GameMap): boolean => {
     // const nextPosition = currentPosition.add(currentDirection.toLength(distance));
     const nextPosition = addVector2(currentPosition, vector2ToLength(currentDirection, distance))
     // const checkingPosition = nextPosition.add(currentDirection.toLength(MOVEMENT_CHECKING_DISTANCE * ( distance < 0 ? -1 : 1 )));
@@ -18,16 +18,16 @@ export const canMoveCameraPosition = (currentPosition: Vector2, currentDirection
     return false;
 }
 
-export const getMovedCameraPosition = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): Vector2 => {
+export const getMovedCameraPosition = (currentPosition: IVector2, currentDirection: IVector2, distance: number, map: GameMap): IVector2 => {
     // const nextPosition = currentPosition.add(currentDirection.toLength(distance));
     const nextPosition = addVector2(currentPosition, vector2ToLength(currentDirection, distance))
     if (canMoveCameraPosition(currentPosition, currentDirection, distance, map)) {
         return nextPosition;
     } else {
-        // const rowDirection: Vector2 = currentDirection.toLength(distance).getRowComponent();
-        const rowDirection: Vector2 = { row: vector2ToLength(currentDirection, distance).row, col: 0 };
-        // const colDirection: Vector2 = currentDirection.toLength(distance).getColComponent();
-        const colDirection: Vector2 = { row: 0, col: vector2ToLength(currentDirection, distance).col } ;
+        // const rowDirection: IVector2 = currentDirection.toLength(distance).getRowComponent();
+        const rowDirection: IVector2 = { row: vector2ToLength(currentDirection, distance).row, col: 0 };
+        // const colDirection: IVector2 = currentDirection.toLength(distance).getColComponent();
+        const colDirection: IVector2 = { row: 0, col: vector2ToLength(currentDirection, distance).col } ;
         if (canMoveCameraPosition(currentPosition, rowDirection, distance, map)) {
             return addVector2(currentPosition, rowDirection);
         } else if (canMoveCameraPosition(currentPosition, colDirection, distance, map)) {

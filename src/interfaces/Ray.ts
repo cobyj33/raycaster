@@ -1,17 +1,17 @@
 import {
-    Vector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2AlterToRow, vector2AlterToCol,
+    IVector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2AlterToRow, vector2AlterToCol,
     Tile,
     GameMap,
 } from "raycaster/interfaces";
 import { Cardinal } from "raycaster/types";
 
 export interface Ray {
-    readonly origin: Vector2;
-    readonly direction: Vector2;
+    readonly origin: IVector2;
+    readonly direction: IVector2;
 }
 
 export interface RaycastNoHit {
-    readonly end: Vector2;
+    readonly end: IVector2;
     readonly distance: number;
     readonly originalRay: Ray;
 }
@@ -22,7 +22,7 @@ export interface RaycastHit extends RaycastNoHit {
 }
 
 
-export function inDimensionBounds({row, col}: Vector2, {row: rows, col: cols}: Vector2) {
+export function inDimensionBounds({row, col}: IVector2, {row: rows, col: cols}: IVector2) {
     return row >= 0 && col >= 0 && row < rows && col < cols;
 }
 
@@ -36,7 +36,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
     let firstColHit: RaycastHit | null = null;
 
 
-    let currentRowPosition: Vector2 = {...ray.origin};
+    let currentRowPosition: IVector2 = {...ray.origin};
     
     if (ray.direction.row !== 0) {
         const rowStepDirection: number = ray.direction.row < 0 ? -1 : 1;
@@ -49,7 +49,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
                     currentRowPosition = {...currentRowPosition, row: Math.round(currentRowPosition.row)};
                 }
 
-            const tileToCheck: Vector2 = rowStepDirection > 0 ? { row: Math.trunc(currentRowPosition.row), col: Math.trunc(currentRowPosition.col) } : {row: Math.floor( currentRowPosition.row + rowStepDirection), col: Math.floor(currentRowPosition.col) };
+            const tileToCheck: IVector2 = rowStepDirection > 0 ? { row: Math.trunc(currentRowPosition.row), col: Math.trunc(currentRowPosition.col) } : {row: Math.floor( currentRowPosition.row + rowStepDirection), col: Math.floor(currentRowPosition.col) };
 
             if (inDimensionBounds(tileToCheck, map.dimensions)) {
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
@@ -70,7 +70,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
     const rowDistance = distanceBetweenVector2(currentRowPosition, ray.origin);
     
     if (ray.direction.col !== 0) {
-        let currentColPosition: Vector2 = {...ray.origin};
+        let currentColPosition: IVector2 = {...ray.origin};
         let distanceTraveled = 0;
         const colStepDirection = ray.direction.col <= 0 ? -1 : 1;
 
@@ -88,7 +88,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
                 currentColPosition = { ...currentColPosition, col: Math.round(currentColPosition.col) };
             }
 
-            const tileToCheck: Vector2 = colStepDirection > 0 ? { row: Math.trunc(currentColPosition.row), col: Math.trunc(currentColPosition.col) } : { row: Math.floor(currentColPosition.row), col: Math.floor( currentColPosition.col + colStepDirection  ) };
+            const tileToCheck: IVector2 = colStepDirection > 0 ? { row: Math.trunc(currentColPosition.row), col: Math.trunc(currentColPosition.col) } : { row: Math.floor(currentColPosition.row), col: Math.floor( currentColPosition.col + colStepDirection  ) };
             
             if (inDimensionBounds(tileToCheck, map.dimensions)) {
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {

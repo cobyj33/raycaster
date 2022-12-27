@@ -1,9 +1,9 @@
-import { Vector2, GameMap, getDefaultSkyBox, getDefaultTile, Tile, getTileMap, getEmptyMap } from "raycaster/interfaces";
+import { IVector2, GameMap, getDefaultSkyBox, getDefaultTile, Tile, getTileMap, getEmptyMap } from "raycaster/interfaces";
 import { isInBounds } from "functions/matrixFunctions";
 
 export interface GenerationAlgorithm {
     readonly name: string;
-    generateMap(dimensions: Vector2): GameMap;
+    generateMap(dimensions: IVector2): GameMap;
 }
 
 type ValidGenerationAlgorithms = "Recursive Backtracker" | "Kruskal";
@@ -20,7 +20,7 @@ export function getGenerationAlgorithm(algo: ValidGenerationAlgorithms): Generat
 export class RecursiveBackTracker implements GenerationAlgorithm {
     readonly name: string = "Recursive Backtracker";
 
-    generateMap(dimensions: Vector2): GameMap {
+    generateMap(dimensions: IVector2): GameMap {
         const tiles: Tile[][] = getTileMap(dimensions, getDefaultTile("Wall Tile"));
         const visited: boolean[][] = Array.from({length: dimensions.row}, () => new Array<boolean>(dimensions.col).fill(false));
         const currentPath: Array<[number, number]> = [];
@@ -138,7 +138,7 @@ export class Kruskal implements GenerationAlgorithm {
     }
     
 
-    generateMap(dimensions: Vector2): GameMap {
+    generateMap(dimensions: IVector2): GameMap {
         const tiles: Tile[][] = this.kruskal(dimensions.row, dimensions.col).map(row => row.map(val => {
             switch (val) {
                 case 0: return getDefaultTile("Empty Tile"); 
@@ -162,7 +162,7 @@ export class BinaryTree implements GenerationAlgorithm {
     readonly name: string = "Binary Tree";
 
     constructor() { }
-    generateMap(dimensions: Vector2): GameMap {
+    generateMap(dimensions: IVector2): GameMap {
         const tiles: Tile[][] = getTileMap(dimensions, getDefaultTile("Wall Tile"));
 
         for (let row = 0; row < dimensions.row; row += 2) {

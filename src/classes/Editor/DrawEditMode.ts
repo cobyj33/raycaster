@@ -1,12 +1,12 @@
 import {getLine} from "raycaster/functions";
-import { Tile, GameMap, gameMapInBounds, Vector2 } from "raycaster/interfaces";
+import { Tile, GameMap, gameMapInBounds, IVector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
 import { EditMode } from "./EditMode";
 
 export class DrawEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
 
-    private tryPlaceCell({row, col}: Vector2) {
+    private tryPlaceCell({row, col}: IVector2) {
         const [map, setMap] = this.data.mapData;
         if (gameMapInBounds(map, row, col)) {
             const tiles: Tile[][] = [...map.tiles];

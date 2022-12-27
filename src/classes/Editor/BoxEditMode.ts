@@ -1,9 +1,9 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "raycaster/editor";
-import { LineSegment, Tile, Vector2, gameMapInBounds } from "raycaster/interfaces"
+import { LineSegment, Tile, IVector2, gameMapInBounds } from "raycaster/interfaces"
 import { getLine, removeDuplicates } from "raycaster/functions";
 
-function getBoxCorners(start: Vector2, end: Vector2): LineSegment[] {
+function getBoxCorners(start: IVector2, end: IVector2): LineSegment[] {
     const firstCorner = { row: start.row, col: end.col }
     const secondCorner = {row: end.row, col: start.col }
     return [
@@ -16,8 +16,8 @@ function getBoxCorners(start: Vector2, end: Vector2): LineSegment[] {
 
 export class BoxEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
-    start: Vector2 | undefined;
-    end: Vector2 | undefined;
+    start: IVector2 | undefined;
+    end: IVector2 | undefined;
     boxLocked: boolean = false;
     private get currentBox(): LineSegment[] {
         if (this.start !== undefined && this.end !== undefined) {
@@ -27,7 +27,7 @@ export class BoxEditMode extends EditMode {
         return []
     };
 
-    private get boxCells(): Vector2[] { return removeDuplicates(this.currentBox.flatMap(line => getLine(line.start, line.end))) ?? [] }
+    private get boxCells(): IVector2[] { return removeDuplicates(this.currentBox.flatMap(line => getLine(line.start, line.end))) ?? [] }
 
     onPointerDown(event: PointerEvent<Element>) {
         this.start = this.data.getHoveredCell(event);
@@ -50,7 +50,7 @@ export class BoxEditMode extends EditMode {
                     row: this.start.row + ( hoveredCell.row < this.start.row ? -sideLength : sideLength ),
                     col: this.start.col + ( hoveredCell.col < this.start.col ? -sideLength : sideLength )       
                 }
-                // this.end = this.start.add( new Vector2( hoveredCell.row < this.start.row ? -sideLength : sideLength, hoveredCell.col < this.start.col ? -sideLength : sideLength ) )
+                // this.end = this.start.add( new IVector2( hoveredCell.row < this.start.row ? -sideLength : sideLength, hoveredCell.col < this.start.col ? -sideLength : sideLength ) )
             } else {
                 this.end = hoveredCell;
             }

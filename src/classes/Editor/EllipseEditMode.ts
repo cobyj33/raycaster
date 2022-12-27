@@ -1,16 +1,16 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "raycaster/editor";
-import { Tile, Vector2, gameMapInBounds } from "raycaster/interfaces"
+import { Tile, IVector2, gameMapInBounds } from "raycaster/interfaces"
 import { getEllipse } from "raycaster/functions";
 
 
 export class EllipseEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
-    start: Vector2 | undefined;
-    end: Vector2 | undefined;
+    start: IVector2 | undefined;
+    end: IVector2 | undefined;
     circleLocked: boolean = false;
 
-    get currentCells(): Vector2[] {
+    get currentCells(): IVector2[] {
         if (this.start !== undefined && this.start !== null && this.end !== undefined && this.end !== null) {
             return getEllipse(this.start, this.end);
         }
@@ -40,7 +40,7 @@ export class EllipseEditMode extends EditMode {
                     col: this.start.col + ( hoveredCell.col < this.start.col ? -sideLength : sideLength )       
                 }
 
-                // this.end = this.start.add( new Vector2( hoveredCell.row < this.start.row ? -sideLength : sideLength, hoveredCell.col < this.start.col ? -sideLength : sideLength ) )
+                // this.end = this.start.add( new IVector2( hoveredCell.row < this.start.row ? -sideLength : sideLength, hoveredCell.col < this.start.col ? -sideLength : sideLength ) )
             } else {
                 this.end = hoveredCell;
             }

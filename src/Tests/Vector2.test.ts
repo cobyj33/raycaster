@@ -1,32 +1,32 @@
-import { Vector2, addVector2, scaleVector2, subtractVector2, rotateVector2, distanceBetweenVector2, dotProductVector2, vector2Normalized, vector2ToLength, getVectorLength } from "raycaster/interfaces"
+import { IVector2, addVector2, scaleVector2, subtractVector2, rotateVector2, distanceBetweenVector2, dotProductVector2, vector2Normalized, vector2ToLength, getVectorLength } from "raycaster/interfaces"
 
 test('vector2 addition', () => {
     const first = { row: 10, col: 5 };
     const second = { row: 12, col: 8 };
-    expect(addVector2(first, second)).toMatchObject<Vector2>({ row: 22, col: 13 });
+    expect(addVector2(first, second)).toMatchObject<IVector2>({ row: 22, col: 13 });
 })
 
 test('vector2 subtraction', () => {
-    const first: Vector2 = {
+    const first: IVector2 = {
         row: 10,
         col: 5
     }
-    const second: Vector2 = {
+    const second: IVector2 = {
         row: 12,
         col: 8
     }
-    expect(subtractVector2(first, second)).toMatchObject<Vector2>({
+    expect(subtractVector2(first, second)).toMatchObject<IVector2>({
         row: -2,
         col: -3
     });
 })
 
 test('vector2 scaling', () => {
-    const first: Vector2 = {
+    const first: IVector2 = {
         row: 10,
         col: 5
     }
-    expect(scaleVector2(first, 2.5)).toMatchObject<Vector2>({
+    expect(scaleVector2(first, 2.5)).toMatchObject<IVector2>({
         row: 25,
         col: 12.5
     });
@@ -49,11 +49,11 @@ test('vector2 rotation col', () => {
 })
 
 test('vector2 distance', () => {
-    const first: Vector2 = {
+    const first: IVector2 = {
         row: 243,
         col: -754
     };
-    const second: Vector2 = {
+    const second: IVector2 = {
         row: -902.4,
         col: 435.98
     }
@@ -62,7 +62,7 @@ test('vector2 distance', () => {
 
 
 test('vector2 toLength row', () => {
-    const vector: Vector2 = {
+    const vector: IVector2 = {
         row: 8,
         col: 5
     }
@@ -70,7 +70,7 @@ test('vector2 toLength row', () => {
 })
 
 test('vector2 toLength col', () => {
-    const vector: Vector2 = {
+    const vector: IVector2 = {
         row: 8,
         col: 5
     }
@@ -78,7 +78,7 @@ test('vector2 toLength col', () => {
 })
 
 test('vector2 toLength', () => {
-    const vector: Vector2 = {
+    const vector: IVector2 = {
         row: 123,
         col: -74
     }
@@ -96,13 +96,13 @@ test('vector2 length', () => {
 })
 
 test("normalized dot product perpendicular", () => {
-    const first: Vector2 = { row: 0, col: 1 }
-    const second: Vector2 = { row: 1, col: 0 }
+    const first: IVector2 = { row: 0, col: 1 }
+    const second: IVector2 = { row: 1, col: 0 }
     expect(dotProductVector2(first, second)).toBeCloseTo(0, 2);
 })
 
 test("normalized dot product 45 degrees", () => {
-    const first: Vector2 = { row: 0, col: 1 }
+    const first: IVector2 = { row: 0, col: 1 }
     const second = vector2Normalized({ row: 1, col: 1 })
     expect(dotProductVector2(first, second)).toBeCloseTo(Math.cos(Math.PI / 4), 2);
 })

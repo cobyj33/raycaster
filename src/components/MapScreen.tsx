@@ -1,6 +1,6 @@
 import { PointerEvent, Ref, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
 import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
-import { Vector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
+import { IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
 import { GenerationAlgorithm, getGenerationAlgorithm } from "raycaster/generation"
@@ -23,7 +23,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     const [cursor, setCursor] = useState<string>("pointer");
     const isPointerDown = useRef<boolean>(false);
     const isCameraGrabbed = useRef<boolean>(false);
-    const lastPointerPosition = useRef<Vector2>({row: 0, col: 0});
+    const lastPointerPosition = useRef<IVector2>({row: 0, col: 0});
     const [map, setMap] = mapData;
     const cameraControls = useKeyHandler(new BirdsEyeCameraControls(setCamera));
     // const containerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         return canvasRef.current !== null && canvasRef.current !== undefined ? Math.min( canvasRef.current.clientWidth / map.dimensions.row, canvasRef.current.clientHeight / map.dimensions.col ) : 1;
     }, [map]);
 
-    const pointerPositionInCanvas = (event: PointerEvent<Element>): Vector2 => {
+    const pointerPositionInCanvas = (event: PointerEvent<Element>): IVector2 => {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         if (canvas !== null && canvas !== undefined) {
           const canvasBounds: DOMRect = canvas.getBoundingClientRect();
@@ -44,9 +44,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         return { row: 0, col: 0  };
       }
 
-    const getHoveredCell: (event: PointerEvent<Element>) => Vector2 = (event: PointerEvent<Element>) => {
-        const position: Vector2 = pointerPositionInCanvas(event);
-        // return new Vector2(Math.floor(position.row / getMapScale()), Math.floor(position.col / getMapScale()) );
+    const getHoveredCell: (event: PointerEvent<Element>) => IVector2 = (event: PointerEvent<Element>) => {
+        const position: IVector2 = pointerPositionInCanvas(event);
+        // return new IVector2(Math.floor(position.row / getMapScale()), Math.floor(position.col / getMapScale()) );
         return {
             row: Math.floor(position.row / getMapScale()),
             col: Math.floor(position.col / getMapScale())
@@ -84,7 +84,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.save();
         if (cameraLoaded) {
             context.transform(1, 0, 0, 1, Math.trunc(camera.position.col * getMapScale()), Math.trunc(camera.position.row * getMapScale()));
-            const offsetDirection = addVector2(vector2ToLength(camera.direction, -cameraImage.height), { row: 0, col: cameraImage.width / 4 });// camera.direction.toLength(-cameraImage.height).add(new Vector2(0, cameraImage.width / 4));
+            const offsetDirection = addVector2(vector2ToLength(camera.direction, -cameraImage.height), { row: 0, col: cameraImage.width / 4 });// camera.direction.toLength(-cameraImage.height).add(new IVector2(0, cameraImage.width / 4));
             context.translate(offsetDirection.col, offsetDirection.row);
             context.rotate(-vector2ToAngle(camera.direction) + Math.PI / 2)
             context.drawImage(cameraImage, -cameraImage.width / 2, -cameraImage.height / 2);
@@ -125,7 +125,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.save();
         context.beginPath();
         context.strokeStyle = 'blue';
-        const cameraPlane: { start: Vector2, end: Vector2 } = getCameraPlane(camera);
+        const cameraPlane: { start: IVector2, end: IVector2 } = getCameraPlane(camera);
         context.moveTo(cameraPlane.start.col * getMapScale(), cameraPlane.start.row * getMapScale());
         context.lineTo(cameraPlane.end.col * getMapScale(), cameraPlane.end.row * getMapScale());
         context.stroke();

@@ -1,12 +1,12 @@
-import { Vector2 } from "raycaster/interfaces"
+import { IVector2 } from "raycaster/interfaces"
 import { removeDuplicates } from "raycaster/functions"
 
 
-export function getLine(start: Vector2, end: Vector2): Vector2[] {
+export function getLine(start: IVector2, end: IVector2): IVector2[] {
         if (start.row === end.row && start.col === end.col) { return [{ ...start }]; }
         const {row: row1, col: col1} = start;
         const {row: row2, col: col2} = end;
-        const intersections: Vector2[] = []
+        const intersections: IVector2[] = []
     
         if (col1 === col2) {
             for (let row = Math.min(row1, row2); row <= Math.max(row1, row2); row++) {
@@ -33,7 +33,7 @@ export function getLine(start: Vector2, end: Vector2): Vector2[] {
         return removeDuplicates(intersections)
     }
 
-export function getEllipse(start: Vector2, end: Vector2): Vector2[] {
+export function getEllipse(start: IVector2, end: IVector2): IVector2[] {
         if (start.row === end.row && start.col === end.col) { return [{ ...start }]; }
         const {row: row1, col: col1} = start;
         const {row: row2, col: col2} = end;
@@ -41,7 +41,7 @@ export function getEllipse(start: Vector2, end: Vector2): Vector2[] {
         const centerRow: number = (row1 + row2 ) / 2
         const horizontalRadius: number = Math.abs(col1 - col2) / 2;
         const verticalRadius: number = Math.abs(row1 - row2) / 2;
-        const intersections: Vector2[] = []
+        const intersections: IVector2[] = []
 
         if (col1 == col2 || row1 == row2) {
             return getLine(start, end);
