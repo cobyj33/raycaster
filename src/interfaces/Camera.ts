@@ -11,8 +11,6 @@ import {
 import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
 import cameraFragmentShaderSource from "shaders/camera.frag?raw"
-import { g } from "vitest/dist/index-40ebba2b";
-
 
 interface CameraData {
     readonly map: GameMap;
@@ -198,6 +196,7 @@ export function getCameraProgram(gl: WebGL2RenderingContext): WebGLProgram {
     gl.vertexAttribPointer(aPosLocation, 2, gl.FLOAT, false, 0, 0);
     return cameraRenderProgram;
 }
+
 
 /**
  * Cast camera lines and render the output of the camera onto the canavas

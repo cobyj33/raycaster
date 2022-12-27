@@ -2,9 +2,11 @@ import { Color, areEqualColors, isColorObject, colorToRGBAString } from "raycast
 
 export interface Tile {
     color: Color;
+    texture: HTMLImageElement | null;
     canHit: boolean;
     canCollide: boolean;
 }
+
 
 export const getFillerTile = (function() {
     const basicTile: Tile = {
@@ -15,7 +17,8 @@ export const getFillerTile = (function() {
             alpha: 0
         },
         canHit: false,
-        canCollide: false
+        canCollide: false,
+        texture: null
     }
 
     return () => ({...basicTile});
