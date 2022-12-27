@@ -1,3 +1,5 @@
+
+
 export interface Vector2 {
     readonly row: number;
     readonly col: number;
@@ -97,3 +99,5 @@ export function dotProductVector2(first: Vector2, second: Vector2): number {
 export function vector2Equals(vector: Vector2, other: Vector2): boolean {
     return vector.row == other.row && vector.col === other.col
 }
+
+export default Vector2

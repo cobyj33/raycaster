@@ -1,6 +1,6 @@
 precision mediump float;
 uniform vec2 resolution;
-uniform sampler2D cameraLines; // Height of 2, length of resolution, (vec4(lineHeightPercentage, red, green, blue), vec4(darkenPercentage, textureIndex / 16, 0, 0), vec4(textureX, textureY, textureWidth, textureHeight))
+uniform sampler2D cameraLines; // Height of 2, length of resolution, (vec4(lineHeightPercentage, red, green, blue), vec4(darkenPercentage, textureIndex / 16 or -1.0, 0, 0), vec4(textureX, textureY, textureWidth, textureHeight))
 uniform int numOfCameraLines;
 uniform float centerLineHeight;
 

@@ -1,12 +1,10 @@
-import {
-    Vector2, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2,
-    GameMap,
-    Ray, RaycastHit, RaycastNoHit, castRay, 
-    Color, darkenColor, colorToRGBString, colorToRGBAString, areEqualColors, gameMapInBounds, vector2Int,
-    StatefulData,
-    areGameMapsEqual,
-    vector2Equals
-} from "raycaster/interfaces";
+import { StatefulData } from "interfaces/utilityInterfaces"
+
+import { GameMap, areGameMapsEqual, gameMapInBounds } from "interfaces/GameMap"
+import { Ray, RaycastHit, RaycastNoHit, castRay } from "interfaces/Ray"
+import { Color, darkenColor, colorToRGBString, colorToRGBAString, areEqualColors } from "interfaces/Color"
+import { Vector2, vector2Int, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
+import React from "react"
 
 import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
@@ -92,7 +90,6 @@ export function getCameraRays(camera: Camera, lineCount: number): Ray[] {
             origin: camera.position,
             direction: rayDirection
         });
-        // new Ray(camera.position, rayDirection, () => { onHit?.() }, () => { onNoHit?.() }));
     }
 
    return rays;
@@ -166,12 +163,6 @@ export function tryPlaceCamera(camera: Camera, targetCell: Vector2): Vector2 {
         return { row: camera.map.dimensions.row / 2, col: camera.map.dimensions.col / 2 }
     }
 }
-
-/**
- * Renders the output of the camera's visuals onto the final canvas
- * 
- * 
- */
 
 export function getCameraProgram(gl: WebGL2RenderingContext): WebGLProgram {
     const quadVertices: number[] = [
@@ -272,70 +263,6 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
     return cameraRenderProgram
 };
 
-
-// export const renderCamera: (camera: Camera, finalCanvas: HTMLCanvasElement) => void = ( () => {
-//     const canvas = document.createElement("canvas");
-//     const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
-
-//     return (camera: Camera, finalCanvas: HTMLCanvasElement) => {
-//         canvas.width = finalCanvas.width;
-//         canvas.height = finalCanvas.height;
-//         const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
-
-//         if (context === null) return;
-//         context.clearRect(0, 0, canvas.width, canvas.height);
-//         context.globalCompositeOperation = 'source-over';
-//         context.lineWidth = 1;
-        //    const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(camera.lookingAngle) * canvas.height / 2));
-//         context.fillStyle = colorToRGBString(camera.map.skyBox.floorColor);
-//         context.fillRect(0, centerHeight, canvas.width, canvas.height - centerHeight);
-//         context.fillStyle = colorToRGBString(camera.map.skyBox.skyColor);
-//         context.fillRect(0, 0, canvas.width, centerHeight);
-//         context.globalAlpha = 1;
-//         context.lineWidth = 2;
-//         context.lineCap = 'square';
-
-//         context.beginPath();
-//         let lastColor: Color | null = null;
-
-//         for (let col = 0; col < cameraLineData.length; col++) {
-//             const currentLine: CameraLine = cameraLineData[col];
-//             if (currentLine.hit != null) {
-//                 let color: Color = currentLine.hit.hitObject.color;
-//                 switch(currentLine.hit.side) {
-//                     case "west": { color = darkenColor(color, 50); break; }
-//                     case "east": { color = darkenColor(color, 50); break; }
-//                     case "south": { color = darkenColor(color, 100); break; }
-//                 }
-
-//                 if (lastColor !== null) {
-//                     context.strokeStyle = colorToRGBAString(lastColor);
-//                     if (!areEqualColors(color, lastColor)) {
-//                         const lastAlpha: number = context.globalAlpha;
-//                         context.globalAlpha = lastColor.alpha / 255;
-//                         context.stroke();
-//                         context.globalAlpha = lastAlpha;
-//                         context.beginPath();
-//                     }
-//                 }
-//                 lastColor = {...color};
-//             } else {
-//                 context.strokeStyle = 'white';
-//             }
-//             const lineHeightInPixels: number = Math.trunc(currentLine.lineLengthPercentage * canvas.height);
-//             context.moveTo(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)) );
-//             context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
-//         }
-//         context.stroke();
-        
-//         const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
-//         if (finalCanvasContext !== null && finalCanvasContext !== undefined) {
-//             finalCanvasContext.drawImage(canvas, 0, 0);
-//         }
-//     }
-
-    
-// })();
 
 export function cameraToString(camera: Camera): string {
     return ` [Camera: {

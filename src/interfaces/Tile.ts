@@ -1,4 +1,7 @@
 import { Color, areEqualColors, isColorObject, colorToRGBAString } from "raycaster/interfaces"
+import marbleTexturePath from "assets/Marble.png"
+import { getImage } from "functions/image";
+
 
 export interface Tile {
     color: Color;
@@ -27,56 +30,110 @@ export const getFillerTile = (function() {
 function isTileObject(obj: any): boolean {
     const test: Tile = obj as Tile;
     if (test.color !== null && test.color !== undefined &&
-    test.canHit !== null && test.canHit !== undefined &&
+        test.canHit !== null && test.canHit !== undefined &&
         test.canCollide !== null && test.canCollide !== undefined) {
-        
-        return isColorObject(test["color"]) && typeof(test["canHit"]) === "boolean" && typeof(test["canCollide"]) === "boolean"
+        if (isColorObject(test["color"]) && typeof(test["canHit"]) === "boolean" && typeof(test["canCollide"]) === "boolean") {
+            if (test.texture !== null && test.texture !== undefined) {
+                if ("tagName" in test.texture) {
+                    if (test.texture.tagName === "img") {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
     }
     return false;
 }
 
-export const TileTypeArray = ["Empty Tile", "Wall Tile", "Red Tile", "Green Tile", "Blue Tile"] as const;
+
+export const TileTypeArray = ["Empty Tile", "Wall Tile", "Red Tile", "Green Tile", "Blue Tile", "Marble Tile"] as const;
 type TileTypes = typeof TileTypeArray[number];
 
 const tileTypeDefinitions: {[key in TileTypes]: Tile} = {
-    "Empty Tile": getFillerTile(),
-    "Wall Tile": getFillerTile(),
-    "Red Tile": getFillerTile(),
-    "Green Tile": getFillerTile(),
-    "Blue Tile": getFillerTile()
+    "Empty Tile": {
+        "color": {
+            "red": 60,
+            "green": 60,
+            "blue": 60,
+            "alpha": 255
+        },
+        "canCollide": false,
+        "canHit": false,
+        "texture": null
+    },
+    "Wall Tile": {
+        "color": {
+            "red": 255,
+            "green": 255,
+            "blue": 255,
+            "alpha": 255
+        },
+        "canCollide": true,
+        "canHit": true,
+        "texture": null
+    },
+    "Red Tile": {
+        "color": {
+            "red": 255,
+            "green": 0,
+            "blue": 0,
+            "alpha": 255
+        },
+        "canCollide": true,
+        "canHit": true,
+        "texture": null
+    },
+    "Green Tile": {
+        "color": {
+            "red": 0,
+            "green": 255,
+            "blue": 0,
+            "alpha": 255
+        },
+        "canCollide": true,
+        "canHit": true,
+        "texture": null
+    },
+    "Blue Tile": {
+        "color": {
+            "red": 0,
+            "green": 0,
+            "blue": 255,
+            "alpha": 255
+        },
+        "canCollide": true,
+        "canHit": true,
+        "texture": null
+    },
+    "Marble Tile": {
+        "color": {
+            "red": 120,
+            "green": 120,
+            "blue": 120,
+            "alpha": 255
+        },
+        "canCollide": true,
+        "canHit": true,
+        "texture": null
+    }
 }
 
-export async function initTiles() {
-    return fetch("json/tiles.json", {
-        headers : { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    }).then(response => response.json())
-        .then(json => {
-            console.log(json);
-            if (typeof(json) == "object") {
-                const pairs: Array<[any, any]> = Object.entries(json);
-                pairs.forEach((entry) => {
-                    const [key, value] = entry;
-                    if (key !== null && key !== undefined && value !== null && value !== undefined) {
-                        if (key in tileTypeDefinitions && isTileObject(value)) {
-                            tileTypeDefinitions[key as TileTypes] = value as Tile;
-                        } else {
-                            if (!(key in tileTypeDefinitions)) {
-                                throw new Error("Invalid tile type, not in definitions: ", key);
-                            }
-                            if (!isTileObject(value)) {
-                                throw new Error("Invalid tile data: not recognized as tile json: ", value);
-                            }
-                        }
-                }})
-            }
+const textureMap: {[key in TileTypes]: string | null} = {
+    "Empty Tile": null,
+    "Wall Tile": null,
+    "Red Tile": null,
+    "Green Tile": null,
+    "Blue Tile": null,
+    "Marble Tile": marbleTexturePath
+}
 
-        })
-        .catch(error => {
-            console.error("ERROR FETCHING DEFAULT TILES: ", error);
-        })
+// TODO: Add a way to asyncronously create the textures for the tiles after loading
+export async function initTiles() {
+    // ( Object.entries(textureMap).filter(entry => entry[1] !== null && entry[1] !== undefined) as [string, string][] ).forEach(entry => async function() {
+    //     getImage.  entry[1]
+    // })
 }
 
 export function getDefaultTile(tileType: TileTypes) {
