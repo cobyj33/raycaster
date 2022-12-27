@@ -12,8 +12,8 @@ export const BoardDrawing = ({ mapData, view, className }: { mapData: StatefulDa
       if (context !== null && context !== undefined) {
         context.fillStyle = 'rgb(60, 60, 60)'
         context.fillRect(0, 0, canvas.width, canvas.height);
-	renderWalls(canvas, context, view, map);
-	renderGrid(canvas, context, view);
+        renderWalls(canvas, context, view, map);
+        renderGrid(canvas, context, view);
       }
     }
   }

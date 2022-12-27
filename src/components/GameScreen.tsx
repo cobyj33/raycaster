@@ -1,10 +1,9 @@
-import { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
+import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/interfaces";
 import "./styles/gamescreen.css"
-
 
 const Y_MOVEMENT_TOLERANCE = 500;
 
@@ -27,11 +26,17 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
         });
     });
 
+    const cameraRenderProgram = React.useRef<WebGLProgram | null>(null)
+
     function render() {
-        if (canvasRef.current != null) {
-            canvasRef.current.width = canvasRef.current.clientWidth;
-            canvasRef.current.height = canvasRef.current.clientHeight;
-            renderCamera(camera, canvasRef.current);
+        if (canvasRef.current !== null && canvasRef.current !== undefined) {
+            const canvas: HTMLCanvasElement = canvasRef.current;
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+            const gl = canvas.getContext("webgl2");
+            if (gl !== null && gl !== undefined) {
+                cameraRenderProgram.current = renderCamera(camera, canvas, gl, cameraRenderProgram.current);
+            }
         }
     }
 
@@ -98,17 +103,6 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 
-      {
-        /*
-        
-        <div className="camera-indicators">
-            { showFOVIndicator && <span className="camera-indicator"> {`FOV: ${(camera.fieldOfView * 180.0/Math.PI).toPrecision(3)}`} </span> }
-        </div>
-
-
-        */
-
-      }
     </div>
   )
 }

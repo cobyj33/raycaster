@@ -8,6 +8,11 @@ import {
     vector2Equals
 } from "raycaster/interfaces";
 
+import WebGLUtils from "functions/webgl"
+import cameraVertexShaderSource from "shaders/camera.vert?raw"
+import cameraFragmentShaderSource from "shaders/camera.frag?raw"
+import { g } from "vitest/dist/index-40ebba2b";
+
 
 interface CameraData {
     readonly map: GameMap;
@@ -170,67 +175,168 @@ export function tryPlaceCamera(camera: Camera, targetCell: Vector2): Vector2 {
  * 
  */
 
-export const renderCamera: (camera: Camera, finalCanvas: HTMLCanvasElement) => void = ( () => {
-    const canvas = document.createElement("canvas");
-    const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
+export function getCameraProgram(gl: WebGL2RenderingContext): WebGLProgram {
+    const quadVertices: number[] = [
+        -1, -1,
+        1, -1,
+        1, 1,
+        -1, 1
+    ]
 
-    return (camera: Camera, finalCanvas: HTMLCanvasElement) => {
-        canvas.width = finalCanvas.width;
-        canvas.height = finalCanvas.height;
-        const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
+    const quadIndices: number[] = [
+        0, 1, 3, 1, 3, 2
+    ]
 
-        if (context === null) return;
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.globalCompositeOperation = 'source-over';
-        context.lineWidth = 1;
-        const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(camera.lookingAngle) * canvas.height / 2));
-        context.fillStyle = colorToRGBString(camera.map.skyBox.floorColor);
-        context.fillRect(0, centerHeight, canvas.width, canvas.height - centerHeight);
-        context.fillStyle = colorToRGBString(camera.map.skyBox.skyColor);
-        context.fillRect(0, 0, canvas.width, centerHeight);
-        context.globalAlpha = 1;
-        context.lineWidth = 2;
-        context.lineCap = 'square';
+    const vertexBuffer = WebGLUtils.createVertexBuffer(gl, quadVertices);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    const quadVertexBuffer = WebGLUtils.createElementArrayBuffer(gl, quadIndices);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quadVertexBuffer);
+    const cameraRenderProgram = WebGLUtils.compileProgramFromSourceStrings(gl, cameraVertexShaderSource, cameraFragmentShaderSource)
+    gl.useProgram(cameraRenderProgram)
+    const aPosLocation = gl.getAttribLocation(cameraRenderProgram, "aPos");
+    gl.enableVertexAttribArray(aPosLocation);
+    gl.vertexAttribPointer(aPosLocation, 2, gl.FLOAT, false, 0, 0);
+    return cameraRenderProgram;
+}
 
-        context.beginPath();
-        let lastColor: Color | null = null;
+/**
+ * Cast camera lines and render the output of the camera onto the canavas
+ * @param camera the Camera object to render from
+ * @param canvas The canvas to render to 
+ * @param gl The gl context to render to, must be the same gl context as the canvas given
+ * @param cameraRenderProgram The camera render program to use (outputted by this program, put the same one here in consecutive calls so that new programs do not have to be compiled)
+ * @returns The same cameraRenderProgram if given, a new cameraRenderProgram if passed null
+ */
+export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, cameraRenderProgram: WebGLProgram | null): WebGLProgram {
+    canvas.width = canvas.width;
+    canvas.height = canvas.height;
 
-        for (let col = 0; col < cameraLineData.length; col++) {
-            const currentLine: CameraLine = cameraLineData[col];
-            if (currentLine.hit != null) {
-                let color: Color = currentLine.hit.hitObject.color;
-                switch(currentLine.hit.side) {
-                    case "west": { color = darkenColor(color, 50); break; }
-                    case "east": { color = darkenColor(color, 50); break; }
-                    case "south": { color = darkenColor(color, 100); break; }
-                }
-
-                if (lastColor !== null) {
-                    context.strokeStyle = colorToRGBAString(lastColor);
-                    if (!areEqualColors(color, lastColor)) {
-                        const lastAlpha: number = context.globalAlpha;
-                        context.globalAlpha = lastColor.alpha / 255;
-                        context.stroke();
-                        context.globalAlpha = lastAlpha;
-                        context.beginPath();
-                    }
-                }
-                lastColor = {...color};
-            } else {
-                context.strokeStyle = 'white';
-            }
-            const lineHeightInPixels: number = Math.trunc(currentLine.lineLengthPercentage * canvas.height);
-            context.moveTo(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)) );
-            context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
-        }
-        context.stroke();
-        
-        const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
-        if (finalCanvasContext !== null && finalCanvasContext !== undefined) {
-            finalCanvasContext.drawImage(canvas, 0, 0);
-        }
+    if (cameraRenderProgram === null || cameraRenderProgram === undefined) {
+        cameraRenderProgram = getCameraProgram(gl)
     }
-})();
+
+    const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0, 0, 0, 0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    const TRANSPARENT = { red: 0, green: 0, blue: 0, alpha: 0}
+
+    const textureData = new Float32Array(cameraLineData.length * 4 * 2)
+
+    // fill first line, percentage and color data
+    for (let i = 0; i < cameraLineData.length; i++) {
+        const data = cameraLineData[i]
+        let color = TRANSPARENT
+        let darkenPercentage = 0.0;
+        
+        if (data.hit !== null && data.hit !== undefined) {
+            color = data.hit.hitObject.color
+            switch(data.hit.side) {
+                case "west": darkenPercentage = 0.10; break;
+                case "east": darkenPercentage = 0.10; break;
+                case "south": darkenPercentage = 0.20; break;
+            }
+        }
+        
+        textureData[i * 4] = data.lineLengthPercentage;
+        textureData[i * 4 + 1] = color.red / 255;
+        textureData[i * 4 + 2] = color.green / 255;
+        textureData[i * 4 + 3] = color.blue / 255;
+
+        textureData[cameraLineData.length * 4 + i * 4] = darkenPercentage;
+        textureData[cameraLineData.length * 4 + i * 4 + 1] = 0; // empty values for now
+        textureData[cameraLineData.length * 4 + i * 4 + 2] = 0; // empty values for now
+        textureData[cameraLineData.length * 4 + i * 4 + 3] = 1; // empty values for now
+    }
+
+    const texture = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, cameraLineData.length, 2, 0, gl.RGBA, gl.FLOAT, textureData)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    const texPosition = gl.getUniformLocation(cameraRenderProgram, "cameraLines");
+    const resolutionPosition = gl.getUniformLocation(cameraRenderProgram, "resolution")
+    const numOfCameraLinesPosition = gl.getUniformLocation(cameraRenderProgram, "numOfCameraLines")
+    const centerLineHeightPosition = gl.getUniformLocation(cameraRenderProgram, "centerLineHeight")
+    gl.uniform1i(texPosition, 0)
+    gl.uniform2f(resolutionPosition, canvas.width, canvas.height)
+    gl.uniform1i(numOfCameraLinesPosition, cameraLineData.length)
+    const centerHeight: number = 0.5 - (Math.tan(camera.lookingAngle) * 0.5);
+
+    gl.uniform1f(centerLineHeightPosition, centerHeight)
+
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0)
+    return cameraRenderProgram
+};
+
+
+// export const renderCamera: (camera: Camera, finalCanvas: HTMLCanvasElement) => void = ( () => {
+//     const canvas = document.createElement("canvas");
+//     const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
+
+//     return (camera: Camera, finalCanvas: HTMLCanvasElement) => {
+//         canvas.width = finalCanvas.width;
+//         canvas.height = finalCanvas.height;
+//         const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
+
+//         if (context === null) return;
+//         context.clearRect(0, 0, canvas.width, canvas.height);
+//         context.globalCompositeOperation = 'source-over';
+//         context.lineWidth = 1;
+        //    const centerHeight: number = Math.trunc(canvas.height / 2 + (Math.tan(camera.lookingAngle) * canvas.height / 2));
+//         context.fillStyle = colorToRGBString(camera.map.skyBox.floorColor);
+//         context.fillRect(0, centerHeight, canvas.width, canvas.height - centerHeight);
+//         context.fillStyle = colorToRGBString(camera.map.skyBox.skyColor);
+//         context.fillRect(0, 0, canvas.width, centerHeight);
+//         context.globalAlpha = 1;
+//         context.lineWidth = 2;
+//         context.lineCap = 'square';
+
+//         context.beginPath();
+//         let lastColor: Color | null = null;
+
+//         for (let col = 0; col < cameraLineData.length; col++) {
+//             const currentLine: CameraLine = cameraLineData[col];
+//             if (currentLine.hit != null) {
+//                 let color: Color = currentLine.hit.hitObject.color;
+//                 switch(currentLine.hit.side) {
+//                     case "west": { color = darkenColor(color, 50); break; }
+//                     case "east": { color = darkenColor(color, 50); break; }
+//                     case "south": { color = darkenColor(color, 100); break; }
+//                 }
+
+//                 if (lastColor !== null) {
+//                     context.strokeStyle = colorToRGBAString(lastColor);
+//                     if (!areEqualColors(color, lastColor)) {
+//                         const lastAlpha: number = context.globalAlpha;
+//                         context.globalAlpha = lastColor.alpha / 255;
+//                         context.stroke();
+//                         context.globalAlpha = lastAlpha;
+//                         context.beginPath();
+//                     }
+//                 }
+//                 lastColor = {...color};
+//             } else {
+//                 context.strokeStyle = 'white';
+//             }
+//             const lineHeightInPixels: number = Math.trunc(currentLine.lineLengthPercentage * canvas.height);
+//             context.moveTo(col, Math.trunc(centerHeight - ( lineHeightInPixels / 2)) );
+//             context.lineTo(col, Math.trunc(centerHeight + ( lineHeightInPixels / 2)) );
+//         }
+//         context.stroke();
+        
+//         const finalCanvasContext: CanvasRenderingContext2D | null = finalCanvas.getContext("2d");
+//         if (finalCanvasContext !== null && finalCanvasContext !== undefined) {
+//             finalCanvasContext.drawImage(canvas, 0, 0);
+//         }
+//     }
+
+    
+// })();
 
 export function cameraToString(camera: Camera): string {
     return ` [Camera: {

@@ -1,10 +1,9 @@
-import _ from "lodash"
-
 export async function fetchTextFile(str: string): Promise<string> {
   const res = await fetch(str)
   const text = await res.text()
   return text
 }
+
 
 // type WebGLContext = WebGL2RenderingContext | WebGLRenderingContext
 type WebGLContext = WebGL2RenderingContext
@@ -110,3 +109,17 @@ export async function compileProgramFromFiles(gl: WebGLContext, vPath: string, f
   return compileProgramFromSourceStrings(gl, vertexShaderSource, fragmentShaderSource)
 }
 
+export default {
+  fetchTextFile,
+
+  compileShader,
+  compileProgram,
+  compileProgramFromFiles,
+  compileProgramFromSourceStrings,
+
+  createElementArrayBuffer,
+  createVertexBuffer,
+  fillBufferData,
+  testShaderCompilation,
+  testProgramLinking
+}
