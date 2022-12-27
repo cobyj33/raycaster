@@ -18,28 +18,12 @@ interface CameraData {
     readonly lookingAngle: number;
 }
 
-interface CameraCache {
-    lastState: CameraData;
-    lines: CameraLine[];
-    rayHits: Array<RaycastHit | RaycastNoHit>;
-}
 
 export function areEqualCameraDatas(first: CameraData, second: CameraData): boolean {
     return vector2Equals(first.position, second.position) && vector2Equals(first.direction, second.direction) && first.fieldOfView === second.fieldOfView && first.viewDistance === second.viewDistance && first.lookingAngle === second.lookingAngle && areGameMapsEqual(first.map, second.map);
 }
 
-export function isCameraCacheUpdated(camera: Camera): boolean {
-    return areEqualCameraDatas(camera, camera.cache.lastState);
-}
-
-export function clearCameraCache(camera: Camera): void {
-    camera.cache.lastState = camera;
-    camera.cache.rayHits = [];
-    camera.cache.lines = [];
-}
-
 export interface Camera extends CameraData {
-    readonly cache: CameraCache;
     readonly moveAmount: number;
     readonly sensitivity: number;
 }
@@ -73,15 +57,8 @@ export const getDefaultCamera = (() => {
             lookingAngle: standardLookingAngle,
         }       
 
-        const cameraCache: CameraCache = {
-            lastState: {...cameraData},
-            lines: [],
-            rayHits: []
-        }
-
         return {
             ...cameraData,
-            cache: cameraCache,
             moveAmount: standardMoveAmount,
             sensitivity: standardSensitivity,
         }
@@ -123,11 +100,7 @@ export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] 
     const cameraLineData: CameraLine[] = [];
     const {start: cameraPlaneStart, end: cameraPlaneEnd} = getCameraPlane(camera);
     const perpendicularDirection = subtractVector2(cameraPlaneEnd, cameraPlaneStart);
-    const shouldUpdateCameraCache = !isCameraCacheUpdated(camera);
 
-    if (shouldUpdateCameraCache) {
-        clearCameraCache(camera);
-    }
 
     const rays: Ray[] = getCameraRays(camera, lineCount);
     rays.forEach(ray => {
@@ -144,17 +117,9 @@ export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] 
 
             cameraLineData.push( cameraLine );
 
-            if (shouldUpdateCameraCache) {
-                camera.cache.rayHits.push(hit);
-                camera.cache.lines.push( cameraLine )
-            }
         } else {
             const noHit = result as RaycastNoHit
             cameraLineData.push(emptyCameraLine)
-            if (shouldUpdateCameraCache) {
-                camera.cache.rayHits.push(noHit);
-                camera.cache.lines.push(emptyCameraLine);
-            }
         }
     });
 
