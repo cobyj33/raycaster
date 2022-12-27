@@ -1,5 +1,5 @@
 import { PointerEvent, Ref, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, isCameraCacheUpdated, clearCameraCache, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
+import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
 import { Vector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
@@ -101,30 +101,20 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.strokeStyle = 'green';
 
 
-        if (isCameraCacheUpdated(camera) && camera.cache.rayHits.length > 0) {
-            camera.cache.rayHits.forEach((hit) => {
+        const rays: Ray[] = getCameraRays(camera, 200);
+        rays.forEach(ray => {
+            const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance);
+            if ("hitObject" in result) { // is a RaycastHit object
+                const hit = result as RaycastHit
                 context.moveTo(hit.originalRay.origin.col * getMapScale(), hit.originalRay.origin.row * getMapScale());
                 context.lineTo(hit.end.col * getMapScale(), hit.end.row * getMapScale());
-            })
-        } else {
-            clearCameraCache(camera);
-            const rays: Ray[] = getCameraRays(camera, 200);
-            rays.forEach(ray => {
-                const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance);
-                if ("hitObject" in result) { // is a RaycastHit object
-                    const hit = result as RaycastHit
-                    context.moveTo(hit.originalRay.origin.col * getMapScale(), hit.originalRay.origin.row * getMapScale());
-                    context.lineTo(hit.end.col * getMapScale(), hit.end.row * getMapScale());
-                    camera.cache.rayHits.push(hit);
-                } else {
-                    const noHit = result as RaycastNoHit
-                    context.moveTo(noHit.originalRay.origin.col * getMapScale(), noHit.originalRay.origin.row * getMapScale());
-                    context.lineTo(noHit.end.col * getMapScale(), noHit.end.row * getMapScale());
-                    camera.cache.rayHits.push(noHit);
-                }
-            })
+            } else {
+                const noHit = result as RaycastNoHit
+                context.moveTo(noHit.originalRay.origin.col * getMapScale(), noHit.originalRay.origin.row * getMapScale());
+                context.lineTo(noHit.end.col * getMapScale(), noHit.end.row * getMapScale());
+            }
+        })
 
-        }
 
 
         context.stroke();
