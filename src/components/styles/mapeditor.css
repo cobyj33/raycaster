@@ -41,39 +41,40 @@
     margin-right: 2px;
     color: black;
 
-	&:hover:not(.disabled) {
-	    transition: background-color 0.25s;
-	    background-color: rgb(220, 220, 220);
-	}
+}
 
-	&:active:not(.disabled) {
-	    transition: background-color 0.1s transform 0.1s;
-	    background-color: black;
-	    transform: translateY(2px);
-	}
+.edit-button:hover:not(.disabled) {
+    transition: background-color 0.25s;
+    background-color: rgb(220, 220, 220);
+}
 
-	&.selected:hover {
-	    transition: background-color 0.25s;
-	    background-color: rgb(110, 110, 110);
-	}
+.edit-button:active:not(.disabled) {
+    transition: background-color 0.1s transform 0.1s;
+    background-color: black;
+    transform: translateY(2px);
+}
 
-	&.selected {
-	    background-color: rgb(50, 50, 50);
-	}
-	&.disabled {
-	    background-color: darkslategray;
-	    color: lightslategray;
-	}
+.edit-button.selected:hover {
+    transition: background-color 0.25s;
+    background-color: rgb(110, 110, 110);
+}
 
-	&.disabled:hover {
-	    background-color: rgb(10, 10, 10);
-	    color: rgb(30, 30, 30);
-	}
+.edit-button.selected {
+    background-color: rgb(50, 50, 50);
+}
+.edit-button.disabled {
+    background-color: darkslategray;
+    color: lightslategray;
+}
 
-	&.disabled:active {
-	    background-color: crimson;
-	    color: red;
-	}
+.edit-button.disabled:hover {
+    background-color: rgb(10, 10, 10);
+    color: rgb(30, 30, 30);
+}
+
+.edit-button.disabled:active {
+    background-color: crimson;
+    color: red;
 }
 
 .tile-picker {
@@ -89,17 +90,17 @@
     margin-left: 2px;
     margin-right: 2px;
 
-    &.selected {
-        background-color: rgb(60, 60, 60);
-        color: green;
-        font-weight: bold;
-    }
-
-    &.unselected {
-        background-color: rgb(10, 10, 10);
-    }
 }
 
+.saved-tile-selection-button.selected {
+    background-color: rgb(60, 60, 60);
+    color: green;
+    font-weight: bold;
+}
+
+.saved-tile-selection-button.unselected {
+    background-color: rgb(10, 10, 10);
+}
 
 .editor-tile-creator {
     display: flex;
@@ -108,9 +109,10 @@
     background-color: rgb(10, 10, 10);
     border-radius: 10px;
     border: 1px solid black;
-	& > * {
-	    margin-top: 5px;
-	}
+}
+
+.editor-tile-creator > * {
+    margin-top: 5px;
 }
 
 .tile-creator-container {
@@ -123,15 +125,15 @@
     opacity: 0;
     pointer-events: none;
     touch-action:none;
-	&.opened {
-        transition: transform 0.25s opacity 0.25s;
-        opacity: 1;
-	    transform: translateX(0);
-        pointer-events: auto;
-        touch-action: auto;
-	}
 }
 
+.tile-creator-container.opened {
+    transition: transform 0.25s opacity 0.25s;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    touch-action: auto;
+}
 
 .editor-tile-creator-open-button {
     position: absolute;
@@ -154,11 +156,12 @@
     background-color: black;
     border: none;
     border-radius: 5px;
-	&:hover {
-	    transition: transform 0.25s;
-	    background-color: darkslategray;
-	    transform: translateY(-5px) scale(1.05) skew(5px);
-	}
+}
+
+.tile-creator-button:hover {
+    transition: transform 0.25s;
+    background-color: darkslategray;
+    transform: translateY(-5px) scale(1.05) skew(5px);
 }
 
 .sketch-picker {
@@ -196,11 +199,12 @@
     align-self: center;
     justify-self: center;
 
-    &:hover {
-        color: lightgreen;
-    }
+}
 
-    &:active {
-        color: green;
-    }
+.map-generate-button:hover {
+    color: lightgreen;
+}
+
+.map-generate-button:active {
+    color: green;
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { Camera, GameMap, Tile, getDefaultCamera, getFilledMapEdges, getEmptyMap, scaleVector2, TileTypeArray, getDefaultTile } from "raycaster/interfaces"
 import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { FaBars } from 'react-icons/fa';
-import './App.scss';
+import './App.css';
 import {initRaycaster} from 'loader';
 
 
@@ -69,7 +69,7 @@ function App() {
         </div>
       </div>
 
-      <div className="viewing-area">
+      <div className={`viewing-area ${currentMenus[1] === null || currentMenus[1] === undefined ? "single" : ""} `}>
         { getMenu(currentMenus[0]) }
         { currentMenus[1] !== null && currentMenus[1] !== undefined ? getMenu(currentMenus[1]) : '' }
       </div>

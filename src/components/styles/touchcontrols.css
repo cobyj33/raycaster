@@ -59,17 +59,18 @@
     border-radius: 5px;
     border: 2px solid black;
     font-family: monospace;
-	&:hover {
-	    transition: background-color 0.2s transform 0.2s;
-	    background-color: rgb(23, 39, 39);
-	    transform: scale(1.05);
-	}
+}
 
-	&:active {
-	    transition: background-color 0.1s color 0.1s transform 0.2s;
-	    background-color: white;
-	    color: black;
-	    transform: scale(1.08) translateY(2px);
-	}
+.game-touch-button:hover {
+    transition: background-color 0.2s transform 0.2s;
+    background-color: rgb(23, 39, 39);
+    transform: scale(1.05);
+}
+
+.game-touch-button:active {
+    transition: background-color 0.1s color 0.1s transform 0.2s;
+    background-color: white;
+    color: black;
+    transform: scale(1.08) translateY(2px);
 }
 

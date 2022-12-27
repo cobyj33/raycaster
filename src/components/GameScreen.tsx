@@ -3,7 +3,7 @@ import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/interfaces";
-import "./styles/gamescreen.scss"
+import "./styles/gamescreen.css"
 
 
 const Y_MOVEMENT_TOLERANCE = 500;

@@ -5,7 +5,7 @@ import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
 import { GenerationAlgorithm, getGenerationAlgorithm } from "raycaster/generation"
 import { BirdsEyeCameraControls } from "raycaster/controls";
-import "./styles/mapscreen.scss";
+import "./styles/mapscreen.css";
 import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
 import { useResizeObserver } from "raycaster/functions";

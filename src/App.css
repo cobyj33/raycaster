@@ -16,9 +16,9 @@ html, body, .app, #root {
     user-select: none;
 }
 
-// *:not(body, html) {
-//     position: relative;
-// }
+/* *:not(body, html) {
+     position: relative;
+ } */
 
 *:not(canvas, input, button) {
     touch-action: pinch-zoom;
@@ -71,33 +71,35 @@ html, body, .app, #root {
     text-shadow: 1px 1px black;
 
 
-    &:active {
-        transition: border-botton 0.1s fill 0.1s;
-        fill: black;
-        border-bottom: 3px solid white;
-    }
+}
+
+.sidebar-open-button:active {
+    transition: border-botton 0.1s fill 0.1s;
+    fill: black;
+    border-bottom: 3px solid white;
 }
 
 .sidebar.left .sidebar-open-button {
     right: 0;
     transform: translateX(100%);
-    &:hover {
-        transition: fill 0.25s transform 0.25s;
-        fill: rgb(200, 200, 200);
-        transform: translateX(100%) translateY(5px);
-    }
+}
+
+.sidebar.left .sidebar-open-button:hover {
+    transition: fill 0.25s transform 0.25s;
+    fill: rgb(200, 200, 200);
+    transform: translateX(100%) translateY(5px);
 }
 
 .sidebar.right .sidebar-open-button {
     left: 0;
     transform: translateX(-100%);
-    &:hover {
-        transition: color 0.25s transform 0.25s;
-        color: rgb(200, 200, 200);
-        transform: translateX(-100%) translateY(5px);
-    }
 }
 
+.sidebar.right .sidebar-open-button:hover {
+    transition: color 0.25s transform 0.25s;
+    color: rgb(200, 200, 200);
+    transform: translateX(-100%) translateY(5px);
+}
 
 .screen-picking-button {
     background-color: black;
@@ -171,4 +173,8 @@ html, body, .app, #root {
     height: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+}
+
+.viewing-area.single {
+    grid-template-columns: 1fr;
 }
