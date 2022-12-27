@@ -1,6 +1,6 @@
-import {useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Camera, GameMap, Tile, getDefaultCamera, getFilledMapEdges, getEmptyMap, scaleVector2, TileTypeArray, getDefaultTile } from "raycaster/interfaces"
-import { MapScreen, GameScreen, MapEditor, ToolTip } from 'raycaster/components';
+import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { FaBars } from 'react-icons/fa';
 import './App.scss';
 import {initRaycaster} from 'loader';
@@ -12,14 +12,14 @@ type Menus = typeof acceptedMenus[number];
 const STARTING_MAP_DIMENSIONS = { row: 50, col: 50 }
 
 function App() {
-    const [savedTiles, setSavedTiles] = useState<{ [key: string]: Tile }>({});
-    const [gameMap, setGameMap] = useState<GameMap>(getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS)));
-    const [camera, setCamera] = useState<Camera>({ ...getDefaultCamera(gameMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  } );
-    const [currentMenus, setCurrentMenus] = useState<[Menus, Menus | undefined]>(["Camera View", "Game Map"]);
-    const [leftSidebarOpened, setLeftSidebarOpened] = useState<boolean>(false);
-    const [rightSidebarOpened, setRightSidebarOpened] = useState<boolean>(false);
+    const [savedTiles, setSavedTiles] = React.useState<{ [key: string]: Tile }>({});
+    const [gameMap, setGameMap] = React.useState<GameMap>(getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS)));
+    const [camera, setCamera] = React.useState<Camera>({ ...getDefaultCamera(gameMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  } );
+    const [currentMenus, setCurrentMenus] = React.useState<[Menus, Menus | undefined]>(["Camera View", "Game Map"]);
+    const [leftSidebarOpened, setLeftSidebarOpened] = React.useState<boolean>(false);
+    const [rightSidebarOpened, setRightSidebarOpened] = React.useState<boolean>(false);
 
-    useEffect( () => {
+    React.useEffect( () => {
         initRaycaster().then( () => { 
             const newMap = getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS));
             setGameMap(newMap)
@@ -32,7 +32,7 @@ function App() {
         })
     }, [])
 
-  useEffect( () => {
+  React.useEffect( () => {
     setCamera((camera: Camera) => ({ ...camera, map: gameMap }));
   }, [gameMap])
 

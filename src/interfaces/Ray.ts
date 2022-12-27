@@ -4,13 +4,10 @@ import {
     GameMap,
 } from "raycaster/interfaces";
 import { Cardinal } from "raycaster/types";
-import { NumberLiteralType } from "typescript";
 
 export interface Ray {
     readonly origin: Vector2;
     readonly direction: Vector2;
-    readonly onHit?: (hit: RaycastHit) => void;
-    readonly onNoHit?: (noHit: RaycastNoHit) => void;
 }
 
 export interface RaycastNoHit {

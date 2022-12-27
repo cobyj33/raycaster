@@ -11,7 +11,7 @@ import "./styles/mapeditor.scss"
 export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap>, tileData: StatefulData<{[key: string]: Tile}> }) => {
   enum EditorEditMode { MOVE = "Move", ZOOM = "Zoom", DRAW = "Draw", ERASE = "Erase", LINE = "Line", BOX = "Box", ELLIPSE = "Ellipse" }
   const mapHistory = useRef<HistoryStack<GameMap>>(new HistoryStack<GameMap>());
-    const [camera, setCamera] = cameraData;
+  const [camera, setCamera] = cameraData;
   const [map, setMap] = mapData;
   const [savedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(getDefaultTile("Wall Tile"));
@@ -23,11 +23,11 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
         cellSize: 10
     });
   const canvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasHolderRef = useRef<HTMLDivElement>(null);
-    const lastHoveredCell: MutableRefObject<Vector2> = useRef<Vector2>({
-        row: 0,
-        col: 0
-    });
+  const canvasHolderRef = useRef<HTMLDivElement>(null);
+  const lastHoveredCell: MutableRefObject<Vector2> = useRef<Vector2>({
+      row: 0,
+      col: 0
+  });
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
 
   const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
@@ -78,6 +78,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
     [EditorEditMode.BOX]: new BoxEditMode(getEditorData()),
     [EditorEditMode.ELLIPSE]: new EllipseEditMode(getEditorData())
   });
+  
   const [editMode, setEditMode] = useState<EditorEditMode>(EditorEditMode.DRAW);
 
   // const centerView: (position: Vector2) => void = (position: Vector2) => {
