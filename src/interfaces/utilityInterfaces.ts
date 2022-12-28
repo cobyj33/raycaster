@@ -22,7 +22,3 @@ export interface IEquatable<T> {
 export interface IHasher<T> {
     hash(toHash: T): string;
 }
-
-export interface ICamera {
-    render(canvas: HTMLCanvasElement): void;
-}

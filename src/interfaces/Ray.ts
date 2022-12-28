@@ -19,6 +19,7 @@ export interface RaycastNoHit {
 export interface RaycastHit extends RaycastNoHit {
     readonly side: Cardinal;
     readonly hitObject: Tile;
+    readonly textureX: number;
 }
 
 
@@ -53,13 +54,20 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
 
             if (inDimensionBounds(tileToCheck, map.dimensions)) {
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
+                    const sideHit: Cardinal = ray.direction.row <= 0 ? "north" : "south"
+                    const percentageAcross = currentRowPosition.col - Math.trunc(currentRowPosition.col)
+                    const textureX: number = sideHit === "north" ? 1 - (percentageAcross) : percentageAcross 
+
                     firstRowHit = {
                         end: currentRowPosition,
-                        side: ray.direction.row <= 0 ? "north" : "south",
+                        side: sideHit,
                         hitObject: map.tiles[tileToCheck.row][tileToCheck.col],
                         originalRay: ray,
-                        distance: distanceBetweenVector2(currentRowPosition, ray.origin)
+                        distance: distanceBetweenVector2(currentRowPosition, ray.origin),
+                        textureX: textureX
                     }
+
+
                 }
             }
 
@@ -91,14 +99,22 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
             const tileToCheck: IVector2 = colStepDirection > 0 ? { row: Math.trunc(currentColPosition.row), col: Math.trunc(currentColPosition.col) } : { row: Math.floor(currentColPosition.row), col: Math.floor( currentColPosition.col + colStepDirection  ) };
             
             if (inDimensionBounds(tileToCheck, map.dimensions)) {
+                
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
+                    const sideHit: Cardinal = ray.direction.col < 0 ? "east" : "west"
+                    const percentageAcross = currentColPosition.row - Math.trunc(currentColPosition.row)
+                    const textureX: number = sideHit === "east" ? 1 - (percentageAcross) : percentageAcross 
+
                     firstColHit = {
                         end: currentColPosition,
                         hitObject: map.tiles[tileToCheck.row][tileToCheck.col],
-                        side: ray.direction.col < 0 ? "east" : "west",
+                        side: sideHit,
                         originalRay: ray,
-                        distance: distanceBetweenVector2(currentColPosition, ray.origin)
+                        distance: distanceBetweenVector2(currentColPosition, ray.origin),
+                        textureX: textureX
                     }
+
+
                 }
             }
 

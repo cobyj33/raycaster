@@ -194,7 +194,6 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
       if (canvasRef.current !== null && canvasRef.current !== undefined) {
         const canvas: HTMLCanvasElement = canvasRef.current;
         const rect: DOMRect = canvas.getBoundingClientRect();
-          console.log(rect);
         const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
         if (context !== null && context !== undefined) {

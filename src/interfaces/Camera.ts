@@ -2,13 +2,19 @@ import { StatefulData } from "interfaces/utilityInterfaces"
 
 import { GameMap, areGameMapsEqual, gameMapInBounds } from "interfaces/GameMap"
 import { Ray, RaycastHit, RaycastNoHit, castRay } from "interfaces/Ray"
-import { Color, darkenColor, colorToRGBString, colorToRGBAString, areEqualColors } from "interfaces/Color"
-import { IVector2, vector2Int, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
+import { RGBA, rgbToString, rgbaToString, areEqualColors } from "interfaces/Color"
+import { IVector2, Vector2, vector2Int, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
 import React from "react"
 
 import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
 import cameraFragmentShaderSource from "shaders/camera.frag?raw"
+import Texture, { TextureAtlas } from "./Texture"
+import { g } from "vitest/dist/index-40ebba2b"
+import { timeStamp } from "console"
+
+
+
 
 interface CameraData {
     readonly map: GameMap;
@@ -24,10 +30,42 @@ export function areEqualCameraDatas(first: CameraData, second: CameraData): bool
     return vector2Equals(first.position, second.position) && vector2Equals(first.direction, second.direction) && first.fieldOfView === second.fieldOfView && first.viewDistance === second.viewDistance && first.lookingAngle === second.lookingAngle && areGameMapsEqual(first.map, second.map);
 }
 
-export interface Camera extends CameraData {
+export interface CameraControlData extends CameraData {
     readonly moveAmount: number;
     readonly sensitivity: number;
 }
+
+export interface Camera extends CameraData, CameraControlData {}
+
+// class Camera implements ICamera {
+//     readonly map: GameMap;
+//     readonly position: Vector2;
+//     readonly direction: Vector2;
+//     readonly fieldOfView: number;
+//     readonly viewDistance: number;
+//     readonly lookingAngle: number;
+//     readonly moveAmount: number;
+//     readonly sensitivity: number;
+
+//     constructor(cameraData: ICamera) {
+//         this.map = cameraData.map
+//         this.position = Vector2.fromIVector2(cameraData.position)
+//         this.direction = Vector2.fromIVector2(cameraData.direction)
+//         this.fieldOfView = cameraData.fieldOfView
+//         this.viewDistance = cameraData.viewDistance
+//         this.lookingAngle = cameraData.lookingAngle
+//         this.moveAmount = cameraData.moveAmount
+//         this.sensitivity = cameraData.sensitivity
+//     }
+
+//     static default(map: GameMap) {
+//         return new Camera(getDefaultCamera(map))
+//     }
+
+//     setMap(map: GameMap) {
+//         return new Camera({...this, map: map})
+//     }
+// }
 
 export interface CameraLine {
     readonly hit?: RaycastHit;
@@ -211,20 +249,36 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
     gl.clear(gl.COLOR_BUFFER_BIT)
     const TRANSPARENT = { red: 0, green: 0, blue: 0, alpha: 0}
 
-    const textureData = new Float32Array(cameraLineData.length * 4 * 2)
+    const textureData = new Float32Array(cameraLineData.length * 4 * 3)
+
+    const foundTextures: { [key: string]: { texture: Texture, indexes: number[] }   } = {}
 
     // fill first line, percentage and color data
     for (let i = 0; i < cameraLineData.length; i++) {
         const data = cameraLineData[i]
         let color = TRANSPARENT
         let darkenPercentage = 0.0;
-        
+        let hasTexture = 0;
+        let textureX = 0;
+
         if (data.hit !== null && data.hit !== undefined) {
             color = data.hit.hitObject.color
+            const tileTextureData = data.hit.hitObject.texture;
+            textureX = data.hit.textureX;
             switch(data.hit.side) {
                 case "west": darkenPercentage = 0.10; break;
                 case "east": darkenPercentage = 0.10; break;
                 case "south": darkenPercentage = 0.20; break;
+            }
+            
+            if (tileTextureData !== null && tileTextureData !== undefined) {
+                if ( (tileTextureData.name in foundTextures) === false ) {
+                    foundTextures[tileTextureData.name] = { texture: tileTextureData, indexes: [cameraLineData.length * 2 * 4 + i * 4] };
+                } else {
+                    foundTextures[tileTextureData.name].indexes.push(cameraLineData.length * 2 * 4 + i * 4)
+                }
+                hasTexture = 1;
+                // color = tileTextureData.atTexel(data.hit.textureX, 0.25)
             }
         }
         
@@ -233,16 +287,58 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
         textureData[i * 4 + 2] = color.green / 255;
         textureData[i * 4 + 3] = color.blue / 255;
 
+
         textureData[cameraLineData.length * 4 + i * 4] = darkenPercentage;
-        textureData[cameraLineData.length * 4 + i * 4 + 1] = 0; // empty values for now
-        textureData[cameraLineData.length * 4 + i * 4 + 2] = 0; // empty values for now
+        textureData[cameraLineData.length * 4 + i * 4 + 1] = hasTexture; // Has Texture (0 or 1)
+        textureData[cameraLineData.length * 4 + i * 4 + 2] = textureX; // TextureX, percentage across texture in texel coordinates
         textureData[cameraLineData.length * 4 + i * 4 + 3] = 1; // empty values for now
+
+        textureData[cameraLineData.length * 2 * 4 + i * 4] = darkenPercentage;
+        textureData[cameraLineData.length * 2 * 4 + i * 4 + 1] = 0; // empty for now
+        textureData[cameraLineData.length * 2 * 4 + i * 4 + 2] = 0; // empty values for now
+        textureData[cameraLineData.length * 2 * 4 + i * 4 + 3] = 1; // empty values for now
     }
 
+    console.log("Found textures: ", foundTextures)
+    if (Object.values(foundTextures).length > 0) {
+        const atlas: TextureAtlas = new TextureAtlas("Temorary Texture Atlas", Object.values(foundTextures).map(data => data.texture))
+        console.log(atlas.pixels)
+        const atlasGLTexture = gl.createTexture()
+        gl.activeTexture(gl.TEXTURE1)
+        gl.bindTexture(gl.TEXTURE_2D, atlasGLTexture)
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlas.width, atlas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, atlas.pixels);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        const textureAtlasPosition = gl.getUniformLocation(cameraRenderProgram, "textureAtlas")
+        const textureAtlasResolutionPosition = gl.getUniformLocation(cameraRenderProgram, "textureAtlasResolution")
+        gl.uniform1i(textureAtlasPosition, 1);
+        gl.uniform2f(textureAtlasResolutionPosition, atlas.width, atlas.height);
+
+        Object.values(foundTextures).forEach(data => {
+            const locationBox = atlas.getTextureTexelLocation(data.texture.name)
+            console.log(locationBox);
+            data.indexes.forEach(index => {
+                textureData[index] = locationBox.col;
+                textureData[index + 1] = locationBox.row;
+                textureData[index + 2] = locationBox.width;
+                textureData[index + 3] = locationBox.height;
+            })
+        })
+    }
+
+
+    // const texIndexes: Texture[] = Object.values(foundTextures).sort((a, b) => a.index - b.index).map(texData => texData.texture)
+
+
     const texture = gl.createTexture()
+    gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, cameraLineData.length, 2, 0, gl.RGBA, gl.FLOAT, textureData)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, cameraLineData.length, 3, 0, gl.RGBA, gl.FLOAT, textureData)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

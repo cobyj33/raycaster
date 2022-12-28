@@ -1,4 +1,4 @@
-import { getViewOffset, View, GameMap, inDimensionBounds, Tile, IVector2, Color, colorToRGBAString } from "raycaster/interfaces"
+import { getViewOffset, View, GameMap, inDimensionBounds, Tile, IVector2, RGBA, rgbaToString } from "raycaster/interfaces"
 
 export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View, map: GameMap): void {
     context.save();
@@ -7,7 +7,7 @@ export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingC
 
         const targetPosition: IVector2 = { row: Math.floor(view.row + row), col: Math.floor(view.col + col) } ;
         if (inDimensionBounds(targetPosition, map.dimensions)) {
-          context.fillStyle = colorToRGBAString(map.tiles[targetPosition.row][targetPosition.col].color);
+          context.fillStyle = rgbaToString(map.tiles[targetPosition.row][targetPosition.col].color);
           context.globalAlpha = map.tiles[targetPosition.row][targetPosition.col].color.alpha / 255;
             const offset: IVector2 = getViewOffset(view);
           context.fillRect(-offset.col + col * view.cellSize, -offset.row + row * view.cellSize, view.cellSize, view.cellSize);
@@ -25,7 +25,7 @@ export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingC
     if (ghostTilePositions.length === 0) return;
      context.save();
     context.globalAlpha = 0.5;
-    context.fillStyle = colorToRGBAString(selectedTile.color);
+    context.fillStyle = rgbaToString(selectedTile.color);
     ghostTilePositions.forEach(pos => drawCell(context, view, pos.row, pos.col))
      context.restore();
   }

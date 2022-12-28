@@ -1,5 +1,5 @@
 import { PointerEvent, Ref, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, colorToRGBString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
+import { tryPlaceCamera, rgbToString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
 import { IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
@@ -59,7 +59,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.canvas.height = map.dimensions.row * getMapScale();
         for (let row = 0; row < map.dimensions.row; row++) {
             for (let col = 0; col < map.dimensions.col; col++) {
-                context.fillStyle = colorToRGBString(map.tiles[row][col].color);
+                context.fillStyle = rgbToString(map.tiles[row][col].color);
                 context.fillRect(col * getMapScale(), row * getMapScale(), getMapScale(), getMapScale());
             }
         }

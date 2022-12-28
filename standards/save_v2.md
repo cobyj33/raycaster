@@ -25,7 +25,7 @@ Values:
 Values:
 - TileName:
   - name: tileName
-  - color: Optional\[Color\]
+  - color: Optional\[RGBA\]
   - 
 
 ### Camera

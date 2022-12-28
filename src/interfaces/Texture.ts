@@ -1,68 +1,179 @@
 
 
 // TODO: Create constructors for the texture format, as well as the 
+
+import { Color } from "interfaces/Color";
+import potpack from "potpack";
+import { Box } from "./Box";
+
 // The texture class will simply hold a texture's height, width, and ImageData
-class Texture {
-    private readonly canvas: HTMLCanvasElement
-    private readonly context: CanvasRenderingContext2D
-    private _loaded: boolean = false
-    private _data: ImageData | null = null
-    readonly width: number
-    readonly height: number
 
-    constructor(width: number, height: number, data: ImageData) {
-        this.width = width;
-        this.height = height
-        this._loaded = false
+/**
+ * 
+ * All textures can be initialized to 
+ */
+export class Texture {
+    // private readonly canvas: HTMLCanvasElement;
+    // private readonly context: CanvasRenderingContext2D;
+    readonly width: number;
+    readonly height: number;
+    private _data: ImageData
+    readonly name: string
 
-        this.canvas = document.createElement("canvas")
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D
-        if (this.context === null || this.context === undefined) {
+    constructor(name: string, data: ImageData) {
+        // this.canvas = document.createElement("canvas")
+        // const context = this.canvas.getContext("2d")
+        // if (context === null || context === undefined) {
+        //     throw new Error("Could not initialize canvas context in Texture")
+        // }
+
+        // this.context = context
+
+        this.name = name
+        this._data = new ImageData(data.data, data.width, data.height)
+        this.width = this._data.width;
+        this.height = this._data.height;
+        // context.putImageData(data, 0, 0)
+    }
+
+    static fromContext2D(name: string, context: CanvasRenderingContext2D) {
+        const data: ImageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
+        return new Texture(name, data)
+    }
+
+    static fromHTMLImage(name: string, image: HTMLImageElement): Texture {
+        const canvas = document.createElement("canvas")
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const context = canvas.getContext("2d") as CanvasRenderingContext2D
+        if (context === null || context === undefined) {
             throw new Error("Could not create Texture object from HTML Image, could not initialize CanvasRenderingContext2D")
         }
+        context.drawImage(image, 0, 0)
+        return Texture.fromContext2D(name, context)
+    }
 
-        const image: HTMLImageElement = document.createElement("img")
-        image.onload = (e) => {
-            this._loaded = true;
-            this.context.drawImage(image, 0, 0)
-            const data: ImageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height)
+    static async fromSourcePath(name: string, src: string): Promise<Texture> {
+        const image: HTMLImageElement = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image()
+            image.onload = () => resolve(image)
+            image.onerror = () => reject("Could not load image data at src " + src)
+            image.src = src
+        })
+        console.log(image)
+        return Texture.fromHTMLImage(name, image)
+    }
+
+    get pixels() {
+        return this._data.data;
+    }
+
+    draw(context: CanvasRenderingContext2D, x: number, y: number) {
+        context.putImageData(this._data, x, y)
+    }
+
+    at(row: number, col: number): Color {
+        row = Math.trunc(row)
+        col = Math.trunc(col)
+        const offset = row * this.width * 4 + col * 4
+        return new Color(
+            this.pixels[offset],
+            this.pixels[offset + 1],
+            this.pixels[offset + 2],
+            this.pixels[offset + 3]
+        )
+    }
+
+    atTexel(x: number, y: number) {
+        return this.at((-y * this.height) + this.height, x * this.width)
+    }
+}
+
+export class TextureAtlas {
+    private readonly textures: Texture[]
+    private readonly textureMap: { [key: string]: { box: Box, texture: Texture } }
+    readonly atlas: Texture
+    private readonly name: string
+    readonly width;
+    readonly height;
+
+
+    constructor(name: string, textures: Texture[]) {
+        this.name = name
+        this.textures = textures
+        const textureBoxes: { w: number, h: number, texture: Texture }[] = textures.map(texture => ({ w: texture.width, h: texture.height, texture: texture }))
+        const { w: atlasWidth, h: atlasHeight } = potpack(textureBoxes)
+        this.textureMap = {}
+
+        const canvas = document.createElement("canvas")
+        const context = canvas.getContext("2d")
+        if (context === null || context === undefined) {
+            throw new Error("Could not initialize Context2D in TextureAtlas")
         }
+        canvas.width = atlasWidth;
+        canvas.height = atlasHeight;
 
-    }  
+        textureBoxes.forEach(box => {
+            const { w: width, h: height, x: col, y: row, texture } = box as { w: number, h: number, x: number, y: number, texture: Texture }
+            texture.draw(context, col, row)
+            this.textureMap[texture.name] = { box: {width: width, height: height, row: row, col: col}, texture: texture }
+        })
 
-    get loaded() {
-        return this._loaded;
+        this.atlas = new Texture(name, context.getImageData(0, 0, canvas.width, canvas.height))
+        console.log(this.textureMap)
+        this.width = atlasWidth;
+        this.height = atlasHeight;
+    }
+
+    addTexture(texture: Texture): TextureAtlas {
+       return new TextureAtlas(this.name, this.textures.concat(texture))
+    }
+
+    addTextures(textures: Texture[]): TextureAtlas {
+        return new TextureAtlas(this.name, textures.concat(...this.textures))
+    }
+
+    getTexture(name: string): Texture {
+        if (this.hasTexture(name)) {
+            return this.textureMap[name].texture
+        }
+        throw new Error(name + " on Texture Atlas " + this.name + " does not exist")
+    }
+
+    getTextureLocation(name: string): Box {
+        if (this.hasTexture(name)) {
+            return this.textureMap[name].box
+        }
+        throw new Error(name + " on Texture Atlas " + this.name + " does not exist")
+    }
+
+    /**
+     * All values bounded from 0 to 1
+     * (row, col) in texel coordinates, which means they are at the bottom right of the texture position in the atlas, not the top left
+     * Consequently, "height", also points upwards instead of downwards
+     * @param name 
+     * @returns 
+     */
+    getTextureTexelLocation(name: string): Box {
+        if (this.hasTexture(name)) {
+            const textureBox = this.getTextureLocation(name)
+            return {
+                row: textureBox.row / this.height,
+                col: textureBox.col / this.width,
+                width: textureBox.width / this.width,
+                height: textureBox.height / this.height
+            }
+        }
+        throw new Error(name + " on Texture Atlas " + this.name + " does not exist")
+    }
+
+    hasTexture(name: string): boolean {
+        return name in this.textureMap
+    }
+
+    get pixels() {
+        return this.atlas.pixels;
     }
 }
 
-// export interface Texture {
-//     readonly width: number
-//     readonly height: number
-//     readonly imageData: ImageData
-//     readonly canvas: CanvasRenderingContext2D
-// }
-
-export async function createTextureFromPath(path: string) {
-
-}
-
-export function createTextureFromHTMLImage(image: HTMLImageElement) {
-    const canvas = document.createElement("canvas")
-    const context: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRenderingContext2D
-    if (context === null || context === undefined) {
-        throw new Error("Could not create Texture object from HTML Image, could not initialize CanvasRenderingContext2D")
-    }
-
-    canvas.width = image.width
-    canvas.height = image.height
-    context.drawImage(image, 0, 0)
-    const data: ImageData = context.getImageData(0, 0, canvas.width, canvas.height)
-    return {
-        width: canvas.width,
-        height: canvas.height,
-        image: canvas,
-        data: data
-    }
-}
+export default Texture;

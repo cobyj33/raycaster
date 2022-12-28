@@ -1,8 +1,10 @@
 import {
     Tile, areEqualTiles, TileJSON, getDefaultTile,
     IVector2,
-    Color
+    RGBA
 } from "raycaster/interfaces"
+import Texture from "./Texture";
+
 
 export interface GameMap {
     readonly tiles: Tile[][];
@@ -10,14 +12,103 @@ export interface GameMap {
     readonly skyBox: SkyBox;
 }
 
+
+
+
+// export class TileMap {
+//     private readonly tiles: Tile[]
+//     readonly width: number
+//     readonly height: number
+
+//     constructor(tiles: Tile[], width: number, height: number) {
+//         this.tiles = tiles;
+//         this.width = width;
+//         this.height = height;
+//     }
+
+//     at(row: number, col: number): Tile {
+//         return {...this.tiles[row * this.width + col]}
+//     }
+// }
+
+/**
+ * Treat as Immutable
+ */
+// export class GameMap implements GameMapData {
+//     readonly tiles: Tile[]; //flattened array
+//     readonly dimensions: IVector2;
+//     readonly skyBox: SkyBox;
+//     readonly atlas: TextureAtlas
+
+//     constructor(tiles: Tile[], dimensions: IVector2, skyBox: SkyBox = getDefaultSkyBox(), textures: Texture[] | null = null) {
+//         this.tiles = [...tiles];
+//         this.dimensions = {...dimensions};
+//         this.skyBox = {...skyBox}
+//         if (textures === null || textures === undefined) {
+//             const texturedTiles = tiles.filter(tile => tile.texture !== null && tile.texture !== undefined) 
+            
+//         } else {
+//             this.textures = textures
+//         }
+//     }
+
+//     forEachTile(callbackfn: (value: Tile, index: number, array: Tile[]) => void, thisArg?: any) {
+//         this.tiles.forEach(callbackfn, thisArg)
+//     }
+
+//     at(row: number, col: number): Tile {
+//         return {...this.tiles[row * this.width + col]}
+//     }
+
+//     set(row: number, col: number, tile: Tile): GameMap {
+//         return new GameMap()
+//     }
+
+//     getTextureAtlas() {
+
+//     }
+
+//     setTileMap(tiles: Tile[], dimensions: IVector2): GameMap {
+//         if (isValidTileMap(tiles)) {
+
+//             return new GameMap(tiles, this.dimensions, this.skyBox, this.textures);
+//         }
+//         throw new Error("Invalid tilemap, " + tiles)
+//     }
+
+//     getTextures(): Texture[] {
+//         return self.textures
+//     }
+
+//     fillEdges() {
+
+//     }
+
+//     static fromGameMapData(data: GameMapData) {
+
+//     }
+
+//     static empty(dimensions: IVector2) {
+//         return GameMap()
+//     }
+
+//     get width() {
+//         return this.dimensions.col
+//     }
+
+//     get height() {
+//         return this.dimensions.row
+//     }
+// }
+
 export interface SkyBox {
-    readonly floorColor: Color;
-    readonly skyColor: Color;
+    readonly floorColor: RGBA;
+    readonly skyColor: RGBA;
 }
 
 export const getDefaultSkyBox: () => SkyBox = ( () => {
-    const defaultFloorColor: Color = { red: 0, green: 135, blue: 0, alpha: 255 };
-    const defaultSkyColor: Color = { red: 135, green: 206, blue: 235, alpha: 255 };
+    const defaultFloorColor: RGBA = { red: 0, green: 135, blue: 0, alpha: 255 };
+    const defaultSkyColor: RGBA = { red: 135, green: 206, blue: 235, alpha: 255 };
 
     return (): SkyBox => ({
             floorColor: {...defaultFloorColor},

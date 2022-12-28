@@ -1,14 +1,29 @@
-import { Color, areEqualColors, isColorObject, colorToRGBAString } from "raycaster/interfaces"
+import { RGBA, areEqualColors, isRGBAObject, rgbaToString } from "raycaster/interfaces"
 import marbleTexturePath from "assets/Marble.png"
+import stoneBrickTexturePath from "assets/Stone Brick Tile.png"
 import { getImage } from "functions/image";
-
+import Texture from "interfaces/Texture"
 
 export interface Tile {
-    color: Color;
-    texture: HTMLImageElement | null;
+    color: RGBA;
+    texture: Texture | null;
     canHit: boolean;
     canCollide: boolean;
 }
+
+
+// class Tile {
+//     readonly color: RGBA;
+//     readonly texture: Texture;
+//     readonly canHit: boolean;
+//     readonly canCollide: boolean;
+
+//     constructor() {
+
+//     }
+// }
+
+
 
 
 export const getFillerTile = (function() {
@@ -32,7 +47,7 @@ function isTileObject(obj: any): boolean {
     if (test.color !== null && test.color !== undefined &&
         test.canHit !== null && test.canHit !== undefined &&
         test.canCollide !== null && test.canCollide !== undefined) {
-        if (isColorObject(test["color"]) && typeof(test["canHit"]) === "boolean" && typeof(test["canCollide"]) === "boolean") {
+        if (isRGBAObject(test["color"]) && typeof(test["canHit"]) === "boolean" && typeof(test["canCollide"]) === "boolean") {
             if (test.texture !== null && test.texture !== undefined) {
                 if ("tagName" in test.texture) {
                     if (test.texture.tagName === "img") {
@@ -48,9 +63,13 @@ function isTileObject(obj: any): boolean {
 }
 
 
-export const TileTypeArray = ["Empty Tile", "Wall Tile", "Red Tile", "Green Tile", "Blue Tile", "Marble Tile"] as const;
+export const TileTypeArray = ["Empty Tile", "Wall Tile", "Red Tile", "Green Tile", "Blue Tile", "Marble Tile", "Stone Brick Tile"] as const;
 type TileTypes = typeof TileTypeArray[number];
 
+/**
+ * 
+ * It is recommended but not required for tile textures to be the size 128x128
+ */
 const tileTypeDefinitions: {[key in TileTypes]: Tile} = {
     "Empty Tile": {
         "color": {
@@ -117,6 +136,17 @@ const tileTypeDefinitions: {[key in TileTypes]: Tile} = {
         "canCollide": true,
         "canHit": true,
         "texture": null
+    },
+    "Stone Brick Tile": {
+        "color": {
+            "red": 120,
+            "green": 120,
+            "blue": 120,
+            "alpha": 255
+        },
+        "canCollide": true,
+        "canHit": true,
+        "texture": null
     }
 }
 
@@ -126,14 +156,21 @@ const textureMap: {[key in TileTypes]: string | null} = {
     "Red Tile": null,
     "Green Tile": null,
     "Blue Tile": null,
-    "Marble Tile": marbleTexturePath
+    "Marble Tile": marbleTexturePath,
+    "Stone Brick Tile": stoneBrickTexturePath
 }
 
 // TODO: Add a way to asyncronously create the textures for the tiles after loading
 export async function initTiles() {
-    // ( Object.entries(textureMap).filter(entry => entry[1] !== null && entry[1] !== undefined) as [string, string][] ).forEach(entry => async function() {
-    //     getImage.  entry[1]
-    // })
+    const withSourcePath = Object.entries(textureMap).filter(entry => entry[1] !== null && entry[1] !== undefined) as [TileTypes, string][]
+    console.log(withSourcePath)
+    const textureLoaders = withSourcePath.map(entry => (async() => {
+        console.log("Being called")
+        tileTypeDefinitions[entry[0]].texture = await Texture.fromSourcePath(entry[0] + " Texture", entry[1]);
+    })() )
+    await Promise.all(textureLoaders)
+
+    console.log("Definitions after init: ", tileTypeDefinitions)
 }
 
 export function getDefaultTile(tileType: TileTypes) {
@@ -142,14 +179,24 @@ export function getDefaultTile(tileType: TileTypes) {
 
 export function tileToString(tile: Tile) {
     return `Tile: [
-        color: ${colorToRGBAString(tile.color)},
+        color: ${rgbaToString(tile.color)},
         canHit: ${tile.canHit},
         canCollide: ${tile.canCollide}
     ]`
 }
 
 export function areEqualTiles(first: Tile, second: Tile) {
-    return areEqualColors(first.color, second.color) && first.canHit === second.canHit && first.canCollide === second.canCollide;
+    if ( first.texture !== null && first.texture !== undefined && second.texture !== null && second.texture !== undefined ) {
+        if (first.texture.name !== second.texture.name) {
+            return false;
+        }
+    } else if ( (first.texture !== null && first.texture !== undefined) && (second.texture === null || second.texture === undefined) ) {
+        return false;
+    } else if ( (first.texture === null || first.texture === undefined) && (second.texture !== null && second.texture !== undefined) ) {
+        return false;
+    }
+
+    return areEqualColors(first.color, second.color) && first.canHit === second.canHit && first.canCollide === second.canCollide
 }
 
 

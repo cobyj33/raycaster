@@ -84,6 +84,14 @@ export class Vector2 implements IVector2 {
         return dotProductVector2(this, other)
     }
 
+    lerp(t: number, other: IVector2): Vector2 {
+        return Vector2.fromIVector2(lerp(t, this, other))
+    }
+
+    adjacent(): [Vector2, Vector2, Vector2, Vector2] {
+        return adjacentVector2(this).map(vec => Vector2.fromIVector2(vec)) as [Vector2, Vector2, Vector2, Vector2]
+    }
+
     equals(other: any): boolean {
         if (typeof(other) === "object") {
             if ("row" in other && "col" in other) {
@@ -97,6 +105,11 @@ export class Vector2 implements IVector2 {
 export interface LineSegment {
     start: IVector2;
     end: IVector2;
+}
+
+export function adjacentVector2(vec: IVector2): [IVector2, IVector2, IVector2, IVector2] {
+    const offsets: [IVector2, IVector2, IVector2, IVector2] = [ {row: 0, col: 1}, {row: 0, col: -1}, {row: 1, col: 0}, {row: -1, col: 0} ]
+    return offsets.map(offset => addVector2(vec, offset)) as [IVector2, IVector2, IVector2, IVector2]
 }
 
 
@@ -187,4 +200,8 @@ export function dotProductVector2(first: IVector2, second: IVector2): number {
 
 export function vector2Equals(vector: IVector2, other: IVector2): boolean {
     return vector.row == other.row && vector.col === other.col
+}
+
+export function lerp(t: number, first: IVector2, second: IVector2): IVector2 {
+    return addVector2(first, scaleVector2( subtractVector2(second, first), t))
 }
