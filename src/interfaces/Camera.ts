@@ -257,7 +257,7 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
     for (let i = 0; i < cameraLineData.length; i++) {
         const data = cameraLineData[i]
         let color = TRANSPARENT
-        let darkenPercentage = 0.0;
+        let brightness = 1.0;
         let hasTexture = 0;
         let textureX = 0;
 
@@ -266,9 +266,9 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
             const tileTextureData = data.hit.hitObject.texture;
             textureX = data.hit.textureX;
             switch(data.hit.side) {
-                case "west": darkenPercentage = 0.10; break;
-                case "east": darkenPercentage = 0.10; break;
-                case "south": darkenPercentage = 0.20; break;
+                case "west": brightness = 0.90; break;
+                case "east": brightness = 0.90; break;
+                case "south": brightness = 0.80; break;
             }
             
             if (tileTextureData !== null && tileTextureData !== undefined) {
@@ -288,15 +288,15 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
         textureData[i * 4 + 3] = color.blue / 255;
 
 
-        textureData[cameraLineData.length * 4 + i * 4] = darkenPercentage;
+        textureData[cameraLineData.length * 4 + i * 4] = brightness;
         textureData[cameraLineData.length * 4 + i * 4 + 1] = hasTexture; // Has Texture (0 or 1)
         textureData[cameraLineData.length * 4 + i * 4 + 2] = textureX; // TextureX, percentage across texture in texel coordinates
-        textureData[cameraLineData.length * 4 + i * 4 + 3] = 1; // empty values for now
+        textureData[cameraLineData.length * 4 + i * 4 + 3] = 1; // empty value for now
 
-        textureData[cameraLineData.length * 2 * 4 + i * 4] = darkenPercentage;
-        textureData[cameraLineData.length * 2 * 4 + i * 4 + 1] = 0; // empty for now
-        textureData[cameraLineData.length * 2 * 4 + i * 4 + 2] = 0; // empty values for now
-        textureData[cameraLineData.length * 2 * 4 + i * 4 + 3] = 1; // empty values for now
+        textureData[cameraLineData.length * 2 * 4 + i * 4] = 0; // will be Texture X
+        textureData[cameraLineData.length * 2 * 4 + i * 4 + 1] = 0; /// will be Texture Y
+        textureData[cameraLineData.length * 2 * 4 + i * 4 + 2] = 0;// will be Texture Width
+        textureData[cameraLineData.length * 2 * 4 + i * 4 + 3] = 0; // will be Texture Height
     }
 
     console.log("Found textures: ", foundTextures)

@@ -73,6 +73,15 @@ export class Color implements RGBA {
             blue: this.blue
         }
     }
+
+    rgba(): RGBA {
+        return {
+            red: this.red,
+            green: this.green,
+            blue: this.blue,
+            alpha: this.alpha
+        }
+    }
 }
 
 
@@ -108,14 +117,6 @@ export function isRGBAObject(obj: any): boolean {
 export function rgbToString(color: RGB): string {
     return `rgb(${color.red}, ${color.green}, ${color.blue})`;
 }
-
-// export function darkenColor(color: RGBA, amount: number): RGBA {
-//     return {  red: Math.max(0, color.red - amount), green: Math.max(0, color.green - amount), blue: Math.max(0, color.blue - amount), alpha: color.alpha  }
-// }
-
-// export function lightenColor(color: RGBA, amount: number): RGBA {
-//     return {  red: Math.max(0, color.red + amount), green: Math.max(0, color.green + amount), blue: Math.max(0, color.blue + amount), alpha: color.alpha  }
-// }
 
 export function rgbaToString(color: RGBA): string {
     return `rgb(${color.red}, ${color.green}, ${color.blue}, ${color.alpha})`;

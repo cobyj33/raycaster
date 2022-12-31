@@ -31,9 +31,6 @@ export interface GameMap {
 //     }
 // }
 
-/**
- * Treat as Immutable
- */
 // export class GameMap implements GameMapData {
 //     readonly tiles: Tile[]; //flattened array
 //     readonly dimensions: IVector2;
