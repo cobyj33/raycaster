@@ -7,9 +7,15 @@ html, body, .app, #root {
 
 .app {
     background-color: black;
-    display: flex;
-    flex-direction: row;
-    z-index: -2;
+    display: grid;
+    flex-direction: column;
+    margin: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(12, 1fr);
+}
+
+* {
+    position: relative;
 }
 
 *:not(input) {
@@ -25,122 +31,6 @@ html, body, .app, #root {
 }
 
 
-.sidebar {
-    position: absolute;
-    top: 0;
-    width: 100px;
-    height: 100vh;
-    transition: transform 0.25s;
-    z-index: 1;
-}
-
-.sidebar.left {
-    left: 0;
-    transform: translateX(-100%);
-}
-
-.sidebar.right {
-    right: 0;
-    transform: translateX(100%);
-}
-
-.sidebar, .sidebar div {
-    touch-action: none;
-    pointer-events: none;
-}
-
-.sidebar *:not(div) {
-    touch-action: auto;
-    pointer-events: auto;
-}
-
-.sidebar-content-area {
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-open-button {
-    position: absolute;
-    top: 0;
-    width: 50px;
-    height: 50px;
-    font-size: 30px;
-    background: none;
-    border: none;
-    color: white;
-    text-shadow: 1px 1px black;
-
-
-}
-
-.sidebar-open-button:active {
-    transition: border-botton 0.1s fill 0.1s;
-    fill: black;
-    border-bottom: 3px solid white;
-}
-
-.sidebar.left .sidebar-open-button {
-    right: 0;
-    transform: translateX(100%);
-}
-
-.sidebar.left .sidebar-open-button:hover {
-    transition: fill 0.25s transform 0.25s;
-    fill: rgb(200, 200, 200);
-    transform: translateX(100%) translateY(5px);
-}
-
-.sidebar.right .sidebar-open-button {
-    left: 0;
-    transform: translateX(-100%);
-}
-
-.sidebar.right .sidebar-open-button:hover {
-    transition: color 0.25s transform 0.25s;
-    color: rgb(200, 200, 200);
-    transform: translateX(-100%) translateY(5px);
-}
-
-.screen-picking-button {
-    background-color: black;
-    color: white;
-    border: none;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    font-family: monospace;
-    cursor: pointer;
-    transform: translateX(0);
-}
-
-.screen-picking-button.opened {
-    background: radial-gradient(lightgreen, rgb(185, 238, 155));
-}
-
-.screen-picking-button:hover {
-    transition: padding-bottom 0.25s padding-top 0.25s border-bottom 0.25s border-top 0.25s;
-    border-top: 2px solid white;
-    border-bottom: 2px solid white;
-    padding-bottom: 5px;
-    padding-top: 5px;
-}
-
-.screen-picking-button::after {
-    transition: transform 0.25s;
-}
-
-.screen-picking-button:active {
-    transition: transform 0.5s box-shadow 0.5s border-right 0.5s border-left 0.5s;
-    border-left: 2px solid white;
-    border-right: 2px solid white;
-    transform: translateY(-5px);
-    box-shadow: 0px 5px 0px white;
-}
-
-.sidebar.opened {
-    transform: translateX(0);
-}
-
 @keyframes screenLoad {
     0% {
         transform: translateY(-100%);
@@ -150,43 +40,83 @@ html, body, .app, #root {
     }
 }
 
-.screen {
-    flex-grow: 1;
-    animation: screenLoad;
-    animation-duration: 0.25s;
-    animation-iteration-count: 1;
-    animation-timing-function: ease-in-out;
-}
-
-.screen::before {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: black;
-}
-
 .viewing-area {
-    width: 100%;
-    height: 100%;
+    grid-row: 2 / 12;
+    grid-column: 1 / 2;
+    grid-template-columns: 1fr;
     display: grid;
+    padding: 20px;
 }
 
 @media screen and (orientation: landscape) {
-    .viewing-area {
-        grid-template-columns: repeat(2, 1fr);
+    .viewing-area.split {
+        grid-template-columns: 1fr 1fr;
     }
 }
 
 @media screen and (orientation: portrait) {
-    .viewing-area {
-        grid-template-rows: repeat(2, 1fr);
+    .viewing-area.split {
+        grid-template-rows: 1fr 1fr;
     }
 }
 
+.nav-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    max-height: 100px;
+}
 
-.viewing-area.single {
-    grid-template-columns: 1fr;
+@media screen and (orientation: landscape) {
+    .nav-bar {
+        grid-row: 1 / 2;
+        grid-column: 1 / 2;
+    }
+}
+
+@media screen and (orientation: portrait) {
+    .nav-bar {
+        grid-row: 12 / 13;
+        grid-column: 1 / 2;
+    }
+}
+
+.nav-bar-logo-holder {
+    display: grid;
+    align-items: center;
+}
+
+.nav-bar-logo { 
+    width: 50px;
+    height: 50px;
+}
+
+
+.nav-button-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    max-width: 100vw;
+    overflow-x: scroll;
+}
+
+.nav-button {
+    padding: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    border: none;
+    color: white;
+    background: none;
+}
+
+.nav-button:hover {
+    transition: background-color 0.25s;
+    background-color: rgb(30, 30, 30);
+    border-bottom: 1px solid white;
+}
+
+.nav-button:active {
+    transition: box-shadow 0.25s;
+    box-shadow: 0px 0px 10px cyan;
 }

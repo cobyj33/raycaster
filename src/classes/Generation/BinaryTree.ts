@@ -1,11 +1,11 @@
 export {  }
-// import { Tile } from "../../interfaces/Tile";
+// import { Tile } from "interfaces/Tile";
 // import { Dimension } from "../Data/Dimension";
 // import { GameMap } from "../GameMap";
 // import { EmptyTile } from "../Tiles/EmptyTile";
 // import { WallTile } from "../Tiles/WallTile";
 // import { GenerationAlgorithm } from "./GenerationAlgorithm";
-// import { getTileMap } from "../../functions/matrixFunctions";
+// import { getTileMap } from "functions/matrixFunctions";
 
 // export class BinaryTree implements GenerationAlgorithm {
 // 	get name(): string { return "Binary Tree" } 

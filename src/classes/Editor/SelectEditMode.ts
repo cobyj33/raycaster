@@ -1,4 +1,4 @@
-import { EditMode } from "./EditMode";
+import { EditMode } from "classes/Editor/EditMode";
 
 export class SelectEditMode extends EditMode {
     cursor() { return "grab" }

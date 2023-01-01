@@ -1,2 +1,2 @@
-export * from "../classes/Structures/CyclicalArray"
-export * from "../classes/Structures/HistoryStack"
+export * from "classes/Structures/CyclicalArray"
+export * from "classes/Structures/HistoryStack"

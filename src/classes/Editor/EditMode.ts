@@ -1,5 +1,5 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { EditorData } from "./EditorData";
+import { EditorData } from "classes/Editor/EditorData";
 
 export abstract class EditMode {
     protected data: EditorData;

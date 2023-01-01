@@ -1,5 +1,5 @@
 export {  }
-// import { Tile } from "../../interfaces/Tile";
+// import { Tile } from "interfaces/Tile";
 // import { Dimension } from "../Data/Dimension";
 // import { GameMap } from "../GameMap";
 // import { EmptyTile } from "../Tiles/EmptyTile";

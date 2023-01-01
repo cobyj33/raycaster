@@ -1,7 +1,7 @@
 import {getLine} from "raycaster/functions";
 import { Tile, GameMap, gameMapInBounds, IVector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
-import { EditMode } from "./EditMode";
+import { EditMode } from "classes/Editor/EditMode";
 
 export class DrawEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }

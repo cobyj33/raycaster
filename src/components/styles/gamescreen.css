@@ -14,15 +14,18 @@
     flex-grow: 5;
     flex-basis: 200px;
     border: 2px solid white;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    aspect-ratio: 16 / 9;
 }
 
 .game-canvas {
-    aspect-ratio: 16 / 9;
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    width: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 
 .camera-indicators {

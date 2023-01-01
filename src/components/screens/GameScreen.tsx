@@ -3,7 +3,7 @@ import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/interfaces";
-import "./styles/gamescreen.css"
+import "components/styles/gamescreen.css"
 
 const Y_MOVEMENT_TOLERANCE = 500;
 
@@ -29,10 +29,12 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
     const cameraRenderProgram = React.useRef<WebGLProgram | null>(null)
 
     function render() {
-        if (canvasRef.current !== null && canvasRef.current !== undefined) {
-            const canvas: HTMLCanvasElement = canvasRef.current;
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
+        const canvas = canvasRef.current
+        const canvasHolder = canvasHolderRef.current
+        if (canvas !== null && canvas !== undefined && canvasHolder !== null && canvasHolder !== undefined) {
+            const rect: DOMRect = canvasHolder.getBoundingClientRect()
+            canvas.width = rect.width;
+            canvas.height = rect.height;
             const gl = canvas.getContext("webgl2");
             if (gl !== null && gl !== undefined) {
                 cameraRenderProgram.current = renderCamera(camera, canvas, gl, cameraRenderProgram.current);

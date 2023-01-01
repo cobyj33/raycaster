@@ -1,6 +1,6 @@
-import { KeyBinding } from "./KeyBinding";
+import { KeyBinding } from "classes/KeySystem/KeyBinding";
 import { KeyboardEvent, MutableRefObject, useEffect, useRef } from "react";
-import { NakedKeyEvent } from "./NakedKeyEvent";
+import { NakedKeyEvent } from "classes/KeySystem/NakedKeyEvent";
 
 export class KeyHandler {
     bindings: KeyBinding[];

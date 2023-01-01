@@ -1,9 +1,9 @@
 export {  }
-// import { getTileMap } from "../../../functions/matrixFunctions";
-// import { Tile } from "../../../interfaces/Tile";
-// import { GameMap } from "../../GameMap";
-// import { EmptyTile } from "../../Tiles/EmptyTile";
-// import { WallTile } from "../../Tiles/WallTile";
+// import { getTileMap } from "../functions/matrixFunctions";
+// import { Tile } from "../interfaces/Tile";
+// import { GameMap } from "GameMap";
+// import { EmptyTile } from "Tiles/EmptyTile";
+// import { WallTile } from "Tiles/WallTile";
 // import { conwayGetNextGeneration } from "../Conway";
 // import { LiveGenerationAlgorithm } from "./LiveGenerationAlgorithm"
 

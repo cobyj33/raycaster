@@ -1,6 +1,6 @@
 import { PointerEvent } from "react";
 import { IVector2, getVectorLength, dotProductVector2, vector2Normalized } from "raycaster/interfaces";
-import { EditMode } from "./EditMode";
+import { EditMode } from "classes/Editor/EditMode";
 
 const ZOOM_DIRECTION: IVector2 = { row: -1, col: -1 }
 

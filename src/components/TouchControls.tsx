@@ -2,7 +2,7 @@ import { Camera, scaleVector2, rotateVector2, StatefulData } from "raycaster/int
 import { getMovedCameraPosition } from "raycaster/controls"
 import { HoldButton } from "raycaster/components";
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaRegArrowAltCircleLeft, FaRegArrowAltCircleRight } from 'react-icons/fa';
-import "./styles/touchcontrols.css"
+import "components/styles/touchcontrols.css"
 
 export const TouchControls = ({ cameraData }: { cameraData: StatefulData<Camera> }) => {
     const [camera, setCamera] = cameraData;

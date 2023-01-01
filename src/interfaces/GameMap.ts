@@ -1,5 +1,5 @@
 import {
-    Tile, areEqualTiles, TileJSON, getDefaultTile,
+    Tile, areEqualTiles, getDefaultTile,
     IVector2,
     RGBA
 } from "raycaster/interfaces"
@@ -210,17 +210,4 @@ export function areGameMapsEqual(first: GameMap, second: GameMap) {
     }
 
     return true;
-}
-
-
-export interface BoardJSON {
-    tiles: string[]; //names
-    dimensions: [number, number];
-}
-
-
-
-export interface MapSave {
-    board: BoardJSON;
-    savedTiles: TileJSON[];
 }

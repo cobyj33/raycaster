@@ -1,11 +1,11 @@
 export {  }
 // import { BlockPickerProps } from "react-color";
 // import { FaWarehouse } from "react-icons/fa";
-// import { Tile } from "../../interfaces/Tile";
+// import { Tile } from "interfaces/Tile";
 // import { Dimension } from "../Data/Dimension";
 // import { GameMap } from "../GameMap";
 // import { GenerationAlgorithm } from "./GenerationAlgorithm";
-// import { getTileMap, isInBounds } from "../../functions/matrixFunctions";
+// import { getTileMap, isInBounds } from "functions/matrixFunctions";
 // import { EmptyTile } from "../Tiles/EmptyTile";
 // import { WallTile } from "../Tiles/WallTile";
 

@@ -1,6 +1,6 @@
 export {  }
-// import { isInBounds } from "../../functions/matrixFunctions";
-// import { Tile } from "../../interfaces/Tile";
+// import { isInBounds } from "functions/matrixFunctions";
+// import { Tile } from "interfaces/Tile";
 // import { Dimension } from "../Data/Dimension";
 // import { GameMap } from "../GameMap";
 // import { EmptyTile } from "../Tiles/EmptyTile";

@@ -5,7 +5,7 @@ import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEd
 import { TileCreator } from "raycaster/components";
 import { HistoryStack } from "raycaster/structures";
 import { drawCell, renderGhostTiles, renderWalls, renderGrid, useHistory, useWindowEvent, useResizeObserver } from "raycaster/functions";
-import "./styles/mapeditor.css"
+import "components/styles/mapeditor.css"
 
 
 export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap>, tileData: StatefulData<{[key: string]: Tile}> }) => {

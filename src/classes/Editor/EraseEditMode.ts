@@ -1,7 +1,7 @@
 import {getLine} from "raycaster/functions";
 import { Tile, getDefaultTile, GameMap, gameMapInBounds, IVector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
-import { EditMode } from "./EditMode";
+import { EditMode } from "classes/Editor/EditMode";
 
 export class EraseEditMode extends EditMode {
     cursor() { return "url('https://img.icons8.com/material-rounded/24/00000/eraser.png'), crosshair" }

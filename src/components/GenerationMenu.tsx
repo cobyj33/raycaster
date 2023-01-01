@@ -1,5 +1,5 @@
 // import { useState } from "react"
-import { GenerationAlgorithm } from "../classes/Generation/GenerationAlgorithm"
+import { GenerationAlgorithm } from "classes/Generation/GenerationAlgorithm"
 // import { BoardDrawing } from "./BoardDrawing"
 // import { View, GameMap, getEmptyMap, getFilledMapEdges } from "raycaster/interfaces";
 

@@ -1,27 +1,23 @@
 import { RGBA, areEqualColors, isRGBAObject, rgbaToString } from "raycaster/interfaces"
-import marbleTexturePath from "assets/Marble.png"
-import stoneBrickTexturePath from "assets/Stone Brick Tile.png"
+import marbleTexturePath from "assets/textures/Marble.png"
+import stoneBrickTexturePath from "assets/textures/Stone Brick Tile.png"
 import { getImage } from "functions/image";
 import Texture from "interfaces/Texture"
 
+/**
+ * The representation of a tile in a TileMap
+ * 
+ * @field color (required): RGBA Unsigned Byte color representation for a fallback when the texture value is not present
+ * @field canCollide (required): Whether or not the camera should collide with this tile (used for movement)
+ * @field canHit (required): Whether or not rays can hit this tile
+ * @field texture (nullable, required): RGBA Unsigned Byte color representation for a fallback when the texture value is not present. Note that even if the texture is not present, the Tile should still have a "texture" field that is set to null
+ */
 export interface Tile {
     color: RGBA;
-    texture: Texture | null;
     canHit: boolean;
     canCollide: boolean;
+    texture: Texture | null;
 }
-
-
-// class Tile {
-//     readonly color: RGBA;
-//     readonly texture: Texture;
-//     readonly canHit: boolean;
-//     readonly canCollide: boolean;
-
-//     constructor() {
-
-//     }
-// }
 
 
 
@@ -199,10 +195,3 @@ export function areEqualTiles(first: Tile, second: Tile) {
     return areEqualColors(first.color, second.color) && first.canHit === second.canHit && first.canCollide === second.canCollide
 }
 
-
-export interface TileJSON {
-    name: string,
-    color: [number, number, number, number],
-    canHit: boolean;
-    canCollide: boolean;
-}

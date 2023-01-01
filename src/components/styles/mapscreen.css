@@ -8,7 +8,9 @@
 
 .map-canvas-holder {
     position: relative;
+    display: flex;
     align-self: stretch;
+    justify-content: center;
     flex-grow: 5;
     flex-basis: 200px;
     border: 2px solid white;
@@ -16,11 +18,6 @@
 
 .map-canvas {
     cursor:pointer;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    width: 100%;
     aspect-ratio: 1;
 }
 
