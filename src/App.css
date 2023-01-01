@@ -172,8 +172,20 @@ html, body, .app, #root {
     width: 100%;
     height: 100%;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
 }
+
+@media screen and (orientation: landscape) {
+    .viewing-area {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (orientation: portrait) {
+    .viewing-area {
+        grid-template-rows: repeat(2, 1fr);
+    }
+}
+
 
 .viewing-area.single {
     grid-template-columns: 1fr;
