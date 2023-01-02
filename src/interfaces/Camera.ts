@@ -3,17 +3,13 @@ import { StatefulData } from "interfaces/utilityInterfaces"
 import { GameMap, areGameMapsEqual, gameMapInBounds } from "interfaces/GameMap"
 import { Ray, RaycastHit, RaycastNoHit, castRay } from "interfaces/Ray"
 import { RGBA, rgbToString, rgbaToString, areEqualColors } from "interfaces/Color"
-import { IVector2, Vector2, vector2Int, LineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
+import { IVector2, Vector2, vector2Int, ILineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals, LineSegment } from "interfaces/Vector2"
 import React from "react"
 
 import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
 import cameraFragmentShaderSource from "shaders/camera.frag?raw"
 import Texture, { TextureAtlas } from "./Texture"
-import { g } from "vitest/dist/index-40ebba2b"
-import { timeStamp } from "console"
-
-
 
 
 interface CameraData {
@@ -108,10 +104,7 @@ export function getCameraPlane(camera: Camera): LineSegment {
     const startingCameraPlaneLocation: IVector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / 2.0)) );
     const endingCameraPlaneLocation: IVector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / -2.0)) );
 
-    return {
-        start: startingCameraPlaneLocation,
-        end: endingCameraPlaneLocation
-    }
+    return new LineSegment(startingCameraPlaneLocation, endingCameraPlaneLocation)
 }
 
 export function getCameraRays(camera: Camera, lineCount: number): Ray[] {

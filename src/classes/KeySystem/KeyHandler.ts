@@ -1,10 +1,10 @@
 import { KeyBinding } from "classes/KeySystem/KeyBinding";
-import { KeyboardEvent, MutableRefObject, useEffect, useRef } from "react";
+import React from "react";
 import { NakedKeyEvent } from "classes/KeySystem/NakedKeyEvent";
 
 export class KeyHandler {
     bindings: KeyBinding[];
-    downedKeys: KeyboardEvent<Element>[] = [];
+    downedKeys: React.KeyboardEvent<Element>[] = [];
 
     constructor(bindings: KeyBinding[] = []) {
         this.bindings = bindings;
@@ -15,7 +15,7 @@ export class KeyHandler {
         this.downedKeys.forEach(event => this.bindings.filter(binding => binding.testDown(event)).forEach(successfulBinding => successfulBinding.runWhileDown(event)));
     }
 
-    onKeyDown(event: KeyboardEvent<Element>) {
+    onKeyDown(event: React.KeyboardEvent<Element>) {
         if (!this.downedKeys.some(key => key.code === event.code)) {
             this.downedKeys.push(event);
         }
@@ -23,22 +23,22 @@ export class KeyHandler {
         this.bindings.filter(binding => binding.testDown(event)).forEach(successfulBinding => successfulBinding.runDown(event));
     }
 
-    onKeyUp(event: KeyboardEvent<Element>) {
+    onKeyUp(event: React.KeyboardEvent<Element>) {
         this.downedKeys = this.downedKeys.filter(downed => downed.code !== event.code);
         this.bindings.filter(binding => binding.testUp(event)).forEach(successfulBinding => successfulBinding.runUp(event));
     }
 }
 
-export function useKeyHandler(handler: KeyHandler, refreshRate: number = 1 / 30): MutableRefObject<KeyHandler> {
-    const keyHandler: MutableRefObject<KeyHandler> = useRef<KeyHandler>(handler);
+export function useKeyHandler(handler: KeyHandler, refreshRate: number = 1 / 30): React.MutableRefObject<KeyHandler> {
+    const keyHandler: React.MutableRefObject<KeyHandler> = React.useRef<KeyHandler>(handler);
 
-    const loopInProgress = useRef(false);
-    function movementLoop() {
+    const loopInProgress = React.useRef(false);
+    const movementLoop = React.useCallback( () => {
         keyHandler.current.callDownedBindings();
         setTimeout( () => requestAnimationFrame(movementLoop), refreshRate);
-    }
+    }, [])
 
-    useEffect( () => {
+    React.useEffect( () => {
         if (loopInProgress.current === false) {
             loopInProgress.current = true;
             setTimeout( () => requestAnimationFrame(movementLoop), refreshRate);

@@ -7,6 +7,8 @@ export class Vector2 implements IVector2 {
     readonly row: number
     readonly col: number
 
+    static readonly ZERO: Vector2 = new Vector2(0, 0)
+
     constructor(row: number, col: number) {
         this.row = row;
         this.col = col;
@@ -16,11 +18,15 @@ export class Vector2 implements IVector2 {
         return new Vector2(vector.row, vector.col)
     }
 
-    get length(): number {
+    isZero(): boolean {
+        return this.equals(Vector2.ZERO)
+    }
+
+    length(): number {
         return getVectorLength(this)
     }
 
-    get angle(): number {
+    angle(): number {
         return vector2ToAngle(this)
     }
 
@@ -58,6 +64,10 @@ export class Vector2 implements IVector2 {
 
     int(): Vector2 {
         return Vector2.fromIVector2(vector2Int(this))
+    }
+
+    add(other: IVector2): Vector2 {
+        return Vector2.fromIVector2(addVector2(this, other))
     }
 
     subtract(other: IVector2): Vector2 {
@@ -102,10 +112,31 @@ export class Vector2 implements IVector2 {
     }
 }
 
-export interface LineSegment {
+export class LineSegment implements ILineSegment {
+    readonly start: Vector2;
+    readonly end: Vector2
+
+    constructor(start: IVector2, end: IVector2) {
+        this.start = Vector2.fromIVector2(start)
+        this.end = Vector2.fromIVector2(end)
+    }
+
+    length(): number {
+        return this.start.distance(this.end)
+    }
+    
+    transform(callbackfn: (vec: Vector2) => Vector2): LineSegment {
+        return new LineSegment(callbackfn(this.start), callbackfn(this.end))
+    }
+
+    
+}
+
+export interface ILineSegment {
     start: IVector2;
     end: IVector2;
 }
+
 
 export function adjacentVector2(vec: IVector2): [IVector2, IVector2, IVector2, IVector2] {
     const offsets: [IVector2, IVector2, IVector2, IVector2] = [ {row: 0, col: 1}, {row: 0, col: -1}, {row: 1, col: 0}, {row: -1, col: 0} ]

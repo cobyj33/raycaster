@@ -1,9 +1,9 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "raycaster/editor";
-import { LineSegment, Tile, IVector2, gameMapInBounds } from "raycaster/interfaces"
+import { ILineSegment, Tile, IVector2, gameMapInBounds } from "raycaster/interfaces"
 import { getLine, removeDuplicates } from "raycaster/functions";
 
-function getBoxCorners(start: IVector2, end: IVector2): LineSegment[] {
+function getBoxCorners(start: IVector2, end: IVector2): ILineSegment[] {
     const firstCorner = { row: start.row, col: end.col }
     const secondCorner = {row: end.row, col: start.col }
     return [
@@ -19,7 +19,7 @@ export class BoxEditMode extends EditMode {
     start: IVector2 | undefined;
     end: IVector2 | undefined;
     boxLocked: boolean = false;
-    private get currentBox(): LineSegment[] {
+    private get currentBox(): ILineSegment[] {
         if (this.start !== undefined && this.end !== undefined) {
             return getBoxCorners(this.start, this.end);
         }
