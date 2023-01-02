@@ -1,0 +1,71 @@
+
+.editor-tile-creator {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background-color: rgb(10, 10, 10);
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+.editor-tile-creator > * {
+    margin-top: 5px;
+}
+
+.tile-creator-container {
+    transform: translateX(100%);
+    transition: transform 0.25s;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+
+    opacity: 0;
+    pointer-events: none;
+    touch-action:none;
+}
+
+.tile-creator-container.opened {
+    transition: transform 0.25s opacity 0.25s;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    touch-action: auto;
+}
+
+.editor-tile-creator-open-button {
+    position: absolute;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 40px;
+    width: 50px;
+    height: 50px;
+    left: 0px;
+    top: 0px;
+    opacity: 1;
+    transform: translateX(-100%);
+}
+
+
+.tile-creator-button {
+    color: white;
+    font-family: monospace;
+    background-color: black;
+    border: none;
+    border-radius: 5px;
+}
+
+.tile-creator-button:hover {
+    transition: transform 0.25s;
+    background-color: darkslategray;
+    transform: translateY(-5px) scale(1.05) skew(5px);
+}
+
+.sketch-picker {
+    background-color: black;
+}
+
+
+.tile-creator-save-button {
+    background-color: green;
+}

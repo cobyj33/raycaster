@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Tile, getFillerTile, StatefulData  } from "raycaster/interfaces" 
 import { SketchPicker } from "react-color"
 
-export const TileCreator = ({ tileData, className }: { tileData: StatefulData<{ [key: string]: Tile }>, className: string }) => {
+export const TileCreator = ({ tileData, className = "" }: { tileData: StatefulData<{ [key: string]: Tile }>, className?: string }) => {
     const [, setSavedTiles] = tileData;
     const [name, setName] = useState<string>("");
     const [tile, setTile] = useState<Tile>(getFillerTile());
@@ -17,7 +17,7 @@ export const TileCreator = ({ tileData, className }: { tileData: StatefulData<{ 
     }
 
   return (
-    <div className={className}>
+    <div className={className} >
         <input className='tile-creator-name-input' onChange={e => setName(e.target.value) } value={name} />
       <SketchPicker
       className='sketch-picker'
@@ -33,8 +33,8 @@ export const TileCreator = ({ tileData, className }: { tileData: StatefulData<{ 
             })
       )} /> 
 
-        <button className='tile-creator-button tile-creator-canHit-button' onClick={() => setTile( (tile: Tile) => ({ ...tile, canHit: !tile.canHit })  )  }> canHit: <b> {tile.canHit.toString()} </b> </button>
-        <button className='tile-creator-button tile-creator-canCollide-button' onClick={() => setTile( (tile: Tile) => ({ ...tile, canCollide: !tile.canCollide })  )  }> canCollide: <b> {tile.canCollide.toString()} </b> </button>
+        <button className='tile-creator-button' onClick={() => setTile( (tile: Tile) => ({ ...tile, canHit: !tile.canHit })  )  }> canHit: <b> {tile.canHit.toString()} </b> </button>
+        <button className='tile-creator-button' onClick={() => setTile( (tile: Tile) => ({ ...tile, canCollide: !tile.canCollide })  )  }> canCollide: <b> {tile.canCollide.toString()} </b> </button>
         <button className='tile-creator-button tile-creator-save-button' onClick={saveTile}> Save Tile </button>
     </div>
   )

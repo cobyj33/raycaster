@@ -3,7 +3,7 @@ import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/interfaces";
-import "components/styles/gamescreen.css"
+import gameScreenStyles from "components/styles/GameScreen.module.css"
 
 const Y_MOVEMENT_TOLERANCE = 500;
 
@@ -97,10 +97,10 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
 
 
   return (
-    <div ref={containerRef} className="game-container screen" onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
+    <div ref={containerRef} className={gameScreenStyles["game-screen-container"]} onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
 
-        <div className="game-canvas-holder" ref={canvasHolderRef}>
-            <canvas onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} className="game-canvas" ref={canvasRef} tabIndex={0}> </canvas>
+        <div className={gameScreenStyles["game-canvas-holder"]} ref={canvasHolderRef}>
+            <canvas className={gameScreenStyles["game-canvas"]} onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} ref={canvasRef} tabIndex={0}> </canvas>
         </div>
         
         {showTouchControls && <TouchControls cameraData={cameraData} />}

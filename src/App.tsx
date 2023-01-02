@@ -4,7 +4,7 @@ import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { AiFillCamera, AiFillBook, AiOutlineSplitCells, AiFillSave, AiOutlineImport, AiFillFileAdd  } from 'react-icons/ai';
 import { BsFillMapFill, BsFillPaletteFill } from "react-icons/bs"
 import { BiHelpCircle } from "react-icons/bi"
-import 'App.css';
+import appStyles from 'App.module.css';
 import {initRaycaster} from 'loader';
 import { requestWebDownload } from 'functions/file';
 import { JRaycaster } from 'classes/app';
@@ -60,33 +60,33 @@ function App() {
 
 
   return (
-    <div className="app" tabIndex={0} >
+    <div className={appStyles["app"]} tabIndex={0} >
 
-      <nav className="nav-bar">
+      <nav className={appStyles["nav-bar"]}>
         {/* <div className="nav-bar-logo-holder">
           <img className="nav-bar-logo" src={JRLogo} alt="JJ Raycaster" />
         </div> */}
 
-        <div className="nav-button-group">
-          <button className="nav-button" onClick={() => setCurrentMenu("Camera View")}><AiFillCamera /></button>
-          <button className="nav-button" onClick={() => setCurrentMenu("Game Map")}><BsFillMapFill /></button>
-          <button className="nav-button" onClick={() => setCurrentMenu("Editor")}><BsFillPaletteFill /></button>
-          <button className="nav-button"><BiHelpCircle /></button>
-          <button className="nav-button"><AiFillBook /></button>
+        <div className={appStyles["nav-button-group"]}>
+          <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Camera View")}><AiFillCamera /></button>
+          <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Game Map")}><BsFillMapFill /></button>
+          <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Editor")}><BsFillPaletteFill /></button>
+          <button className={appStyles["nav-button"]}><BiHelpCircle /></button>
+          <button className={appStyles["nav-button"]}><AiFillBook /></button>
         </div>
 
-        <div className="file-button-group">
-          <button className="nav-button"><AiFillFileAdd /></button>
-          <button className="nav-button"><AiFillSave /></button>
-          <button className="nav-button"><AiOutlineImport /></button>
+        <div className={appStyles["nav-button-group"]}> {/* File Manipulation */}
+          <button className={appStyles["nav-button"]}><AiFillFileAdd /></button>
+          <button className={appStyles["nav-button"]}><AiFillSave /></button>
+          <button className={appStyles["nav-button"]}><AiOutlineImport /></button>
         </div>
 
-        {/* <div className="view-button-group">
-          <button className="nav-button"><AiOutlineSplitCells /></button>
+        {/* <div className={appStyles["view-button-group"]}> 
+          <button className={appStyles["nav-button"]}><AiOutlineSplitCells /></button>
         </div> */}
       </nav>
 
-      <div className="viewing-area single">
+      <div className={`${appStyles["viewing-area"]} ${appStyles["single"]}`}>
         { getMenu(currentMenu) }
       </div>
 

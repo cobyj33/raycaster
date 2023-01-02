@@ -1,4 +1,4 @@
-.game-container {
+.game-screen-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -7,7 +7,7 @@
     padding: 20px;
 }
 
-* { color: white; } 
+/* * { color: white; }  */
 
 .game-canvas-holder {
     position: relative;
@@ -40,7 +40,7 @@
     justify-content: center;
     align-items: center;
 }
-
+/* 
 @keyframes slight-bounce {
     0% {
         transform: translateY(-5px);
@@ -51,9 +51,9 @@
     100% {
         transform: translateY(0px);
     }
-}
+} */
 
-.camera-indicator {
+/* .camera-indicator {
     animation: slight-bounce;
     animation-duration: 0.5s;
     animation-iteration-count: 1;
@@ -66,4 +66,4 @@
     border-radius: 5px;
     padding: 5px;
     border: 1px solid white;
-}
+} */

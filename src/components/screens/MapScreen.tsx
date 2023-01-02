@@ -5,7 +5,7 @@ import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
 import { GenerationAlgorithm, getGenerationAlgorithm } from "raycaster/generation"
 import { BirdsEyeCameraControls } from "raycaster/controls";
-import "components/styles/mapscreen.css";
+import mapScreenStyles from "components/styles/MapScreen.module.css";
 import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
 import { useResizeObserver } from "raycaster/functions";
@@ -250,10 +250,10 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 	// const generationAlgorithms = useRef<GenerationAlgorithm[]>([getGenerationAlgorithm("Recursive Backtracker"), getGenerationAlgorithm("Kruskal")]);
 
     return (
-    <div className="map-container screen" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
+    <div className={mapScreenStyles["map-container"]} onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
 
-        <div className="map-canvas-holder" ref={canvasHolderRef}>
-        <canvas style={{cursor: cursor}} className="map-canvas" onWheel={onWheel} onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef} width={map.dimensions.row * getMapScale()} height={map.dimensions.row * getMapScale()}> </canvas>
+        <div className={mapScreenStyles["map-canvas-holder"]} ref={canvasHolderRef}>
+        <canvas style={{cursor: cursor}} className={mapScreenStyles["map-canvas"]} onWheel={onWheel} onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef} width={map.dimensions.row * getMapScale()} height={map.dimensions.row * getMapScale()}> </canvas>
         </div>
 
         {showTouchControls && <TouchControls cameraData={cameraData} />}

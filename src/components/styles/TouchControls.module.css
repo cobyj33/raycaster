@@ -1,5 +1,5 @@
 
-.game-touch-controls {
+.touch-controls {
     aspect-ratio: 4 / 5;
     min-width: 100px;
     width: 20%;
@@ -12,7 +12,7 @@
 }
 
 
-.game-movement-touch-controls {
+.movement-touch-controls {
     flex-grow: 5;
     padding: 10px;
     display: grid;
@@ -22,38 +22,38 @@
     align-items: stretch;
 }
 
-.game-w-button {
+.forward-touch-button {
     grid-row: 1 / 2;
     grid-column: 2 / 3;
 }
 
-.game-a-button {
+.backward-touch-button {
     grid-row: 2 / 3;
     grid-column: 1 / 2;
 }
 
-.game-s-button {
+.left-touch-button {
     grid-row: 3 / 4;
     grid-column: 2 / 3;
 }
 
-.game-d-button {
+.right-touch-button {
     grid-row: 2 / 3;
     grid-column: 3 / 4;
 }
 
-.game-orientation-controls {
+.orientation-touch-controls {
     flex-grow: 2;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
 }
 
-.game-orientation-touch-button {
+.orientation-touch-button {
     flex-grow: 1;
 }
 
-.game-touch-button {
+.touch-button {
     color: white;
     background-color: rgb(47, 79, 79);
     border-radius: 5px;
@@ -61,13 +61,13 @@
     font-family: monospace;
 }
 
-.game-touch-button:hover {
+.touch-button:hover {
     transition: background-color 0.2s transform 0.2s;
     background-color: rgb(23, 39, 39);
     transform: scale(1.05);
 }
 
-.game-touch-button:active {
+.touch-button:active {
     transition: background-color 0.1s color 0.1s transform 0.2s;
     background-color: white;
     color: black;
