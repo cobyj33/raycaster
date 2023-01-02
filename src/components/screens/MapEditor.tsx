@@ -191,9 +191,10 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
     //TODO: CHECK DEPENDENCIES IN THIS USE EFFECT
 
     const updateCanvasSize = useCallback(() => {
-      if (canvasRef.current !== null && canvasRef.current !== undefined) {
-        const canvas: HTMLCanvasElement = canvasRef.current;
-        const rect: DOMRect = canvas.getBoundingClientRect();
+      const canvas = canvasRef.current
+      const canvasHolder = canvasHolderRef.current
+      if (canvas !== null && canvas !== undefined && canvasHolder !== null && canvasHolder !== undefined) {
+        const rect: DOMRect = canvasHolder.getBoundingClientRect();
         const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
         if (context !== null && context !== undefined) {

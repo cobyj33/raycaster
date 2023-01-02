@@ -15,7 +15,6 @@
     align-self: stretch;
     justify-content: center;
     flex-basis: 200px;
-    border: 2px solid white;
 }
 
 .editing-canvas {
@@ -24,6 +23,7 @@
     left: 0;
     bottom: 0;
     right: 0;
+    border: 2px solid white;
 }
 
 .editing-buttons {

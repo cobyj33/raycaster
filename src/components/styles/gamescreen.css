@@ -4,6 +4,7 @@
     align-items: center;
     justify-content: center;
     background-color: black;
+    padding: 20px;
 }
 
 * { color: white; } 
@@ -13,11 +14,10 @@
     align-self: stretch;
     flex-grow: 5;
     flex-basis: 200px;
-    border: 2px solid white;
     display: flex;
     align-items: stretch;
     justify-content: center;
-    aspect-ratio: 16 / 9;
+    /* aspect-ratio: 16 / 9; */
 }
 
 .game-canvas {
@@ -26,6 +26,7 @@
     left: 0;
     bottom: 0;
     right: 0;
+    border: 2px solid white;
 }
 
 .camera-indicators {

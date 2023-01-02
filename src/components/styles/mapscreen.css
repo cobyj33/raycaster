@@ -8,9 +8,7 @@
 
 .map-canvas-holder {
     position: relative;
-    display: flex;
     align-self: stretch;
-    justify-content: center;
     flex-grow: 5;
     flex-basis: 200px;
     border: 2px solid white;
@@ -18,7 +16,11 @@
 
 .map-canvas {
     cursor:pointer;
-    aspect-ratio: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .algorithm-generation-button, .algorithm-menu-selection  {

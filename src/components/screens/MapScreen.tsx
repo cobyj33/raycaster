@@ -1,5 +1,5 @@
 import { PointerEvent, Ref, RefObject, useCallback, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, rgbToString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit } from "raycaster/interfaces";
+import { tryPlaceCamera, rgbToString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit, View } from "raycaster/interfaces";
 import { IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
@@ -20,6 +20,10 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     const canvasHolderRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
     const [camera, setCamera] = cameraData;
+
+
+    const [screenView, setScreenView] = useState<View>({ row: 0, col: 0, cellSize: 10 })
+
     const [cursor, setCursor] = useState<string>("pointer");
     const isPointerDown = useRef<boolean>(false);
     const isCameraGrabbed = useRef<boolean>(false);
@@ -154,23 +158,24 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     function updateCanvasSize() {
         const canvas: HTMLCanvasElement | null = canvasRef.current;
         const canvasHolder: HTMLDivElement | null = canvasHolderRef.current;
-        if (canvas === null || canvas === undefined) return;
-        if (canvasHolder === null || canvasHolder === undefined) return;
-        const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
-        if (context === null || context === undefined) return;
-
-        const rect: DOMRect = canvas.getBoundingClientRect();
-        if (rect.width !== canvas.width || rect.height !== canvas.height) {
-            const imageData: ImageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            context.putImageData(imageData, 0, 0);
-        } else {
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+        if (canvas !== null && canvas !== undefined && canvasHolder !== null && canvasHolder !== undefined) {
+            const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
+            if (context !== null && context !== undefined) {
+                const rect: DOMRect = canvasHolder.getBoundingClientRect();
+                if (rect.width !== canvas.width || rect.height !== canvas.height) {
+                    const imageData: ImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                    context.putImageData(imageData, 0, 0);
+                } else {
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                }
+        
+                render();
+            }
         }
 
-        render();
       }
 
     function faceCameraToPointer(event: PointerEvent<Element>) {
@@ -240,9 +245,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     }
 
 
-	const [generationMenuIndex, setGenerationMenuIndex] = useState<number>(0);
+	// const [generationMenuIndex, setGenerationMenuIndex] = useState<number>(0);
 
-	const generationAlgorithms = useRef<GenerationAlgorithm[]>([getGenerationAlgorithm("Recursive Backtracker"), getGenerationAlgorithm("Kruskal")]);
+	// const generationAlgorithms = useRef<GenerationAlgorithm[]>([getGenerationAlgorithm("Recursive Backtracker"), getGenerationAlgorithm("Kruskal")]);
 
     return (
     <div className="map-container screen" onKeyDown={(event) => cameraControls.current.onKeyDown(event)} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
@@ -253,13 +258,13 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
         {showTouchControls && <TouchControls cameraData={cameraData} />}
 
-	<MenuSelector sendMenuIndex={(index) => setGenerationMenuIndex(index)}>
+	{/* <MenuSelector sendMenuIndex={(index) => setGenerationMenuIndex(index)}>
 		{ generationAlgorithms.current.map( (algo, index) => (
             <MenuSelection className={`algorithm-menu-selection ${generationMenuIndex === index ? "selected" : "unselected"}`} name={algo.name} key={`algorithmSelection ${algo.name}` }>
-            { /* <GenerationMenu algo={algo} /> */ }
+             <GenerationMenu algo={algo} /> 
                 <button className="algorithm-generation-button" onClick={() => setMap(map => algo.generateMap(map.dimensions))}> Generate {algo.name} </button>
             </MenuSelection> )  ) } 
-	</MenuSelector>
+	</MenuSelector> */}
     </div>
   )
 }
