@@ -23,6 +23,10 @@ export class Color implements RGBA {
         this.blue = blue;
         this.alpha = alpha;
     }
+
+    static fromRGBA(rgba: RGBA) {
+        return new Color(rgba.red, rgba.green, rgba.blue, rgba.alpha)
+    }
     
     static fromCSS(name: string): Color {
         const color: RGBA = getColorFromCSS(name)

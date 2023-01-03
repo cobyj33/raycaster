@@ -12,11 +12,13 @@ import Texture from "interfaces/Texture"
  * @field canHit (required): Whether or not rays can hit this tile
  * @field texture (nullable, required): RGBA Unsigned Byte color representation for a fallback when the texture value is not present. Note that even if the texture is not present, the Tile should still have a "texture" field that is set to null
  */
+
+
 export interface Tile {
-    color: RGBA;
-    canHit: boolean;
-    canCollide: boolean;
-    texture: Texture | null;
+    readonly color: RGBA;
+    readonly canHit: boolean;
+    readonly canCollide: boolean;
+    readonly texture: Texture | null;
 }
 
 
@@ -159,14 +161,13 @@ const textureMap: {[key in TileTypes]: string | null} = {
 // TODO: Add a way to asyncronously create the textures for the tiles after loading
 export async function initTiles() {
     const withSourcePath = Object.entries(textureMap).filter(entry => entry[1] !== null && entry[1] !== undefined) as [TileTypes, string][]
-    console.log(withSourcePath)
     const textureLoaders = withSourcePath.map(entry => (async() => {
-        console.log("Being called")
-        tileTypeDefinitions[entry[0]].texture = await Texture.fromSourcePath(entry[0] + " Texture", entry[1]);
+        const toAddTexture = tileTypeDefinitions[entry[0]]
+        const loadedTexture: Texture = await Texture.fromSourcePath(entry[0] + " Texture", entry[1])
+        tileTypeDefinitions[entry[0]] = { ...toAddTexture, texture: loadedTexture };
     })() )
     await Promise.all(textureLoaders)
 
-    console.log("Definitions after init: ", tileTypeDefinitions)
 }
 
 export function getDefaultTile(tileType: TileTypes) {

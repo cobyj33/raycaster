@@ -2,27 +2,40 @@ import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, us
 import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { TouchControls } from "raycaster/components"
-import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera } from "raycaster/interfaces";
+import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera, GameMap } from "raycaster/interfaces";
 import gameScreenStyles from "components/styles/GameScreen.module.css"
+import { clamp } from 'functions/util';
 
 const Y_MOVEMENT_TOLERANCE = 500;
 
-export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> }  ) => {
+export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera> }  ) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
     const canvasHolderRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const containerRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+
     const [camera, setCamera] = cameraData;
+    const [gameMap, setGameMap] = mapData;
     const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
     // const [map, setMap] = mapData;
 
-    const keyHandlerRef = useKeyHandler(new FirstPersonCameraControls(setCamera));
+    const cameraControls = React.useRef<FirstPersonCameraControls>(new FirstPersonCameraControls(gameMap, setCamera))
+    const keyHandlerRef = useKeyHandler(cameraControls.current);
+    React.useEffect( () => {
+        cameraControls.current.map = gameMap
+    }, [mapData])
+
     const mouseControls = useRef<(event: PointerEvent<Element>) => void>((event: PointerEvent<Element>) => {
         const xMovement = -event.movementX;
         // const yMovement = -Math.sin(event.movementY / 10 * (Math.PI / 180.0));
         const yMovement = -Math.atan2(event.movementY, Y_MOVEMENT_TOLERANCE);
         setCamera( (camera: Camera) => {
-            const newLookingAngle =  Math.max( -Math.PI / 4, Math.min( Math.PI / 4, camera.lookingAngle + yMovement ) ) 
-            return ({...camera, direction: rotateVector2(camera.direction,  xMovement / 40 * (Math.PI / 180.0) ), lookingAngle: newLookingAngle });
+            const MAX_LOOKING_ANGLE = Math.PI / 4
+            const MIN_LOOKING_ANGLE = -Math.PI / 4
+            const TURN_DAMPENING_FACTOR = 1 / 40;
+
+            const newLookingAngle =  clamp(camera.lookingAngle + yMovement, MIN_LOOKING_ANGLE, MAX_LOOKING_ANGLE) 
+            const cameraRotation = xMovement * TURN_DAMPENING_FACTOR * (Math.PI / 180.0)
+            return camera.face(camera.direction.rotate(cameraRotation)).withLookingAngle(newLookingAngle)
         });
     });
 
@@ -37,7 +50,7 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
             canvas.height = rect.height;
             const gl = canvas.getContext("webgl2");
             if (gl !== null && gl !== undefined) {
-                cameraRenderProgram.current = renderCamera(camera, canvas, gl, cameraRenderProgram.current);
+                cameraRenderProgram.current = renderCamera(camera, gameMap, canvas, gl, cameraRenderProgram.current);
             }
         }
     }
@@ -50,7 +63,7 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
         if (canvasRef.current !== null && canvasRef.current !== undefined) {
             pointerLockEvents.current = new PointerLockEvents( [ ['mousemove', mouseControls.current] ], canvasRef.current )
         }
-        setCamera(camera => ({...camera, position: tryPlaceCamera(camera, camera.position)})) // Resolve any starting collisions with walls
+        setCamera(camera => camera) // Resolve any starting collisions with walls
 
         return () => {
             if (pointerLockEvents.current !== null && pointerLockEvents.current !== undefined) {
@@ -73,10 +86,9 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
     }
 
     function onWheel(event: WheelEvent<Element>) {
-        setCamera( camera => ({
-            ...camera,
-            fieldOfView: camera.fieldOfView + (event.deltaY / 50 * Math.PI / 180.0)
-        }) )
+        const WHEEL_DAMPENING_FACTOR = 1 / 50;
+        const changeInFOV = event.deltaY * WHEEL_DAMPENING_FACTOR * Math.PI / 180.0
+        setCamera( camera => camera.withFOV(camera.fieldOfView + changeInFOV) )
     }
 
     const [showFOVIndicator, setShowFOVIndicator] = useState<boolean>(false);

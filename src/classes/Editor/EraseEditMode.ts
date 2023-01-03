@@ -1,5 +1,5 @@
 import {getLine} from "raycaster/functions";
-import { Tile, getDefaultTile, GameMap, gameMapInBounds, IVector2 } from "raycaster/interfaces";
+import { getDefaultTile, GameMap, IVector2 } from "raycaster/interfaces";
 import { PointerEvent } from "react";
 import { EditMode } from "classes/Editor/EditMode";
 
@@ -8,10 +8,8 @@ export class EraseEditMode extends EditMode {
 
     private tryPlaceCell({row, col}: IVector2) {
         const [map, setMap] = this.data.mapData;
-        if (gameMapInBounds(map, row, col)) {
-            const tiles: Tile[][] = [...map.tiles];
-            tiles[row][col] = getDefaultTile("Empty Tile") 
-            setMap((map: GameMap) => ({ ...map, tiles: tiles}));
+        if (map.inBounds(row, col)) {
+            setMap((map: GameMap) => map.set(row, col, getDefaultTile("Empty Tile")));
         }
     }
 
@@ -23,12 +21,12 @@ export class EraseEditMode extends EditMode {
     }
 
     onPointerMove(event: PointerEvent<Element>) {
+        const [map, setMap] = this.data.mapData
         const hoveredCell = this.data.getHoveredCell(event);
         const lastHoveredCell = this.data.lastHoveredCell;
         if (this.data.isPointerDown) {
-            getLine(lastHoveredCell, hoveredCell).forEach(cell => {
-                this.tryPlaceCell(cell);
-            });
+            const placementData = getLine(lastHoveredCell, hoveredCell).filter(cell => map.inBoundsVec2(cell)).map(cell => ({ position: cell, tile: getDefaultTile("Empty Tile")}) )
+            setMap(map => map.setTiles(placementData))
         }
     }
 }

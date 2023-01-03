@@ -1,37 +1,33 @@
-import { Camera, GameMap, IVector2, addVector2, vector2ToLength, gameMapInBounds, rotateVector2, scaleVector2 } from "raycaster/interfaces"
+import { Camera, GameMap, Vector2 } from "raycaster/interfaces"
 import { KeyBinding, KeyHandler } from "raycaster/keysystem"
 
-const MOVEMENT_CHECKING_DISTANCE = 0.05;
+const MOVEMENT_CHECKING_DISTANCE = 0.15;
 
-export const canMoveCameraPosition = (currentPosition: IVector2, currentDirection: IVector2, distance: number, map: GameMap): boolean => {
-    // const nextPosition = currentPosition.add(currentDirection.toLength(distance));
-    const nextPosition = addVector2(currentPosition, vector2ToLength(currentDirection, distance))
-    // const checkingPosition = nextPosition.add(currentDirection.toLength(MOVEMENT_CHECKING_DISTANCE * ( distance < 0 ? -1 : 1 )));
-    const checkingPosition = addVector2(nextPosition, vector2ToLength(currentDirection, MOVEMENT_CHECKING_DISTANCE * (distance < 0 ? -1 : 1)));
-    const nextRowOnMap = Math.floor(checkingPosition.row);
-    const nextColOnMap = Math.floor(checkingPosition.col);
-    if (gameMapInBounds(map, nextRowOnMap, nextColOnMap)) {
-        if (map.tiles[nextRowOnMap][nextColOnMap].canCollide === false) {
+export const canMoveCameraPosition = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): boolean => {
+    const nextPosition = currentPosition.add(currentDirection.toLength(distance))
+    const checkingOffset = MOVEMENT_CHECKING_DISTANCE * (distance < 0 ? -1 : 1)
+
+    const checkingPosition = nextPosition.add(currentDirection.toLength(checkingOffset))
+    const nextMapPosition = checkingPosition.floor()
+    if (map.inBoundsVec2(nextMapPosition)) {
+        if (map.atVec2(nextMapPosition).canCollide === false) {
             return true
         }
     }
     return false;
 }
 
-export const getMovedCameraPosition = (currentPosition: IVector2, currentDirection: IVector2, distance: number, map: GameMap): IVector2 => {
-    // const nextPosition = currentPosition.add(currentDirection.toLength(distance));
-    const nextPosition = addVector2(currentPosition, vector2ToLength(currentDirection, distance))
+export const getMovedCameraPosition = (currentPosition: Vector2, currentDirection: Vector2, distance: number, map: GameMap): Vector2 => {
+    const movement: Vector2 = currentDirection.toLength(distance)
+    const nextPosition = currentPosition.add(movement)
+
     if (canMoveCameraPosition(currentPosition, currentDirection, distance, map)) {
         return nextPosition;
     } else {
-        // const rowDirection: IVector2 = currentDirection.toLength(distance).getRowComponent();
-        const rowDirection: IVector2 = { row: vector2ToLength(currentDirection, distance).row, col: 0 };
-        // const colDirection: IVector2 = currentDirection.toLength(distance).getColComponent();
-        const colDirection: IVector2 = { row: 0, col: vector2ToLength(currentDirection, distance).col } ;
-        if (canMoveCameraPosition(currentPosition, rowDirection, distance, map)) {
-            return addVector2(currentPosition, rowDirection);
-        } else if (canMoveCameraPosition(currentPosition, colDirection, distance, map)) {
-            return addVector2(currentPosition, colDirection);
+        if (canMoveCameraPosition(currentPosition, movement.rowcomp(), distance, map)) {
+            return currentPosition.add(movement.rowcomp());
+        } else if (canMoveCameraPosition(currentPosition, movement.colcomp(), distance, map)) {
+            return currentPosition.add(movement.colcomp());
         }
     }
     return currentPosition;
@@ -40,58 +36,92 @@ export const getMovedCameraPosition = (currentPosition: IVector2, currentDirecti
 export class FirstPersonCameraControls extends KeyHandler {
     moveSpeed: number = 0.25;
     moveFactor: number = 1;
-    
-    constructor(setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
+    map: GameMap
+    setCamera: React.Dispatch<React.SetStateAction<Camera>>
 
+    get speed() {
+        return this.moveSpeed * this.moveFactor
+    }
 
-        const moveForward = () => setCamera( (camera) => {
-            return { ...camera, position: getMovedCameraPosition(camera.position, camera.direction, this.moveSpeed * this.moveFactor, camera.map) };
-        })
+    moveForward() {
+        this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction, this.speed, this.map)));
+    }
 
-        const moveBackward = () => setCamera( (camera) => {
-            return { ...camera, position: getMovedCameraPosition(camera.position, scaleVector2(camera.direction, -1), this.moveSpeed * this.moveFactor, camera.map) };
-        })
+    moveBackward() {
+        this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.scale(-1), this.speed, this.map)));
+    }
 
-        const moveLeft = () => setCamera( (camera) => {
-            return { ...camera, position: getMovedCameraPosition(camera.position, rotateVector2(camera.direction, Math.PI / 2), this.moveSpeed * this.moveFactor, camera.map) };
-        })
+    moveLeft() {
+        this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.rotate(Math.PI / 2), this.speed, this.map) ));
+    }
 
-        const moveRight = () => setCamera( (camera) => {
-            return { ...camera, position: getMovedCameraPosition(camera.position, rotateVector2(camera.direction, -Math.PI / 2), this.moveSpeed * this.moveFactor, camera.map) };
-        })
+    moveRight() {
+        this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.rotate(-Math.PI / 2), this.speed, this.map) ));
+    }
 
-        super([
-            new KeyBinding({ code: 'KeyW', onDown: moveForward, whileDown: moveForward }),
-            new KeyBinding({ code: 'KeyA', onDown: moveLeft, whileDown: moveLeft }),
-            new KeyBinding( {code: 'KeyS', onDown: moveBackward, whileDown: moveBackward }),
-            new KeyBinding( {code: 'KeyD', onDown: moveRight, whileDown: moveRight }),
-            new KeyBinding( {code: 'ShiftLeft', onDown: () => this.moveFactor = 2, onUp: () => this.moveFactor = 1})
+    constructor(map: GameMap, setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
+        super()
+        this.map = map
+        this.setCamera = setCamera
+
+        super.setBindings([
+            new KeyBinding({ code: 'KeyW', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),
+            new KeyBinding({ code: 'KeyA', onDown: this.moveLeft.bind(this), whileDown: this.moveLeft.bind(this)}),
+            new KeyBinding({code: 'KeyS', onDown: this.moveBackward.bind(this), whileDown: this.moveBackward.bind(this) }),
+            new KeyBinding({code: 'KeyD', onDown: this.moveRight.bind(this), whileDown: this.moveRight.bind(this) }),
+            new KeyBinding({code: 'ShiftLeft', onDown: () => this.moveFactor = 2, onUp: () => this.moveFactor = 1})
         ])
     }
+
 }
 
 export class BirdsEyeCameraControls extends KeyHandler {
     moveSpeed: number = 0.25;
     sensitivity: number = 1;
+    map: GameMap
+    setCamera: React.Dispatch<React.SetStateAction<Camera>>
+
+    moveForward() {
+        this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction, this.speed, this.map)));
+
+    }
+
+    moveBackward() {
+        this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.scale(-1), this.speed, this.map)));
+    }
+
+    turnLeft() {
+        this.setCamera(camera => camera.face(camera.direction.rotate(this.rotation)) );
+    }
+
+    turnRight() {
+        this.setCamera(camera => camera.face(camera.direction.rotate(-this.rotation)) );
+    }
+
+    slowDown() {
+        this.sensitivity = 0.5;
+    }
+
+    get speed() {
+        return this.moveSpeed * this.sensitivity
+    }
+
+    get rotation() {
+        return this.sensitivity * Math.PI / 180
+    }
     
-    constructor(setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
+    constructor(map: GameMap, setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
+        super()
+        this.map = map
+        this.setCamera = setCamera
 
-        const moveForward = () => setCamera(camera => ({ ...camera, position: getMovedCameraPosition(camera.position, camera.direction, this.moveSpeed * this.sensitivity, camera.map) }) )
-        const moveBackward = () => setCamera(camera => ({ ...camera, position: getMovedCameraPosition(camera.position, scaleVector2(camera.direction, -1), this.moveSpeed * this.sensitivity, camera.map) }) )
-        const turnRight = () => setCamera(camera => ({ ...camera, direction: rotateVector2(camera.direction, -this.sensitivity * Math.PI / 180) }));
-        const turnLeft = () => setCamera(camera => ({ ...camera, direction: rotateVector2(camera.direction, this.sensitivity * Math.PI / 180) }));
-        
-        const slowDown = () => {
-            this.sensitivity = 0.5;
-        }
-
-        super([
-            new KeyBinding({ code: 'KeyW', onDown: moveForward, whileDown: moveForward }),
-            new KeyBinding({ code: 'KeyA', onDown: turnLeft, whileDown: turnLeft }),
-            new KeyBinding( {code: 'KeyS', onDown: moveBackward, whileDown: moveBackward }),
-            new KeyBinding( {code: 'KeyD', onDown: turnRight, whileDown: turnRight }),
+        super.setBindings([
+            new KeyBinding({ code: 'KeyW', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),
+            new KeyBinding({ code: 'KeyA', onDown: this.turnLeft.bind(this), whileDown: this.turnLeft.bind(this) }),
+            new KeyBinding( {code: 'KeyS', onDown: this.moveBackward.bind(this), whileDown: this.moveBackward.bind(this) }),
+            new KeyBinding( {code: 'KeyD', onDown: this.turnRight.bind(this), whileDown: this.turnRight.bind(this) }),
             new KeyBinding( {code: 'ShiftLeft', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1}),
-            new KeyBinding( { code: "KeyQ", onDown: slowDown, onUp: () => this.sensitivity = 1})
+            new KeyBinding( { code: "KeyQ", onDown: this.slowDown.bind(this), onUp: () => this.sensitivity = 1})
         ])
     }
 }

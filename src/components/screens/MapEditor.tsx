@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback } from 'react'
-import { getFillerTile, vector2Int, StatefulData, IVector2, View, GameMap, getFilledMapEdges, getDefaultTile, Tile, gameMapInBounds, areGameMapsEqual, getEmptyMap, tryPlaceCamera, Camera, areEqualTiles, Vector2, subtractVector2, getViewOffset, inDimensionBounds, rgbaToString } from "raycaster/interfaces";
+import { getFillerTile, vector2Int, StatefulData, IVector2, View, GameMap, getDefaultTile, Tile, areGameMapsEqual, tryPlaceCamera, Camera, areEqualTiles, Vector2, subtractVector2, getViewOffset, inDimensionBounds, rgbaToString } from "raycaster/interfaces";
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH, FaUndo, FaRedo, FaHammer } from "react-icons/fa"
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "raycaster/editor"
 import { HistoryStack } from "raycaster/structures";
@@ -133,14 +133,6 @@ function focus(worldPosition: IVector2) {
   
   const [editMode, setEditMode] = useState<EditorEditMode>(EditorEditMode.DRAW);
 
-  // const centerView: (position: IVector2) => void = (position: IVector2) => {
-  //   const canvas: HTMLCanvasElement | null = canvasRef.current;
-  //   if (canvas !== null && canvas !== undefined) {
-  //     // setView( view.withCoordinates( new IVector2(position.row - (canvas.width / view.cellSize), position.col - (canvas.height / view.cellSize)) )  )
-  //       setView( view => ({...view, ...{ row: position.row - (canvas.width / view.cellSize), col: position.col - (canvas.height / view.cellSize)  }   }) )
-  //   }
-  // }
-
   function drawCell(context: CanvasRenderingContext2D, view: View, row: number, col: number) {
     context.fillRect((col - view.col) * view.cellSize, (row - view.row) * view.cellSize, view.cellSize, view.cellSize  );
   }
@@ -212,7 +204,8 @@ function focus(worldPosition: IVector2) {
 
 
     context.globalAlpha = 0.5;
-    context.fillStyle = gameMapInBounds(map, lastHoveredCell.current.row, lastHoveredCell.current.col) ? 'blue' : 'red';
+    context.fillStyle = map.inBoundsVec2(lastHoveredCell.current) ? 'blue' : 'red';
+    // context.fillStyle = gameMapInBounds(map, lastHoveredCell.current.row, lastHoveredCell.current.col) ? 'blue' : 'red';
     drawCell(context, view, lastHoveredCell.current.row + 1, lastHoveredCell.current.col + 1);
     context.globalAlpha = 1;
   }
@@ -283,8 +276,6 @@ function focus(worldPosition: IVector2) {
   // }, [map])
 
   // function undo() {
-  //   console.log(mapHistory.current.length);
-  //   console.log(mapHistory.current.canGoBack());
   //   if (mapHistory.current.canGoBack()) {
   //     mapHistory.current.back();
   //     setMap(mapHistory.current.state);
@@ -292,7 +283,6 @@ function focus(worldPosition: IVector2) {
   // }
 
   // function redo() {
-  //   console.log(mapHistory.current.length);
   //   if (mapHistory.current.canGoForward()) {
   //     mapHistory.current.forward();
   //     setMap(mapHistory.current.state);
@@ -347,11 +337,9 @@ function focus(worldPosition: IVector2) {
   }, [])
 
   function onMapGenerate() {
-    setMap(getFilledMapEdges(getEmptyMap(newMapDimension), getDefaultTile("Wall Tile")))
-    setCamera( (camera: Camera) => ({...camera, position: tryPlaceCamera(camera, {
-      row: camera.position.row / map.dimensions.row * newMapDimension.row,
-      col: camera.position.col / map.dimensions.col * newMapDimension.col
-    })}) )
+    setMap(GameMap.filledEdges("Generated Map", newMapDimension) )
+    const desiredCameraPosition = new Vector2(camera.position.row / map.dimensions.row * newMapDimension.row, camera.position.col / map.dimensions.col * newMapDimension.col)
+    setCamera(camera => camera.place(tryPlaceCamera(camera, map, desiredCameraPosition)))
   }
 
   const [newMapDimension, setNewMapDimension] = useState<IVector2>({row: 10, col: 10});

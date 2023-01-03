@@ -1,10 +1,8 @@
-import { StatefulData } from "interfaces/utilityInterfaces"
+import { StatefulData } from "interfaces/util"
 
-import { GameMap, areGameMapsEqual, gameMapInBounds } from "interfaces/GameMap"
-import { Ray, RaycastHit, RaycastNoHit, castRay } from "interfaces/Ray"
-import { RGBA, rgbToString, rgbaToString, areEqualColors } from "interfaces/Color"
-import { IVector2, Vector2, vector2Int, ILineSegment, addVector2, subtractVector2, scaleVector2, rotateVector2, vector2ToLength, vector2Normalized, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals, LineSegment } from "interfaces/Vector2"
-import React from "react"
+import { GameMap } from "interfaces/GameMap"
+import { Ray, RaycastHit, castRay } from "interfaces/Ray"
+import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals, LineSegment } from "interfaces/Vector2"
 
 import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
@@ -12,8 +10,7 @@ import cameraFragmentShaderSource from "shaders/camera.frag?raw"
 import Texture, { TextureAtlas } from "./Texture"
 
 
-interface CameraData {
-    readonly map: GameMap;
+interface ICamera {
     readonly position: IVector2;
     readonly direction: IVector2;
     readonly fieldOfView: number;
@@ -21,47 +18,122 @@ interface CameraData {
     readonly lookingAngle: number;
 }
 
-
-export function areEqualCameraDatas(first: CameraData, second: CameraData): boolean {
-    return vector2Equals(first.position, second.position) && vector2Equals(first.direction, second.direction) && first.fieldOfView === second.fieldOfView && first.viewDistance === second.viewDistance && first.lookingAngle === second.lookingAngle && areGameMapsEqual(first.map, second.map);
-}
-
-export interface CameraControlData extends CameraData {
+export interface CameraControlData {
     readonly moveAmount: number;
     readonly sensitivity: number;
 }
 
-export interface Camera extends CameraData, CameraControlData {}
 
-// class Camera implements ICamera {
-//     readonly map: GameMap;
-//     readonly position: Vector2;
-//     readonly direction: Vector2;
-//     readonly fieldOfView: number;
-//     readonly viewDistance: number;
-//     readonly lookingAngle: number;
-//     readonly moveAmount: number;
-//     readonly sensitivity: number;
 
-//     constructor(cameraData: ICamera) {
-//         this.map = cameraData.map
-//         this.position = Vector2.fromIVector2(cameraData.position)
-//         this.direction = Vector2.fromIVector2(cameraData.direction)
-//         this.fieldOfView = cameraData.fieldOfView
-//         this.viewDistance = cameraData.viewDistance
-//         this.lookingAngle = cameraData.lookingAngle
-//         this.moveAmount = cameraData.moveAmount
-//         this.sensitivity = cameraData.sensitivity
-//     }
+const CAMERA_PLANE_CAST_LENGTH = 0.0001
 
-//     static default(map: GameMap) {
-//         return new Camera(getDefaultCamera(map))
-//     }
+export class Camera implements ICamera {
+    readonly position: Vector2;
+    readonly direction: Vector2;
+    readonly fieldOfView: number;
+    readonly viewDistance: number;
+    readonly lookingAngle: number;
 
-//     setMap(map: GameMap) {
-//         return new Camera({...this, map: map})
-//     }
-// }
+    constructor(position: IVector2, direction: IVector2, fieldOfView: number, viewDistance: number, lookingAngle: number) {
+        this.position = Vector2.fromIVector2(position)
+        this.direction = Vector2.fromIVector2(direction)
+        this.fieldOfView = fieldOfView
+        this.viewDistance = viewDistance
+        this.lookingAngle = lookingAngle
+    }
+
+    plane(distanceAway: number = 1) {
+        const startingCameraPlaneLocation: IVector2 = this.position.add(this.direction.rotate(this.fieldOfView / 2.0).toLength(distanceAway))
+        const endingCameraPlaneLocation: IVector2 = this.position.add(this.direction.rotate(this.fieldOfView / -2.0).toLength(distanceAway)) 
+        return new LineSegment(startingCameraPlaneLocation, endingCameraPlaneLocation)
+    }
+
+    rays(count: number): Ray[] {
+        const rays: Ray[] = [];
+        const cameraPlane: LineSegment = this.plane(CAMERA_PLANE_CAST_LENGTH);
+        const perpendicularDirection: Vector2 = cameraPlane.end.subtract(cameraPlane.start)
+        const cameraPlaneLength: number = cameraPlane.length()
+        let currentCameraPlaneLocation: Vector2 = cameraPlane.start;
+        const step = perpendicularDirection.toLength(cameraPlaneLength / count)
+
+        for (let i = 0; i < count; i++) {
+            currentCameraPlaneLocation = currentCameraPlaneLocation.add(step);
+            const rayDirection: IVector2 = currentCameraPlaneLocation.subtract(this.position).normalize()
+            rays.push( {
+                origin: this.position,
+                direction: rayDirection
+            });
+        }
+
+        return rays;
+    }
+
+    place(position: IVector2): Camera {
+        return new Camera(position, this.direction, this.fieldOfView, this.viewDistance, this.lookingAngle)
+    }
+
+    face(direction: IVector2): Camera {
+        return new Camera(this.position, direction, this.fieldOfView, this.viewDistance, this.lookingAngle)
+    }
+
+    withFOV(value: number): Camera {
+        return new Camera(this.position, this.direction, value, this.viewDistance, this.lookingAngle)
+
+    }
+
+    withViewDistance(value: number): Camera {
+        return new Camera(this.position, this.direction, this.fieldOfView, value, this.lookingAngle)
+
+    }
+
+    withLookingAngle(value: number): Camera {
+        return new Camera(this.position, this.direction, this.fieldOfView, this.viewDistance, value)
+    }
+
+    cameraLines(count: number, map: GameMap) {
+        const cameraLineData: CameraLine[] = [];
+        const cameraPlane = this.plane(CAMERA_PLANE_CAST_LENGTH);
+        const perpendicularDirection = cameraPlane.end.subtract(cameraPlane.start);
+
+
+        const rays: Ray[] = this.rays(count);
+        rays.map(ray => castRay(ray, map, this.viewDistance)).forEach(result => {
+            if ("hitObject" in result) {
+                const hit = result as RaycastHit
+                const rayPlaneIntersection: IVector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
+                const distanceFromHitToPlane: number = distanceBetweenVector2(rayPlaneIntersection, hit.end) * Math.sin( Math.min(angleBetweenVector2( perpendicularDirection, hit.originalRay.direction ), angleBetweenVector2( scaleVector2(perpendicularDirection, -1), hit.originalRay.direction ) ) );
+
+                const cameraLine: CameraLine = {
+                    lineLengthPercentage: 1.0 / distanceFromHitToPlane,
+                    hit: hit
+                }
+
+                cameraLineData.push( cameraLine );
+            } else {
+                cameraLineData.push(emptyCameraLine)
+            }
+            
+        });
+
+        return cameraLineData;
+    }
+
+    static fromCameraData(cameraData: ICamera): Camera {
+        return new Camera(Vector2.fromIVector2(cameraData.position),
+                            Vector2.fromIVector2(cameraData.direction),
+                            cameraData.fieldOfView,
+                            cameraData.viewDistance,
+                            cameraData.lookingAngle)
+    }
+
+    static default() {
+        return Camera.fromCameraData(getDefaultCamera())
+    }
+}
+
+export function areEqualCameras(first: ICamera, second: ICamera): boolean {
+    return vector2Equals(first.position, second.position) && vector2Equals(first.direction, second.direction) && first.fieldOfView === second.fieldOfView && first.viewDistance === second.viewDistance && first.lookingAngle === second.lookingAngle
+}
 
 export interface CameraLine {
     readonly hit?: RaycastHit;
@@ -73,105 +145,42 @@ export const emptyCameraLine: CameraLine = {
     lineLengthPercentage: 0
 }
 
-export const getDefaultCamera = (() => {
+export const getDefaultCamera: () => ICamera = (() => {
     const standardCameraFOV: number = 7 * Math.PI / 18;
-    const standardCameraPosition = { row: 0, col: 0 };
-    const standardCameraDirection = { row: 0, col: 1 };
+    const standardCameraPosition: IVector2 = { row: 0, col: 0 };
+    const standardCameraDirection: IVector2 = { row: 0, col: 1 };
     const standardMoveAmount: number = 0.25;
     const standardLookingAngle: number = 0;
     const standardViewDistance: number = 1000;
-    const standardSensitivity: number = 1;
 
-    return (map: GameMap): Camera => {
-        const cameraData: CameraData = {
-            map: map,
+    return (): ICamera => {
+        return {
             position: standardCameraPosition,
             direction: standardCameraDirection,
             fieldOfView: standardCameraFOV,
             viewDistance: standardViewDistance,
             lookingAngle: standardLookingAngle,
-        }       
-
-        return {
-            ...cameraData,
-            moveAmount: standardMoveAmount,
-            sensitivity: standardSensitivity,
         }
     }
 })();
 
-export function getCameraPlane(camera: Camera): LineSegment {
-    const startingCameraPlaneLocation: IVector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / 2.0)) );
-    const endingCameraPlaneLocation: IVector2 = addVector2(camera.position, vector2Normalized(rotateVector2(camera.direction, camera.fieldOfView / -2.0)) );
+export function tryPlaceCamera(camera: Camera, map: GameMap, targetCell: IVector2): Vector2 {
 
-    return new LineSegment(startingCameraPlaneLocation, endingCameraPlaneLocation)
-}
+    if (map.inBoundsVec2(targetCell)) {
 
-export function getCameraRays(camera: Camera, lineCount: number): Ray[] {
-    const rays: Ray[] = [];
-    const {start: startingCameraPlaneLocation, end: endingCameraPlaneLocation} = getCameraPlane(camera);
-    const perpendicularDirection: IVector2 = subtractVector2(endingCameraPlaneLocation, startingCameraPlaneLocation);
-    const distanceBetweenStartAndEnd: number = distanceBetweenVector2(startingCameraPlaneLocation, endingCameraPlaneLocation);
-    let currentCameraPlaneLocation: IVector2 = { ...startingCameraPlaneLocation };
-
-    for (let i = 0; i < lineCount; i++) {
-        currentCameraPlaneLocation = addVector2(currentCameraPlaneLocation, vector2ToLength(perpendicularDirection, distanceBetweenStartAndEnd / lineCount));
-        const rayDirection: IVector2 = subtractVector2(currentCameraPlaneLocation, camera.position);
-        rays.push( {
-            origin: camera.position,
-            direction: rayDirection
-        });
-    }
-
-   return rays;
-}
-
-
-export function getCameraLines(camera: Camera, lineCount: number): CameraLine[] {
-    const cameraLineData: CameraLine[] = [];
-    const {start: cameraPlaneStart, end: cameraPlaneEnd} = getCameraPlane(camera);
-    const perpendicularDirection = subtractVector2(cameraPlaneEnd, cameraPlaneStart);
-
-
-    const rays: Ray[] = getCameraRays(camera, lineCount);
-    rays.forEach(ray => {
-        const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance)
-        if ("hitObject" in result) {
-            const hit = result as RaycastHit
-            const rayPlaneIntersection: IVector2 = addVector2(hit.originalRay.origin, hit.originalRay.direction);
-            const distanceFromHitToPlane: number = distanceBetweenVector2(rayPlaneIntersection, hit.end) * Math.sin( Math.min(angleBetweenVector2( perpendicularDirection, hit.originalRay.direction ), angleBetweenVector2( scaleVector2(perpendicularDirection, -1), hit.originalRay.direction ) ) );
-
-            const cameraLine: CameraLine = {
-                lineLengthPercentage: 1.0 / distanceFromHitToPlane,
-                hit: hit
-            }
-
-            cameraLineData.push( cameraLine );
-
-        } else {
-            const noHit = result as RaycastNoHit
-            cameraLineData.push(emptyCameraLine)
-        }
-    });
-
-    return cameraLineData;
-}
-
-export function tryPlaceCamera(camera: Camera, targetCell: IVector2): IVector2 {
-
-    if (gameMapInBounds(camera.map, targetCell.row, targetCell.col)) {
         targetCell = vector2Int(targetCell);
-        if (camera.map.tiles[targetCell.row][targetCell.col].canCollide) {
+        
+        if (map.tiles[targetCell.row][targetCell.col].canCollide) {
             let found = false;
             const searchQueue: IVector2[] = [];
             const visited: Set<string> = new Set<string>();
             searchQueue.push(targetCell);
             visited.add(JSON.stringify(targetCell));
             let current: IVector2 = targetCell;
-            while (searchQueue.length > 0 && !found && visited.size < camera.map.dimensions.row * camera.map.dimensions.col) {
+            while (searchQueue.length > 0 && !found && visited.size < map.area) {
                 current = searchQueue.splice(0, 1)[0];
-                if (current.row >= 0 && current.col >= 0 && current.row < camera.map.tiles.length && current.col < camera.map.tiles[0].length) {
-                    if (camera.map.tiles[current.row][current.col].canCollide === false) {
+                if (map.inBoundsVec2(current)) {
+                    if (map.tiles[current.row][current.col].canCollide === false) {
                         found = true;
                         break;
                     }
@@ -185,13 +194,12 @@ export function tryPlaceCamera(camera: Camera, targetCell: IVector2): IVector2 {
                 });
             }
 
-            // setCamera(camera => camera.withPosition(current));
-            return current;
+            return Vector2.fromIVector2(current);
         } else {
-            return {...targetCell};
+            return Vector2.fromIVector2(targetCell);
         }
     } else {
-        return { row: camera.map.dimensions.row / 2, col: camera.map.dimensions.col / 2 }
+        return map.center
     }
 }
 
@@ -228,7 +236,7 @@ export function getCameraProgram(gl: WebGL2RenderingContext): WebGLProgram {
  * @param cameraRenderProgram The camera render program to use (outputted by this program, put the same one here in consecutive calls so that new programs do not have to be compiled)
  * @returns The same cameraRenderProgram if given, a new cameraRenderProgram if passed null
  */
-export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, cameraRenderProgram: WebGLProgram | null): WebGLProgram {
+export function renderCamera(camera: Camera, map: GameMap, canvas: HTMLCanvasElement, gl: WebGL2RenderingContext, cameraRenderProgram: WebGLProgram | null): WebGLProgram {
     canvas.width = canvas.width;
     canvas.height = canvas.height;
 
@@ -236,23 +244,26 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
         cameraRenderProgram = getCameraProgram(gl)
     }
 
-    const cameraLineData: CameraLine[] = getCameraLines(camera, canvas.width);
+    const cameraLineData: CameraLine[] = camera.cameraLines(canvas.width, map);
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(0, 0, 0, 0)
     gl.clear(gl.COLOR_BUFFER_BIT)
     const TRANSPARENT = { red: 0, green: 0, blue: 0, alpha: 0}
 
-    const textureData = new Float32Array(cameraLineData.length * 4 * 3)
+    const shaderInputData = new Float32Array(cameraLineData.length * 4 * 3)
+    const atlas: TextureAtlas = map.textureAtlas
 
-    const foundTextures: { [key: string]: { texture: Texture, indexes: number[] }   } = {}
-
-    // fill first line, percentage and color data
     for (let i = 0; i < cameraLineData.length; i++) {
         const data = cameraLineData[i]
         let color = TRANSPARENT
         let brightness = 1.0;
         let hasTexture = 0;
         let textureX = 0;
+
+        let textureTexelAtlasX = 0;
+        let textureTexelAtlasY = 0;
+        let textureTexelAtlasWidth = 0;
+        let textureTexelAtlasHeight = 0;
 
         if (data.hit !== null && data.hit !== undefined) {
             color = data.hit.hitObject.color
@@ -265,63 +276,61 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
             }
             
             if (tileTextureData !== null && tileTextureData !== undefined) {
-                if ( (tileTextureData.name in foundTextures) === false ) {
-                    foundTextures[tileTextureData.name] = { texture: tileTextureData, indexes: [cameraLineData.length * 2 * 4 + i * 4] };
-                } else {
-                    foundTextures[tileTextureData.name].indexes.push(cameraLineData.length * 2 * 4 + i * 4)
-                }
+                // if ( (tileTextureData.name in foundTextures) === false ) {
+                //     foundTextures[tileTextureData.name] = { texture: tileTextureData, indexes: [cameraLineData.length * 2 * 4 + i * 4] };
+                // } else {
+                //     foundTextures[tileTextureData.name].indexes.push(cameraLineData.length * 2 * 4 + i * 4)
+                // }
+                const locationBox = atlas.getTextureTexelLocation(tileTextureData.name)
+                textureTexelAtlasX = locationBox.col
+                textureTexelAtlasY = locationBox.row
+                textureTexelAtlasWidth = locationBox.width
+                textureTexelAtlasHeight = locationBox.height 
                 hasTexture = 1;
-                // color = tileTextureData.atTexel(data.hit.textureX, 0.25)
             }
         }
         
-        textureData[i * 4] = data.lineLengthPercentage;
-        textureData[i * 4 + 1] = color.red / 255;
-        textureData[i * 4 + 2] = color.green / 255;
-        textureData[i * 4 + 3] = color.blue / 255;
+        shaderInputData[i * 4] = data.lineLengthPercentage;
+        shaderInputData[i * 4 + 1] = color.red / 255;
+        shaderInputData[i * 4 + 2] = color.green / 255;
+        shaderInputData[i * 4 + 3] = color.blue / 255;
 
 
-        textureData[cameraLineData.length * 4 + i * 4] = brightness;
-        textureData[cameraLineData.length * 4 + i * 4 + 1] = hasTexture; // Has Texture (0 or 1)
-        textureData[cameraLineData.length * 4 + i * 4 + 2] = textureX; // TextureX, percentage across texture in texel coordinates
-        textureData[cameraLineData.length * 4 + i * 4 + 3] = 1; // empty value for now
+        shaderInputData[cameraLineData.length * 4 + i * 4] = brightness;
+        shaderInputData[cameraLineData.length * 4 + i * 4 + 1] = hasTexture; // Has Texture (0 or 1)
+        shaderInputData[cameraLineData.length * 4 + i * 4 + 2] = textureX; // TextureX, percentage across texture in texel coordinates
+        shaderInputData[cameraLineData.length * 4 + i * 4 + 3] = 1; // empty value for now
 
-        textureData[cameraLineData.length * 2 * 4 + i * 4] = 0; // will be Texture X
-        textureData[cameraLineData.length * 2 * 4 + i * 4 + 1] = 0; /// will be Texture Y
-        textureData[cameraLineData.length * 2 * 4 + i * 4 + 2] = 0;// will be Texture Width
-        textureData[cameraLineData.length * 2 * 4 + i * 4 + 3] = 0; // will be Texture Height
+        shaderInputData[cameraLineData.length * 2 * 4 + i * 4] = textureTexelAtlasX; // will be Texture X
+        shaderInputData[cameraLineData.length * 2 * 4 + i * 4 + 1] = textureTexelAtlasY; /// will be Texture Y
+        shaderInputData[cameraLineData.length * 2 * 4 + i * 4 + 2] = textureTexelAtlasWidth;// will be Texture Width
+        shaderInputData[cameraLineData.length * 2 * 4 + i * 4 + 3] = textureTexelAtlasHeight; // will be Texture Height
     }
 
-    console.log("Found textures: ", foundTextures)
-    if (Object.values(foundTextures).length > 0) {
-        const atlas: TextureAtlas = new TextureAtlas("Temorary Texture Atlas", Object.values(foundTextures).map(data => data.texture))
-        console.log(atlas.pixels)
-        const atlasGLTexture = gl.createTexture()
-        gl.activeTexture(gl.TEXTURE1)
-        gl.bindTexture(gl.TEXTURE_2D, atlasGLTexture)
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlas.width, atlas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, atlas.pixels);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const atlasGLTexture = gl.createTexture()
+    gl.activeTexture(gl.TEXTURE1)
+    gl.bindTexture(gl.TEXTURE_2D, atlasGLTexture)
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlas.width, atlas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, atlas.pixels);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-        const textureAtlasPosition = gl.getUniformLocation(cameraRenderProgram, "textureAtlas")
-        const textureAtlasResolutionPosition = gl.getUniformLocation(cameraRenderProgram, "textureAtlasResolution")
-        gl.uniform1i(textureAtlasPosition, 1);
-        gl.uniform2f(textureAtlasResolutionPosition, atlas.width, atlas.height);
+    const textureAtlasPosition = gl.getUniformLocation(cameraRenderProgram, "textureAtlas")
+    const textureAtlasResolutionPosition = gl.getUniformLocation(cameraRenderProgram, "textureAtlasResolution")
+    gl.uniform1i(textureAtlasPosition, 1);
+    gl.uniform2f(textureAtlasResolutionPosition, atlas.width, atlas.height);
 
-        Object.values(foundTextures).forEach(data => {
-            const locationBox = atlas.getTextureTexelLocation(data.texture.name)
-            console.log(locationBox);
-            data.indexes.forEach(index => {
-                textureData[index] = locationBox.col;
-                textureData[index + 1] = locationBox.row;
-                textureData[index + 2] = locationBox.width;
-                textureData[index + 3] = locationBox.height;
-            })
-        })
-    }
+    // Object.values(foundTextures).forEach(data => {
+    //     const locationBox = atlas.getTextureTexelLocation(data.texture.name)
+    //     data.indexes.forEach(index => {
+    //         shaderInputData[index] = locationBox.col;
+    //         shaderInputData[index + 1] = locationBox.row;
+    //         shaderInputData[index + 2] = locationBox.width;
+    //         shaderInputData[index + 3] = locationBox.height;
+    //     })
+    // })
 
 
     // const texIndexes: Texture[] = Object.values(foundTextures).sort((a, b) => a.index - b.index).map(texData => texData.texture)
@@ -331,7 +340,7 @@ export function renderCamera(camera: Camera, canvas: HTMLCanvasElement, gl: WebG
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, cameraLineData.length, 3, 0, gl.RGBA, gl.FLOAT, textureData)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, cameraLineData.length, 3, 0, gl.RGBA, gl.FLOAT, shaderInputData)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

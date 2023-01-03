@@ -78,8 +78,6 @@ export function useHistory<T>(stateData: StatefulData<T>, comparer: IEqualityCom
     const history= useRef<HistoryStack<T>>(new HistoryStack<T>());
 
     useEffect(() => {
-        // console.log(state);
-        // console.log(history.current.peek());
         if (history.current.empty === false) {
           if (comparer(state, history.current.peek()) === false) {
             history.current.pushState(state);
@@ -90,8 +88,6 @@ export function useHistory<T>(stateData: StatefulData<T>, comparer: IEqualityCom
       }, [state])
     
       function undo() {
-        // console.log(history.current.length);
-        // console.log(history.current.canGoBack());
         if (history.current.canGoBack()) {
           history.current.back();
           setState(history.current.state);
@@ -99,7 +95,6 @@ export function useHistory<T>(stateData: StatefulData<T>, comparer: IEqualityCom
       }
     
       function redo() {
-        // console.log(history.current.length);
         if (history.current.canGoForward()) {
             history.current.forward();
           setState(history.current.state);

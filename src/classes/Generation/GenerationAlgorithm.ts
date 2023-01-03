@@ -1,4 +1,4 @@
-import { IVector2, GameMap, getDefaultSkyBox, getDefaultTile, Tile, getTileMap, getEmptyMap } from "raycaster/interfaces";
+import { IVector2, GameMap, getDefaultSkyBox, getDefaultTile, Tile, getTileMap } from "raycaster/interfaces";
 import { isInBounds } from "functions/matrixFunctions";
 
 export interface GenerationAlgorithm {
@@ -68,9 +68,8 @@ export class RecursiveBackTracker implements GenerationAlgorithm {
             }
         }
 
-        console.log(tiles)
         
-        return { ...getEmptyMap(dimensions), tiles: tiles };
+        return GameMap.fromTileMap("Recursive Backtracker", tiles)
     }
 }
 
@@ -148,12 +147,7 @@ export class Kruskal implements GenerationAlgorithm {
         }));
 
 
-        return {
-            tiles: tiles,
-            dimensions: dimensions,
-            skyBox: getDefaultSkyBox()
-        }
-
+        return GameMap.fromTileMap("Kruskal Generated", tiles)
     }
 }
 
@@ -181,7 +175,7 @@ export class BinaryTree implements GenerationAlgorithm {
             }
         }
 
-        return { ...getEmptyMap(dimensions), tiles: tiles }
+        return GameMap.fromTileMap("Binary Tree", tiles)
     }
 }
 

@@ -13,27 +13,16 @@ import { Box } from "./Box";
  * All textures can be initialized to 
  */
 export class Texture {
-    // private readonly canvas: HTMLCanvasElement;
-    // private readonly context: CanvasRenderingContext2D;
     readonly width: number;
     readonly height: number;
     private _data: ImageData
     readonly name: string
 
     constructor(name: string, data: ImageData) {
-        // this.canvas = document.createElement("canvas")
-        // const context = this.canvas.getContext("2d")
-        // if (context === null || context === undefined) {
-        //     throw new Error("Could not initialize canvas context in Texture")
-        // }
-
-        // this.context = context
-
         this.name = name
         this._data = new ImageData(data.data, data.width, data.height)
         this.width = this._data.width;
         this.height = this._data.height;
-        // context.putImageData(data, 0, 0)
     }
 
     static fromContext2D(name: string, context: CanvasRenderingContext2D) {
@@ -60,7 +49,6 @@ export class Texture {
             image.onerror = () => reject("Could not load image data at src " + src)
             image.src = src
         })
-        console.log(image)
         return Texture.fromHTMLImage(name, image)
     }
 
@@ -110,19 +98,21 @@ export class TextureAtlas {
         if (context === null || context === undefined) {
             throw new Error("Could not initialize Context2D in TextureAtlas")
         }
-        canvas.width = atlasWidth;
-        canvas.height = atlasHeight;
-
+        canvas.width = Math.max(atlasWidth, 1);
+        canvas.height = Math.max(atlasHeight, 1);
+        
         textureBoxes.forEach(box => {
             const { w: width, h: height, x: col, y: row, texture } = box as { w: number, h: number, x: number, y: number, texture: Texture }
             texture.draw(context, col, row)
             this.textureMap[texture.name] = { box: {width: width, height: height, row: row, col: col}, texture: texture }
         })
 
-        this.atlas = new Texture(name, context.getImageData(0, 0, canvas.width, canvas.height))
-        console.log(this.textureMap)
-        this.width = atlasWidth;
-        this.height = atlasHeight;
+
+        const imageData = canvas.width === 0 || canvas.height === 0 ? new ImageData(new Uint8ClampedArray([0, 0, 0, 0]), 1, 1) : context.getImageData(0, 0, canvas.width, canvas.height)
+
+        this.atlas = new Texture(name, imageData)
+        this.width = canvas.width;
+        this.height = canvas.height;
     }
 
     addTexture(texture: Texture): TextureAtlas {
@@ -138,6 +128,10 @@ export class TextureAtlas {
             return this.textureMap[name].texture
         }
         throw new Error(name + " on Texture Atlas " + this.name + " does not exist")
+    }
+
+    getTextureNames(): string[] {
+        return this.textures.map(texture => texture.name)
     }
 
     getTextureLocation(name: string): Box {

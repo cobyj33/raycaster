@@ -10,6 +10,10 @@ export class KeyHandler {
         this.bindings = bindings;
     }
 
+    setBindings(bindings: KeyBinding[]) {
+        this.bindings = bindings
+    }
+
     callDownedBindings() {
         if (this.downedKeys.length === 0) return;
         this.downedKeys.forEach(event => this.bindings.filter(binding => binding.testDown(event)).forEach(successfulBinding => successfulBinding.runWhileDown(event)));
@@ -34,8 +38,10 @@ export function useKeyHandler(handler: KeyHandler, refreshRate: number = 1 / 30)
 
     const loopInProgress = React.useRef(false);
     const movementLoop = React.useCallback( () => {
-        keyHandler.current.callDownedBindings();
-        setTimeout( () => requestAnimationFrame(movementLoop), refreshRate);
+        if (loopInProgress.current) {
+            keyHandler.current.callDownedBindings();
+            setTimeout( () => requestAnimationFrame(movementLoop), refreshRate);
+        }
     }, [])
 
     React.useEffect( () => {
@@ -43,7 +49,9 @@ export function useKeyHandler(handler: KeyHandler, refreshRate: number = 1 / 30)
             loopInProgress.current = true;
             setTimeout( () => requestAnimationFrame(movementLoop), refreshRate);
         }
+        return () => { loopInProgress.current = false }
     }, [])
+
 
     return keyHandler
 }

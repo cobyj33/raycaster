@@ -72,7 +72,6 @@ export class KeyBinding {
   
     testAndRunUp(event: KeyboardEvent<Element>) {
         if (this.testUp(event)) {
-            // console.log(event)
             this.runUp(event)
         }
     }

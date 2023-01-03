@@ -1,6 +1,6 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "raycaster/editor";
-import { ILineSegment, Tile, IVector2, gameMapInBounds } from "raycaster/interfaces"
+import { ILineSegment, Tile, IVector2, GameMap } from "raycaster/interfaces"
 import { getLine, removeDuplicates } from "raycaster/functions";
 
 function getBoxCorners(start: IVector2, end: IVector2): ILineSegment[] {
@@ -61,13 +61,10 @@ export class BoxEditMode extends EditMode {
 
     onPointerUp() {
 
-        console.log(this.start, this.end);
         if (this.start !== undefined && this.end !== undefined) {
             const [map, setMap] = this.data.mapData;
-
-            const tiles: Tile[][] = [...map.tiles];
-            this.boxCells.filter(cell => gameMapInBounds(map, cell.row, cell.col)).forEach(cell => tiles[cell.row][cell.col] = {...this.data.selectedTile});
-            setMap(map => ({...map, tiles: tiles}));
+            const newTiles = this.boxCells.filter(cell => map.inBoundsVec2(cell)).map(cell => ( { position: cell, tile: this.data.selectedTile} ));
+            setMap(map => map.setTiles(newTiles));
 
             const [,setGhostTilePositions] = this.data.ghostTilePositions;
             const toRemove = new Set<string>(this.boxCells.map(cell => JSON.stringify(cell)));

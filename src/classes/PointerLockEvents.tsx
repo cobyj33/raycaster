@@ -8,7 +8,6 @@ export class PointerLockEvents {
 
 
     constructor( onLocked: DocEvent[], target: HTMLElement, onError?: Action  ) {
-        console.log(onLocked);
         this.onLockedEvents = onLocked;
         this.target = target;
         this.onError = onError ?? (() => console.error("POINTER LOCK ERROR"));

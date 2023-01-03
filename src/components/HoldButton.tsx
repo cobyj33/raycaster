@@ -43,7 +43,6 @@ function useLoop(refreshRate: number, action: Action) {
     const loop = useRef<() => void>(() => {
         if (isStopped.current === false) {
             action()
-            console.log(refreshRate);
             setTimeout(loop.current, refreshRate);
         }
     });

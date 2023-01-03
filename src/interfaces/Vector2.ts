@@ -1,3 +1,5 @@
+import { getLine } from "functions/shape";
+
 export interface IVector2 {
     readonly row: number;
     readonly col: number;
@@ -18,6 +20,18 @@ export class Vector2 implements IVector2 {
         return new Vector2(vector.row, vector.col)
     }
 
+    static fromDimension(width: number, height: number) {
+        return new Vector2(height, width)
+    }
+
+    rowcomp() {
+        return new Vector2(this.row, 0)
+    }
+
+    colcomp() {
+        return new Vector2(0, this.col)
+    }
+
     isZero(): boolean {
         return this.equals(Vector2.ZERO)
     }
@@ -28,6 +42,18 @@ export class Vector2 implements IVector2 {
 
     angle(): number {
         return vector2ToAngle(this)
+    }
+
+    floor(): Vector2 {
+        return new Vector2(Math.floor(this.row), Math.floor(this.col))
+    }
+
+    ceil(): Vector2 {
+        return new Vector2(Math.ceil(this.row), Math.ceil(this.col))
+    }
+
+    trunc(): Vector2 {
+        return new Vector2(Math.trunc(this.row), Math.trunc(this.col))
     }
 
     rotate(angle: number): Vector2 {
@@ -110,6 +136,10 @@ export class Vector2 implements IVector2 {
         }
         return false
     }
+
+    clone(): Vector2 {
+        return new Vector2(this.row, this.col)
+    }
 }
 
 export class LineSegment implements ILineSegment {
@@ -119,6 +149,10 @@ export class LineSegment implements ILineSegment {
     constructor(start: IVector2, end: IVector2) {
         this.start = Vector2.fromIVector2(start)
         this.end = Vector2.fromIVector2(end)
+    }
+
+    cells(): IVector2[] {
+        return getLine(this.start, this.end)
     }
 
     length(): number {

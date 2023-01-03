@@ -13,10 +13,6 @@ export class ZoomEditMode extends EditMode {
             const movementVector: Vector2 = new Vector2(event.movementY, event.movementX);
             if (getVectorLength(movementVector) !== 0) {
                 setView(view =>  view.withCellSize(Math.max(2, view.cellSize + ZOOM_DIRECTION.dot(movementVector.normalize()))) )
-                //     ...view, 
-                //     cellSize: Math.max(2, view.cellSize + Math.trunc(dotProductVector2(ZOOM_DIRECTION, vector2Normalized(movementVector))))
-                // }) ) 
-                // setView(view.withCellSize( Math.max(2, view.cellSize + Math.trunc(IVector2.dotProduct(this.zoomDirection, movementVector.normalized()  )) )  ));
             }
         }   
     }

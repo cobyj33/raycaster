@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, GameMap, Tile, getDefaultCamera, getFilledMapEdges, getEmptyMap, scaleVector2, TileTypeArray, getDefaultTile } from "raycaster/interfaces"
+import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile } from "raycaster/interfaces"
 import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { AiFillCamera, AiFillBook, AiOutlineSplitCells, AiFillSave, AiOutlineImport, AiFillFileAdd  } from 'react-icons/ai';
 import { BsFillMapFill, BsFillPaletteFill } from "react-icons/bs"
@@ -7,7 +7,6 @@ import { BiHelpCircle } from "react-icons/bi"
 import appStyles from 'App.module.css';
 import {initRaycaster} from 'loader';
 import { requestWebDownload } from 'functions/file';
-import { JRaycaster } from 'classes/app';
 
 // import JRLogo from "assets/JRWhite.svg"
 
@@ -25,15 +24,15 @@ interface MenuState {
 function App() {
     // const [app, setApp] = React.useState<JRaycaster>(new JRaycaster(STARTING_MAP_DIMENSIONS))
     const [savedTiles, setSavedTiles] = React.useState<{ [key: string]: Tile }>({});
-    const [gameMap, setGameMap] = React.useState<GameMap>(getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS)));
-    const [camera, setCamera] = React.useState<Camera>({ ...getDefaultCamera(gameMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  } );
+    const [gameMap, setGameMap] = React.useState<GameMap>(GameMap.filledEdges("Starting Map", STARTING_MAP_DIMENSIONS));
+    const [camera, setCamera] = React.useState<Camera>(Camera.default().place(gameMap.center));
     const [currentMenu, setCurrentMenu] = React.useState<Menus>("Camera View")
 
     React.useEffect( () => {
         initRaycaster().then( () => { 
-            const newMap = getFilledMapEdges(getEmptyMap(STARTING_MAP_DIMENSIONS));
+            const newMap = GameMap.filledEdges("Starting Map", STARTING_MAP_DIMENSIONS);
             setGameMap(newMap)
-            setCamera({ ...getDefaultCamera(newMap), position: scaleVector2(STARTING_MAP_DIMENSIONS, 0.5)  })
+            setCamera(Camera.default().place(newMap.center))
             
             const customTiles: { [key: string]: Tile } = {};
             TileTypeArray.forEach(tileName => customTiles[tileName] = getDefaultTile(tileName));
@@ -42,14 +41,10 @@ function App() {
         })
     }, [])
 
-  React.useEffect( () => {
-    setCamera((camera: Camera) => ({ ...camera, map: gameMap }));
-  }, [gameMap])
-
   function getMenu(menu: Menus) {
     switch(menu) {
       case "Game Map": return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
-      case "Camera View": return <GameScreen cameraData={[camera, setCamera]} />
+      case "Camera View": return <GameScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />
       case "Editor": return <MapEditor cameraData={[camera, setCamera]} mapData={[gameMap, setGameMap]} tileData={[savedTiles, setSavedTiles]} />
     }
   }

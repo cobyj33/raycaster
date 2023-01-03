@@ -1,6 +1,6 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "raycaster/editor";
-import { Tile, IVector2, gameMapInBounds } from "raycaster/interfaces"
+import { Tile, IVector2 } from "raycaster/interfaces"
 import { getEllipse } from "raycaster/functions";
 
 
@@ -53,9 +53,10 @@ export class EllipseEditMode extends EditMode {
         if (this.start !== undefined && this.end !== undefined) {
             const [map, setMap] = this.data.mapData;
 
-            const tiles: Tile[][] = [...map.tiles];
-            this.currentCells.filter(cell => gameMapInBounds(map, cell.row, cell.col)).forEach(cell => tiles[cell.row][cell.col] = {...this.data.selectedTile});
-            setMap(map => ({...map, tiles: tiles}));
+            // this.currentCells.filter(cell => map.inBo(map, cell.row, cell.col)).forEach(cell => tiles[cell.row][cell.col] = {...this.data.selectedTile});
+            // setMap(map => ({...map, tiles: tiles}));
+            const newTiles = this.currentCells.filter(cell => map.inBoundsVec2(cell)).map(cell => ( { position: cell, tile: this.data.selectedTile} ));
+            setMap(map => map.setTiles(newTiles));
 
             const [,setGhostTilePositions] = this.data.ghostTilePositions;
             const toRemove = new Set<string>(this.currentCells.map(cell => JSON.stringify(cell)));

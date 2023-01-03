@@ -1,5 +1,5 @@
-import { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, rgbToString, StatefulData, getCameraPlane, castRay, Ray, GameMap, Camera, getCameraRays, RaycastHit, RaycastNoHit, View, ILineSegment, LineSegment } from "raycaster/interfaces";
+import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
+import { tryPlaceCamera, rgbToString, StatefulData, castRay, Ray, GameMap, Camera, RaycastHit, RaycastNoHit, View, ILineSegment, LineSegment } from "raycaster/interfaces";
 import { Vector2, IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
 import { useKeyHandler } from 'raycaster/keysystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
@@ -39,7 +39,12 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     const isCameraGrabbed = useRef<boolean>(false);
     const lastPointerPosition = useRef<Vector2>(Vector2.ZERO);
     const [map, _] = mapData;
-    const cameraControls = useKeyHandler(new BirdsEyeCameraControls(setCamera));
+ 
+    const cameraControls = React.useRef<BirdsEyeCameraControls>(new BirdsEyeCameraControls(map, setCamera))
+    const keyHandler = useKeyHandler(cameraControls.current);
+    React.useEffect(() => {
+        cameraControls.current.map = map
+    }, [mapData])
     
     function canvasToWorld(canvasPosition: IVector2): Vector2 {
         return new Vector2(canvasPosition.row / screenView.cellSize - screenView.row, canvasPosition.col / screenView.cellSize - screenView.col)
@@ -150,9 +155,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.beginPath();
         context.strokeStyle = 'green';
 
-        const rays: Ray[] = getCameraRays(camera, 200);
+        const rays: Ray[] = camera.rays(200);
         rays.forEach(ray => {
-            const result: RaycastHit | RaycastNoHit = castRay(ray, camera.map, camera.viewDistance);
+            const result: RaycastHit | RaycastNoHit = castRay(ray, map, camera.viewDistance);
             const screenRayStart = worldToCanvas(result.originalRay.origin)
             const screenRayEnd = worldToCanvas(result.end)
             context.moveTo(screenRayStart.col, screenRayStart.row);
@@ -167,7 +172,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.save();
         context.beginPath();
         context.strokeStyle = 'blue';
-        const cameraPlane: LineSegment = getCameraPlane(camera).transform(vec => worldToCanvas(vec));
+        const cameraPlane: LineSegment = camera.plane(1).transform(vec => worldToCanvas(vec));
         context.moveTo(cameraPlane.start.col, cameraPlane.start.row);
         context.lineTo(cameraPlane.end.col, cameraPlane.end.row);
         context.stroke();
@@ -191,7 +196,6 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
     useEffect(render, [render])
     useEffect( () => {
-        console.log(canvasRef.current)
         updateCanvasSize()
         center()
         fit()
@@ -227,10 +231,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         const cameraPosition = worldToCanvas(camera.position);
         const pointerPosition = pointerPositionInCanvas(event);
         if (!cameraPosition.equals(pointerPosition)) {
-            setCamera(camera => ({
-                ...camera,
-                direction: pointerPosition.subtract(cameraPosition).normalize() 
-            }))
+            setCamera(camera => camera.face(pointerPosition.subtract(cameraPosition).normalize()))
         }
     }
 
@@ -247,7 +248,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             } else if (isCameraGrabbed.current) {
                 const worldPointerPosition = pointerPositionInWorld(event);
                 if (worldPointerPosition.row >= 0 && worldPointerPosition.col >= 0 && worldPointerPosition.row < map.tiles.length && worldPointerPosition.col < map.tiles[0].length) {
-                    setCamera(camera => ( { ...camera, position: worldPointerPosition } ))
+                    setCamera(camera => camera.place(worldPointerPosition))
                 }
             } else {
                 faceCameraToPointer(event);
@@ -267,13 +268,15 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             const movementVector = new Vector2(event.movementY, event.movementX);
             setScreenView(screenView => screenView.withPosition(pos => pos.add(movementVector)))
         } else {
+            const CAMERA_GRAB_CANVAS_DISTANCE = 30
 
-            if (pointerCanvasPosition.distance(worldToCanvas(camera.position)) <= 15) {
+            if (pointerCanvasPosition.distance(worldToCanvas(camera.position)) <= CAMERA_GRAB_CANVAS_DISTANCE) {
                 isCameraGrabbed.current = true;
                 setCursor('move');
             } else {
                 faceCameraToPointer(event);
             }
+
         }
 
 
@@ -285,7 +288,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         isCameraGrabbed.current = false;
         lastPointerPosition.current = Vector2.ZERO;
 
-        setCamera( (camera: Camera) => ({...camera, position: tryPlaceCamera(camera, camera.position)}) );
+        setCamera((camera: Camera) =>  camera.place(tryPlaceCamera(camera, map, camera.position)))
         setCursor('pointer');
     }
 
@@ -294,7 +297,6 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     function onPointerCancel() { reset(); }
 
     function onWheel(event: WheelEvent<Element>) {
-        console.log(event.shiftKey, event.deltaY)
         const WHEEL_WEAKEN = 50;
         if (event.shiftKey) {
             const changeInSize = event.deltaY / WHEEL_WEAKEN;
@@ -302,16 +304,13 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             const MIN_CELL_SIZE = 2;
             setScreenView( screenView => screenView.withCellSize(cellSize => clamp(cellSize + changeInSize, MIN_CELL_SIZE, MAX_CELL_SIZE)))
         } else {
-            setCamera( camera => ({
-                ...camera,
-                fieldOfView: camera.fieldOfView + (event.deltaY / WHEEL_WEAKEN * Math.PI / 180.0)
-            }) )
+            const changeInFOV = event.deltaY / WHEEL_WEAKEN * Math.PI / 180.0
+            setCamera( camera => camera.withFOV(camera.fieldOfView + changeInFOV))
         }
     }
 
     function onKeyDown(event: KeyboardEvent<Element>) {
         cameraControls.current.onKeyDown(event)
-        console.log(event.key)
         if (event.key.toLowerCase() === "c") {
             center()
         } else if (event.key.toLowerCase() === "f") {
