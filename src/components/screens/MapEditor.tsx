@@ -1,21 +1,25 @@
 import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback } from 'react'
-import { getFillerTile, vector2Int, StatefulData, IVector2, View, GameMap, getFilledMapEdges, getDefaultTile, Tile, gameMapInBounds, areGameMapsEqual, getEmptyMap, tryPlaceCamera, Camera, areEqualTiles } from "raycaster/interfaces";
+import { getFillerTile, vector2Int, StatefulData, IVector2, View, GameMap, getFilledMapEdges, getDefaultTile, Tile, gameMapInBounds, areGameMapsEqual, getEmptyMap, tryPlaceCamera, Camera, areEqualTiles, Vector2, subtractVector2, getViewOffset, inDimensionBounds, rgbaToString } from "raycaster/interfaces";
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH, FaUndo, FaRedo, FaHammer } from "react-icons/fa"
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "raycaster/editor"
 import { HistoryStack } from "raycaster/structures";
-import { drawCell, renderGhostTiles, renderWalls, renderGrid, useHistory, useWindowEvent, useResizeObserver } from "raycaster/functions";
+import { useHistory, useWindowEvent, useResizeObserver, getCanvasAndContext } from "raycaster/functions";
 import mapEditorStyles from "components/styles/MapEditor.module.css"
 import { SketchPicker } from "react-color"
 import { TileCreator } from 'components/TileCreator';
 
 
+
 export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap>, tileData: StatefulData<{[key: string]: Tile}> }) => {
   enum EditorEditMode { MOVE = "Move", ZOOM = "Zoom", DRAW = "Draw", ERASE = "Erase", LINE = "Line", BOX = "Box", ELLIPSE = "Ellipse" }
   const mapHistory = useRef<HistoryStack<GameMap>>(new HistoryStack<GameMap>());
+
   const [camera, setCamera] = cameraData;
   const [map, setMap] = mapData;
   const [savedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(getDefaultTile("Wall Tile"));
+
+
   const [ghostTilePositions, setGhostTilePositions] = useState<IVector2[]>([]);
   const [cursor, setCursor] = useState<string>('crosshair');
     const [view, setView] = useState<View>({
@@ -23,6 +27,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
         col: 0,
         cellSize: 10
     });
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasHolderRef = useRef<HTMLDivElement>(null);
   const lastHoveredCell: MutableRefObject<IVector2> = useRef<IVector2>({
@@ -33,17 +38,67 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
 
   const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
 
-    const pointerPositionInCanvas = (event: PointerEvent<Element>): IVector2 => {
-        const canvas: HTMLCanvasElement | null = canvasRef.current;
-        if (canvas !== null && canvas !== undefined) {
+  function pointerPositionInCanvas(event: PointerEvent<Element>): Vector2 {
+      const canvas: HTMLCanvasElement | null = canvasRef.current;
+      if (canvas !== null && canvas !== undefined) {
           const canvasBounds: DOMRect = canvas.getBoundingClientRect();
-            return {
-                row: Math.trunc(event.clientY - canvasBounds.y),
-                col: Math.trunc(event.clientX - canvasBounds.x)
-            }
-        }
-        return { row: 0, col: 0  };
+          return new Vector2(Math.trunc(event.clientY - canvasBounds.y), Math.trunc(event.clientX - canvasBounds.x))
       }
+      return Vector2.ZERO
+  }
+
+  function canvasToWorld(canvasPosition: IVector2): Vector2 {
+    return new Vector2(canvasPosition.row / view.cellSize - view.row, canvasPosition.col / view.cellSize - view.col)
+  }
+
+  function worldToCanvas(worldPosition: IVector2): Vector2 {
+      return new Vector2((view.row + worldPosition.row) * view.cellSize, (view.col + worldPosition.col) * view.cellSize)
+  }
+
+function focus(worldPosition: IVector2) {
+    setView(view => { 
+        try {
+            const [canvas, _] = getCanvasAndContext(canvasRef)
+            const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/view.cellSize).scale(1/2)
+            const viewPosition = subtractVector2(Vector2.fromIVector2(worldPosition).scale(-1), worldViewportCenter.scale(-1))
+            return {...view, ...viewPosition }
+        } catch (error) {
+            return {...view}
+        }
+    })
+}
+
+  function center(): void {
+    setView(view => { 
+      try {
+          const [canvas, _] = getCanvasAndContext(canvasRef)
+          const mapCenter: IVector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
+          const startingCellSize: number =  Math.trunc( Math.min( canvas.height / map.dimensions.row, canvas.width / map.dimensions.col  ) ); 
+          const startingCoordinates: IVector2 = {
+              row: mapCenter.row - (canvas.height / view.cellSize / 2),
+              col: mapCenter.col - (canvas.width / view.cellSize / 2)
+          } 
+          return {...view, ...startingCoordinates }
+      } catch (error) {
+          return {...view}
+      }
+    })
+  }
+
+  function fit(): void {
+      setView(view => {
+              try {
+                  const [canvas, _] = getCanvasAndContext(canvasRef)
+                  const dimensions = new Vector2(map.tiles.length, map.tiles[0].length)
+                  const viewportSize = new Vector2(canvas.height, canvas.width)
+                  const cellSize = Math.min(viewportSize.row / dimensions.row, viewportSize.col / dimensions.col)
+                  // setView(view => ({...view, ...viewPosition}))
+              return {...view, cellSize: cellSize }
+              } catch (error) {
+                  return {...view}
+              }
+          })
+  }
 
 
   const getHoveredCell = (event: PointerEvent<Element>) => {
@@ -89,6 +144,60 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   //       setView( view => ({...view, ...{ row: position.row - (canvas.width / view.cellSize), col: position.col - (canvas.height / view.cellSize)  }   }) )
   //   }
   // }
+
+  function drawCell(context: CanvasRenderingContext2D, view: View, row: number, col: number) {
+    context.fillRect((col - view.col) * view.cellSize, (row - view.row) * view.cellSize, view.cellSize, view.cellSize  );
+  }
+
+  function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View, map: GameMap): void {
+    context.save();
+    for (let row = 0; row < canvas.height / view.cellSize; row++) {
+      for (let col = 0; col < canvas.width / view.cellSize; col++) {
+
+        const targetPosition: IVector2 = { row: Math.floor(view.row + row), col: Math.floor(view.col + col) } ;
+        if (inDimensionBounds(targetPosition, map.dimensions)) {
+          context.fillStyle = rgbaToString(map.tiles[targetPosition.row][targetPosition.col].color);
+          context.globalAlpha = map.tiles[targetPosition.row][targetPosition.col].color.alpha / 255;
+            const offset: IVector2 = getViewOffset(view);
+          context.fillRect(-offset.col + col * view.cellSize, -offset.row + row * view.cellSize, view.cellSize, view.cellSize);
+        }
+
+      }
+    }
+
+    // context.fill();
+
+    context.restore();
+  }
+
+  function renderGhostTiles(context: CanvasRenderingContext2D, view: View, ghostTilePositions: IVector2[], selectedTile: Tile) {
+    if (ghostTilePositions.length === 0) return;
+     context.save();
+    context.globalAlpha = 0.5;
+    context.fillStyle = rgbaToString(selectedTile.color);
+    ghostTilePositions.forEach(pos => drawCell(context, view, pos.row, pos.col))
+     context.restore();
+  }
+
+  function renderGrid(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View) {
+     context.save();
+    context.strokeStyle = 'black';
+    context.beginPath()
+     const viewOffset: IVector2 = getViewOffset(view);
+    for (let y = -viewOffset.row; y <= canvas.height; y += view.cellSize) {
+      context.moveTo(0, y);
+      context.lineTo(canvas.width, y);
+    }
+    
+    for (let x = -viewOffset.col; x <= canvas.width; x += view.cellSize) {
+      context.moveTo(x, 0);
+      context.lineTo(x, canvas.height);
+    }
+
+    context.stroke();
+     context.restore();
+  }
+
 
 
   function render() {
@@ -148,6 +257,11 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
       redo();
     } else if (event.code === "KeyZ" && event.ctrlKey === true) {
       undo();
+    } else if (event.code === "KeyC") {
+      center()
+    } else if (event.code === "KeyF") {
+      fit()
+      center()
     }
   }
 
@@ -208,13 +322,13 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
           canvas.height = rect.height;
         }
 
-        const mapCenter: IVector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
-        const adjustedCoordinates: IVector2 = vector2Int({ 
-            row: mapCenter.row - (canvas.height / view.cellSize / 2),
-            col: mapCenter.col - (canvas.width / view.cellSize / 2)
-        })
+        // const mapCenter: IVector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
+        // const adjustedCoordinates: IVector2 = vector2Int({ 
+        //     row: mapCenter.row - (canvas.height / view.cellSize / 2),
+        //     col: mapCenter.col - (canvas.width / view.cellSize / 2)
+        // })
 
-        setView(view => ({...view, ...adjustedCoordinates}));
+        // setView(view => ({...view, ...adjustedCoordinates}));
       }
     }, [map, view])
 
@@ -226,12 +340,12 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
       if (canvas === null || canvas === undefined) return;
 
       updateCanvasSize();
-        const mapCenter: IVector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
-        const startingCellSize: number =  Math.trunc( Math.min( canvas.height / map.dimensions.row, canvas.width / map.dimensions.col  ) ); 
-        const startingCoordinates: IVector2 = {
-            row: mapCenter.row - (canvas.height / view.cellSize / 2),
-            col: mapCenter.col - (canvas.width / view.cellSize / 2)
-        } 
+      const mapCenter: IVector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
+      const startingCellSize: number =  Math.trunc( Math.min( canvas.height / map.dimensions.row, canvas.width / map.dimensions.col  ) ); 
+      const startingCoordinates: IVector2 = {
+          row: mapCenter.row - (canvas.height / view.cellSize / 2),
+          col: mapCenter.col - (canvas.width / view.cellSize / 2)
+      } 
 
         setView({ cellSize: startingCellSize, ...startingCoordinates });
   }, [])

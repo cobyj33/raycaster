@@ -2,7 +2,7 @@ import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, us
 import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { TouchControls } from "raycaster/components"
-import { StatefulData, Camera, renderCamera, rotateVector2 } from "raycaster/interfaces";
+import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera } from "raycaster/interfaces";
 import gameScreenStyles from "components/styles/GameScreen.module.css"
 
 const Y_MOVEMENT_TOLERANCE = 500;
@@ -50,6 +50,7 @@ export const GameScreen = ( { cameraData  }: { cameraData: StatefulData<Camera> 
         if (canvasRef.current !== null && canvasRef.current !== undefined) {
             pointerLockEvents.current = new PointerLockEvents( [ ['mousemove', mouseControls.current] ], canvasRef.current )
         }
+        setCamera(camera => ({...camera, position: tryPlaceCamera(camera, camera.position)})) // Resolve any starting collisions with walls
 
         return () => {
             if (pointerLockEvents.current !== null && pointerLockEvents.current !== undefined) {
