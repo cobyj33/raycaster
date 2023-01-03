@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback } from 'react'
+import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback, ChangeEvent } from 'react'
 import { getFillerTile, vector2Int, StatefulData, IVector2, View, GameMap, getDefaultTile, Tile, areGameMapsEqual, tryPlaceCamera, Camera, areEqualTiles, Vector2, subtractVector2, getViewOffset, inDimensionBounds, rgbaToString } from "raycaster/interfaces";
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaLine, FaBox, FaEllipsisH, FaUndo, FaRedo, FaHammer } from "react-icons/fa"
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "raycaster/editor"
@@ -9,9 +9,9 @@ import { SketchPicker } from "react-color"
 import { TileCreator } from 'components/TileCreator';
 
 
+type EditorEditMode = "MOVE" | "ZOOM" | "DRAW" | "ERASE" | "LINE" | "BOX" | "ELLIPSE"
 
 export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap>, tileData: StatefulData<{[key: string]: Tile}> }) => {
-  enum EditorEditMode { MOVE = "Move", ZOOM = "Zoom", DRAW = "Draw", ERASE = "Erase", LINE = "Line", BOX = "Box", ELLIPSE = "Ellipse" }
   const mapHistory = useRef<HistoryStack<GameMap>>(new HistoryStack<GameMap>());
 
   const [camera, setCamera] = cameraData;
@@ -122,16 +122,16 @@ function focus(worldPosition: IVector2) {
   }
   
   const editorModes: MutableRefObject<{[key in EditorEditMode]: EditMode}> = useRef({ 
-    [EditorEditMode.DRAW]: new DrawEditMode(getEditorData()),
-    [EditorEditMode.ZOOM]: new ZoomEditMode(getEditorData()),
-    [EditorEditMode.MOVE]: new MoveEditMode(getEditorData()),
-    [EditorEditMode.ERASE]: new EraseEditMode(getEditorData()),
-    [EditorEditMode.LINE]: new LineEditMode(getEditorData()),
-    [EditorEditMode.BOX]: new BoxEditMode(getEditorData()),
-    [EditorEditMode.ELLIPSE]: new EllipseEditMode(getEditorData())
+    "DRAW": new DrawEditMode(getEditorData()),
+    "ZOOM": new ZoomEditMode(getEditorData()),
+    "MOVE": new MoveEditMode(getEditorData()),
+    "ERASE": new EraseEditMode(getEditorData()),
+    "LINE": new LineEditMode(getEditorData()),
+    "BOX": new BoxEditMode(getEditorData()),
+    "ELLIPSE": new EllipseEditMode(getEditorData())
   });
   
-  const [editMode, setEditMode] = useState<EditorEditMode>(EditorEditMode.DRAW);
+  const [editMode, setEditMode] = useState<EditorEditMode>("DRAW");
 
   function drawCell(context: CanvasRenderingContext2D, view: View, row: number, col: number) {
     context.fillRect((col - view.col) * view.cellSize, (row - view.row) * view.cellSize, view.cellSize, view.cellSize  );
@@ -307,14 +307,6 @@ function focus(worldPosition: IVector2) {
           canvas.width = rect.width;
           canvas.height = rect.height;
         }
-
-        // const mapCenter: IVector2 = { row: map.dimensions.row / 2, col: map.dimensions.col / 2 }
-        // const adjustedCoordinates: IVector2 = vector2Int({ 
-        //     row: mapCenter.row - (canvas.height / view.cellSize / 2),
-        //     col: mapCenter.col - (canvas.width / view.cellSize / 2)
-        // })
-
-        // setView(view => ({...view, ...adjustedCoordinates}));
       }
     }, [map, view])
 
@@ -343,44 +335,86 @@ function focus(worldPosition: IVector2) {
   }
 
   const [newMapDimension, setNewMapDimension] = useState<IVector2>({row: 10, col: 10});
-  
+  const [tileCreatorBlueprint, setTileCreatorBlueprint] = useState<Tile>(getDefaultTile("Wall Tile"));
+
+  function createTile() {
+
+  }
+
+  function onTileCreatorTextureImport(e: ChangeEvent<HTMLInputElement>) {
+
+  }
+
   return (
     <div className={mapEditorStyles["editor-container"]}>
-      <div className={mapEditorStyles["editing-buttons"]}> 
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.DRAW ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.DRAW)}> <FaBrush /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.MOVE ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.MOVE)}> <FaArrowsAlt /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.ZOOM ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.ZOOM)}> <FaSearch /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.ERASE ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.ERASE)}> <FaEraser /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.LINE ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.LINE)}> <FaLine /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.BOX ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.BOX)}> <FaBox /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ editMode === EditorEditMode.ELLIPSE ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(EditorEditMode.ELLIPSE)}> <FaEllipsisH /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoBack() === false ? mapEditorStyles["disabled"] : '' }`} onClick={undo}> <FaUndo /> </button>
-        <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoForward() === false ? mapEditorStyles["disabled"] : '' }`} onClick={redo}> <FaRedo /> </button>
+      <div className={mapEditorStyles["tool-bar"]}>
+        <div className={mapEditorStyles["editing-buttons"]}> 
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "DRAW" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("DRAW")}> <FaBrush /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "MOVE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("MOVE")}> <FaArrowsAlt /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "ZOOM" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("ZOOM")}> <FaSearch /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "ERASE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("ERASE")}> <FaEraser /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "LINE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("LINE")}> <FaLine /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "BOX" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("BOX")}> <FaBox /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "ELLIPSE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("ELLIPSE")}> <FaEllipsisH /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoBack() === false ? mapEditorStyles["disabled"] : '' }`} onClick={undo}> <FaUndo /> </button>
+          <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoForward() === false ? mapEditorStyles["disabled"] : '' }`} onClick={redo}> <FaRedo /> </button>
+        </div>
       </div>
 
-      <div className={mapEditorStyles["tile-picker"]}>
-        { Object.keys(savedTiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${areEqualTiles(selectedTile, savedTiles[tileName]) ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
-      </div>
+      <aside className={mapEditorStyles["left-side-bar"]}>
 
+        <div className={mapEditorStyles["tile-picker"]}>
+          { Object.keys(savedTiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${areEqualTiles(selectedTile, savedTiles[tileName]) ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
+        </div>
+
+        {/* <div className={mapEditorStyles["tile-creator"]}>
+          <h3> Tile Creator </h3>
+          
+          <div className={mapEditorStyles["tile-creator-color-picker"]}>
+            Color
+            <input type="range" min={0} max={255} />
+            <input type="range" min={0} max={255} />
+            <input type="range" min={0} max={255} />
+            {/* <input type="range" min={0} max={255} /> Alpha not really supported to be honest, so will hide for now }
+          </div>
+
+          <button> Can Hit </button> 
+          <button> Can Collide </button>
+          <input type="file" onChange={onTileCreatorTextureImport} />
+          <button> Create </button>
+
+        </div> */}
+
+      </aside>
+
+      <aside className={mapEditorStyles["right-side-bar"]}>
+
+        <div className={mapEditorStyles["map-generator"]}>
+
+          <div className={mapEditorStyles["map-dimensions-input"]}>
+            <p> Rows: </p>
+            <input type="number" min={4} onChange={(e) => setNewMapDimension(({...newMapDimension, row: e.target.valueAsNumber }))} value={newMapDimension.row} />
+            <p> Cols: </p>
+            <input type="number" min={4} onChange={(e) => setNewMapDimension({ ...newMapDimension, col: e.target.valueAsNumber })} value={newMapDimension.col} />
+          </div>
+
+          <button className={mapEditorStyles['map-generate-button']} onClick={onMapGenerate}> Generate {newMapDimension.row} x {newMapDimension.col} Map </button>
+        </div>
+
+      </aside>
+
+
+      
       <div className={mapEditorStyles["editing-canvas-holder"]} ref={canvasHolderRef}>
           <canvas style={{cursor: cursor}} className={mapEditorStyles["editing-canvas"]} ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
       </div>
 
       {/* <div className={`tile-creator-container ${tileCreatorOpened ? 'opened' : ''}`}>
         <button className='editor-tile-creator-open-button' onClick={() => setTileCreatorOpened(!tileCreatorOpened)}> <FaHammer /> </button>
-          <TileCreator className={`editor-tile-creator`} tileData={tileData} />
+        <TileCreator className={`editor-tile-creator`} tileData={tileData} />
       </div> */}
 
-      <div className={mapEditorStyles["map-generator"]}>
-        <div className={mapEditorStyles["map-dimensions-input"]}>
-          <p> Rows: </p>
-          <input type="number" min={4} onChange={(e) => setNewMapDimension(({...newMapDimension, row: e.target.valueAsNumber }))} value={newMapDimension.row} />
-          <p> Cols: </p>
-          <input type="number" min={4} onChange={(e) => setNewMapDimension({ ...newMapDimension, col: e.target.valueAsNumber })} value={newMapDimension.col} />
-        </div>
-
-      <button className={mapEditorStyles['map-generate-button']} onClick={onMapGenerate}> Generate {newMapDimension.row} x {newMapDimension.col} Map </button>
-      </div>
+      
 
     </div>
   )

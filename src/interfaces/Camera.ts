@@ -8,19 +8,15 @@ import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
 import cameraFragmentShaderSource from "shaders/camera.frag?raw"
 import Texture, { TextureAtlas } from "./Texture"
+import { m } from "vitest/dist/index-761e769b"
 
 
-interface ICamera {
+export interface ICamera {
     readonly position: IVector2;
     readonly direction: IVector2;
     readonly fieldOfView: number;
     readonly viewDistance: number;
     readonly lookingAngle: number;
-}
-
-export interface CameraControlData {
-    readonly moveAmount: number;
-    readonly sensitivity: number;
 }
 
 
@@ -129,6 +125,17 @@ export class Camera implements ICamera {
     static default() {
         return Camera.fromCameraData(getDefaultCamera())
     }
+
+    data(): ICamera {
+        return {
+            position: this.position.data(),
+            direction: this.direction.data(),
+            fieldOfView: this.fieldOfView,
+            lookingAngle: this.lookingAngle,
+            viewDistance: this.viewDistance
+        }
+    }
+    
 }
 
 export function areEqualCameras(first: ICamera, second: ICamera): boolean {

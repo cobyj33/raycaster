@@ -140,6 +140,13 @@ export class Vector2 implements IVector2 {
     clone(): Vector2 {
         return new Vector2(this.row, this.col)
     }
+
+    data(): IVector2 {
+        return {
+            row: this.row,
+            col: this.col
+        }
+    }
 }
 
 export class LineSegment implements ILineSegment {

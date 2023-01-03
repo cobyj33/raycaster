@@ -5,7 +5,6 @@ Images themselves will be stored as data base 64 strings, which may be a bad ide
 The JSON will first consist of 4 fields
 -format
 -map
--textures
 -tiles
 -camera
 -skybox
@@ -31,6 +30,7 @@ Values:
     - green: int
     - alpha: int
   - canHit: bool
+  - texture: base64 | null
 ... continue with all tile names
 
 ### Camera
