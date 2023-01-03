@@ -185,7 +185,7 @@ export function tryPlaceCamera(camera: Camera, targetCell: IVector2): IVector2 {
                 });
             }
 
-            // setCamera(camera => camera.setPosition(current));
+            // setCamera(camera => camera.withPosition(current));
             return current;
         } else {
             return {...targetCell};

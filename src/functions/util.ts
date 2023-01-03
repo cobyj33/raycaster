@@ -47,7 +47,10 @@ export function getCanvasAndContext(ref: React.RefObject<HTMLCanvasElement>): [H
     throw new Error(`Could not get Canvas Context: Canvas found to be ${canvas}`)
 }
 
-
-
-
-
+export function clamp(value: number, lower: number, higher: number) {
+    if (higher < lower) {
+        throw new Error("Cannot clamp values, \"higher\" input " + higher + " is lower than \"lower\" input " + lower)
+    }
+    
+    return Math.min(higher, Math.max(lower, value))
+}

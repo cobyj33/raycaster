@@ -9,7 +9,7 @@ import mapScreenStyles from "components/styles/MapScreen.module.css";
 import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
 import { useResizeObserver } from "raycaster/functions";
-import { getCanvasAndContext } from 'functions/util';
+import { clamp, getCanvasAndContext } from 'functions/util';
 
 const cameraImage = new Image();
 let cameraLoaded = false;
@@ -33,7 +33,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     /** the amount of map rows and columns that the view is offset
      * NOTE: THE "row" and "column" VALUES ARE RELATIVE TO THE ACTUAL GAME MAP, NOT THE PIXELS OF THE SCREEN VIEW
      */
-    const [screenView, setScreenView] = useState<View>({ row: 0, col: 0, cellSize: 10 })
+    const [screenView, setScreenView] = useState<View>(new View(Vector2.ZERO, 10))
     const [cursor, setCursor] = useState<string>("pointer");
     const isPointerDown = useRef<boolean>(false);
     const isCameraGrabbed = useRef<boolean>(false);
@@ -54,10 +54,10 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             try {
                 const [canvas, _] = getCanvasAndContext(canvasRef)
                 const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/screenView.cellSize).scale(1/2)
-                const viewPosition = subtractVector2(Vector2.fromIVector2(worldPosition).scale(-1), worldViewportCenter.scale(-1))
-                return {...screenView, ...viewPosition }
+                const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
+                return screenView.withPosition(viewPosition)
             } catch (error) {
-                return {...screenView}
+                return screenView
             }
         })
     }
@@ -73,10 +73,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
                     const dimensions = new Vector2(map.tiles.length, map.tiles[0].length)
                     const viewportSize = new Vector2(canvas.height, canvas.width)
                     const cellSize = Math.min(viewportSize.row / dimensions.row, viewportSize.col / dimensions.col)
-                    // setScreenView(screenView => ({...screenView, ...viewPosition}))
-                return {...screenView, cellSize: cellSize }
+                    return screenView.withCellSize(cellSize)
                 } catch (error) {
-                    return {...screenView}
+                    return screenView
                 }
             })
     }
@@ -244,7 +243,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
                 const WEAKEN_FACTOR = .10;
                 const movementVector = new Vector2(event.movementY, event.movementX).scale(WEAKEN_FACTOR);
                 const newScreenPosition = addVector2(screenView, movementVector)
-                setScreenView(screenView => ({...screenView, ...newScreenPosition}))
+                setScreenView(screenView => screenView.withPosition(newScreenPosition))
             } else if (isCameraGrabbed.current) {
                 const worldPointerPosition = pointerPositionInWorld(event);
                 if (worldPointerPosition.row >= 0 && worldPointerPosition.col >= 0 && worldPointerPosition.row < map.tiles.length && worldPointerPosition.col < map.tiles[0].length) {
@@ -266,8 +265,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
         if (event.shiftKey) {
             const movementVector = new Vector2(event.movementY, event.movementX);
-            const newScreenPosition = addVector2(screenView, movementVector)
-            setScreenView(screenView => ({...screenView, ...newScreenPosition}))
+            setScreenView(screenView => screenView.withPosition(pos => pos.add(movementVector)))
         } else {
 
             if (pointerCanvasPosition.distance(worldToCanvas(camera.position)) <= 15) {
@@ -276,7 +274,6 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             } else {
                 faceCameraToPointer(event);
             }
-
         }
 
 
@@ -301,7 +298,9 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         const WHEEL_WEAKEN = 50;
         if (event.shiftKey) {
             const changeInSize = event.deltaY / WHEEL_WEAKEN;
-            setScreenView( screenView => ({...screenView, cellSize: Math.min(64, Math.max(2, screenView.cellSize + changeInSize)) } ))
+            const MAX_CELL_SIZE = 64
+            const MIN_CELL_SIZE = 2;
+            setScreenView( screenView => screenView.withCellSize(cellSize => clamp(cellSize + changeInSize, MIN_CELL_SIZE, MAX_CELL_SIZE)))
         } else {
             setCamera( camera => ({
                 ...camera,

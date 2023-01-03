@@ -22,11 +22,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
 
   const [ghostTilePositions, setGhostTilePositions] = useState<IVector2[]>([]);
   const [cursor, setCursor] = useState<string>('crosshair');
-    const [view, setView] = useState<View>({
-        row: 0,
-        col: 0,
-        cellSize: 10
-    });
+    const [view, setView] = useState<View>(new View(Vector2.ZERO, 10));
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasHolderRef = useRef<HTMLDivElement>(null);
@@ -60,10 +56,10 @@ function focus(worldPosition: IVector2) {
         try {
             const [canvas, _] = getCanvasAndContext(canvasRef)
             const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/view.cellSize).scale(1/2)
-            const viewPosition = subtractVector2(Vector2.fromIVector2(worldPosition).scale(-1), worldViewportCenter.scale(-1))
-            return {...view, ...viewPosition }
+            const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
+            return view.withPosition(viewPosition)
         } catch (error) {
-            return {...view}
+            return view
         }
     })
 }
@@ -78,9 +74,9 @@ function focus(worldPosition: IVector2) {
               row: mapCenter.row - (canvas.height / view.cellSize / 2),
               col: mapCenter.col - (canvas.width / view.cellSize / 2)
           } 
-          return {...view, ...startingCoordinates }
+          return view.withPosition(startingCoordinates)
       } catch (error) {
-          return {...view}
+          return view
       }
     })
   }
@@ -92,25 +88,25 @@ function focus(worldPosition: IVector2) {
                   const dimensions = new Vector2(map.tiles.length, map.tiles[0].length)
                   const viewportSize = new Vector2(canvas.height, canvas.width)
                   const cellSize = Math.min(viewportSize.row / dimensions.row, viewportSize.col / dimensions.col)
-                  // setView(view => ({...view, ...viewPosition}))
-              return {...view, cellSize: cellSize }
+                return view.withCellSize(cellSize)
               } catch (error) {
-                  return {...view}
+                  return view
               }
           })
   }
 
 
-  const getHoveredCell = (event: PointerEvent<Element>) => {
+
+  function getHoveredCell(event: PointerEvent<Element>): Vector2 {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     if (canvas !== null && canvas !== undefined) {
       const pointerPosition: IVector2 = pointerPositionInCanvas(event);
-      return {
+      return Vector2.fromIVector2({
           row: Math.trunc((pointerPosition.row / view.cellSize) + view.row),
           col: Math.trunc((pointerPosition.col / view.cellSize) + view.col)
-      }
+      })
     }
-    return { row: 0, col: 0 };
+    return Vector2.ZERO;
   }
   
   const getEditorData: () => EditorData = () => {
@@ -347,7 +343,7 @@ function focus(worldPosition: IVector2) {
           col: mapCenter.col - (canvas.width / view.cellSize / 2)
       } 
 
-        setView({ cellSize: startingCellSize, ...startingCoordinates });
+        setView(new View(startingCoordinates, startingCellSize));
   }, [])
 
   function onMapGenerate() {
