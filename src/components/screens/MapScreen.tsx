@@ -8,8 +8,11 @@ import { BirdsEyeCameraControls } from "raycaster/controls";
 import mapScreenStyles from "components/styles/MapScreen.module.css";
 import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
-import { useResizeObserver } from "raycaster/functions";
-import { clamp, getCanvasAndContext } from 'functions/util';
+import { useCanvasHolderUpdater, useResizeObserver } from "raycaster/functions";
+import { clamp, getCanvasAndContext2D } from 'functions/util';
+
+import { FaArrowsAlt, FaMousePointer, FaSearch } from 'react-icons/fa';
+import { RxAngle } from "react-icons/rx"
 
 const cameraImage = new Image();
 let cameraLoaded = false;
@@ -57,7 +60,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     function focus(worldPosition: IVector2) {
         setScreenView(screenView => { 
             try {
-                const [canvas, _] = getCanvasAndContext(canvasRef)
+                const [canvas, _] = getCanvasAndContext2D(canvasRef)
                 const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/screenView.cellSize).scale(1/2)
                 const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
                 return screenView.withPosition(viewPosition)
@@ -74,7 +77,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     function fit(): void {
         setScreenView(screenView => {
                 try {
-                    const [canvas, _] = getCanvasAndContext(canvasRef)
+                    const [canvas, _] = getCanvasAndContext2D(canvasRef)
                     const dimensions = new Vector2(map.tiles.length, map.tiles[0].length)
                     const viewportSize = new Vector2(canvas.height, canvas.width)
                     const cellSize = Math.min(viewportSize.row / dimensions.row, viewportSize.col / dimensions.col)
@@ -181,7 +184,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
     function render() {
         try {
-            const [canvas, context] = getCanvasAndContext(canvasRef)
+            const [canvas, context] = getCanvasAndContext2D(canvasRef)
             context.clearRect(0, 0, canvas.width, canvas.height);
             renderMap(context);
             renderCamera(context);
@@ -196,36 +199,37 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
     useEffect(render, [render])
     useEffect( () => {
-        updateCanvasSize()
+        // updateCanvasSize()
         center()
         fit()
     }, [])
 
-    useResizeObserver(canvasHolderRef, updateCanvasSize);
+    // useResizeObserver(canvasHolderRef, updateCanvasSize);
+    useCanvasHolderUpdater(canvasRef, canvasHolderRef, render)
 
-    function updateCanvasSize() {
-        try {
-            const [canvas, context]: [HTMLCanvasElement, CanvasRenderingContext2D] = getCanvasAndContext(canvasRef);
-            const canvasHolder: HTMLDivElement | null = canvasHolderRef.current;
-            if (canvasHolder !== null && canvasHolder !== undefined) {
-                const rect: DOMRect = canvasHolder.getBoundingClientRect();
-                if (rect.width !== canvas.width || rect.height !== canvas.height) {
-                    const imageData: ImageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                    canvas.width = rect.width;
-                    canvas.height = rect.height;
-                    context.putImageData(imageData, 0, 0);
-                } else {
-                    canvas.width = rect.width;
-                    canvas.height = rect.height;
-                }
+    // function updateCanvasSize() {
+    //     try {
+    //         const [canvas, context]: [HTMLCanvasElement, CanvasRenderingContext2D] = getCanvasAndContext2D(canvasRef);
+    //         const canvasHolder: HTMLDivElement | null = canvasHolderRef.current;
+    //         if (canvasHolder !== null && canvasHolder !== undefined) {
+    //             const rect: DOMRect = canvasHolder.getBoundingClientRect();
+    //             if (rect.width !== canvas.width || rect.height !== canvas.height) {
+    //                 const imageData: ImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    //                 canvas.width = rect.width;
+    //                 canvas.height = rect.height;
+    //                 context.putImageData(imageData, 0, 0);
+    //             } else {
+    //                 canvas.width = rect.width;
+    //                 canvas.height = rect.height;
+    //             }
             
-                render();
-            }
-        } catch (err) {
-            console.error(err)
-        }
+    //             render();
+    //         }
+    //     } catch (err) {
+    //         console.error(err)
+    //     }
 
-      }
+    //   }
 
     function faceCameraToPointer(event: PointerEvent<Element>) {
         const cameraPosition = worldToCanvas(camera.position);
@@ -322,12 +326,20 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
 
     return (
-    <div className={mapScreenStyles["map-container"]} onKeyDown={onKeyDown} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
-        <div className={mapScreenStyles["map-canvas-holder"]} ref={canvasHolderRef}>
-            <canvas style={{cursor: cursor}} className={mapScreenStyles["map-canvas"]} onWheel={onWheel} onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef}> </canvas>
-        </div>
+        <div className={mapScreenStyles["map-container"]} onKeyDown={onKeyDown} onKeyUp={(event) => cameraControls.current.onKeyUp(event)} tabIndex={0}>
 
-        {showTouchControls && <TouchControls cameraData={cameraData} />}
-    </div>
+            {/* <div className={mapScreenStyles["tool-bar"]}> TO BE ADDED SOON
+                <button className={`${mapScreenStyles["tool"]} `}><FaMousePointer /></button>
+                <button className={`${mapScreenStyles["tool"]} `}><FaArrowsAlt /></button>
+                <button className={`${mapScreenStyles["tool"]} `}><FaSearch /></button>
+                <button className={`${mapScreenStyles["tool"]} `}><RxAngle /></button>
+            </div> */}
+
+            <div className={mapScreenStyles["map-canvas-holder"]} ref={canvasHolderRef}>
+                <canvas style={{cursor: cursor}} className={mapScreenStyles["map-canvas"]} onWheel={onWheel} onPointerCancel={onPointerCancel} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onPointerMove={onPointerMove}  onTouchStart={() => setShowTouchControls(true)} ref={canvasRef}> </canvas>
+            </div>
+
+            {showTouchControls && <TouchControls cameraData={cameraData} mapData={mapData}/>}
+        </div>
   )
 }

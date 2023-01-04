@@ -1,6 +1,6 @@
 .map-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background-color: black;
@@ -12,6 +12,7 @@
     flex-grow: 5;
     flex-basis: 200px;
     border: 2px solid white;
+    flex-grow: 1;
 }
 
 .map-canvas {
@@ -23,34 +24,38 @@
     bottom: 0;
 }
 
-.algorithm-generation-button, .algorithm-menu-selection  {
-    color: white;
-    background-color: rgb(10, 10, 10);
-    border: 1px solid rgb(30, 30, 30);
-    border-radius: 2px;
-    
-
-    
+.tool-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px;
 }
 
-.algorithm-generation-button:hover, .algorithm-menu-selection:hover {
-    transition: border 0.1s background-color 0.25s;
-    background-color: rgb(30, 30, 30);
-    border: 1px solid white;
-}
-
-.algorithm-generation-button:active, .algorithm-menu-selection:hover {
-    transition: border 0.1s background-color 0.1s transform 0.1s;
-    background-color: rgb(60, 60, 60);
-    transform: translateY(3px);
-    border: 1px solid white;
-    border-bottom: 3px solid white;
-}
-
-.algorithm-generation-button.selected, .algorithm-menu-selection:hover {
-    transition: color 0.1s border 0.1s background-color 0.1s transform 0.1s;
-    color: black;
+.tool {
+    padding: 5px;
+    border: none;
     background-color: white;
-    transform: translateY(2px);
-    border: 1px solid green;
+    border-radius: 5px;
+}
+
+.tool:hover {
+    background-color: rgb(240, 240, 240);
+}
+
+.tool:active {
+    background-color: rgb(220, 220, 220);
+}
+
+.tool.selected {
+    background-color: rgb(50, 205, 50);
+}
+
+.tool.selected:hover {
+    background-color: rgb(45, 184, 45);
+}
+
+.tool.selected:active {
+    background-color: rgb(40, 164, 40);
 }

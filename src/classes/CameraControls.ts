@@ -66,9 +66,13 @@ export class FirstPersonCameraControls extends KeyHandler {
 
         super.setBindings([
             new KeyBinding({ code: 'KeyW', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),
+            new KeyBinding({ code: 'ArrowUp', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),
             new KeyBinding({ code: 'KeyA', onDown: this.moveLeft.bind(this), whileDown: this.moveLeft.bind(this)}),
+            new KeyBinding({ code: 'ArrowLeft', onDown: this.moveLeft.bind(this), whileDown: this.moveLeft.bind(this)}),
             new KeyBinding({code: 'KeyS', onDown: this.moveBackward.bind(this), whileDown: this.moveBackward.bind(this) }),
+            new KeyBinding({code: 'ArrowDown', onDown: this.moveBackward.bind(this), whileDown: this.moveBackward.bind(this) }),
             new KeyBinding({code: 'KeyD', onDown: this.moveRight.bind(this), whileDown: this.moveRight.bind(this) }),
+            new KeyBinding({code: 'ArrowRight', onDown: this.moveRight.bind(this), whileDown: this.moveRight.bind(this) }),
             new KeyBinding({code: 'ShiftLeft', onDown: () => this.moveFactor = 2, onUp: () => this.moveFactor = 1})
         ])
     }
@@ -117,9 +121,13 @@ export class BirdsEyeCameraControls extends KeyHandler {
 
         super.setBindings([
             new KeyBinding({ code: 'KeyW', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),
+            new KeyBinding({ code: 'ArrowUp', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),
             new KeyBinding({ code: 'KeyA', onDown: this.turnLeft.bind(this), whileDown: this.turnLeft.bind(this) }),
+            new KeyBinding({ code: 'ArrowLeft', onDown: this.turnLeft.bind(this), whileDown: this.turnLeft.bind(this) }),
             new KeyBinding( {code: 'KeyS', onDown: this.moveBackward.bind(this), whileDown: this.moveBackward.bind(this) }),
+            new KeyBinding( {code: 'ArrowDown', onDown: this.moveBackward.bind(this), whileDown: this.moveBackward.bind(this) }),
             new KeyBinding( {code: 'KeyD', onDown: this.turnRight.bind(this), whileDown: this.turnRight.bind(this) }),
+            new KeyBinding( {code: 'ArrowRight', onDown: this.turnRight.bind(this), whileDown: this.turnRight.bind(this) }),
             new KeyBinding( {code: 'ShiftLeft', onDown: () => this.sensitivity = 2, onUp: () => this.sensitivity = 1}),
             new KeyBinding( { code: "KeyQ", onDown: this.slowDown.bind(this), onUp: () => this.sensitivity = 1})
         ])

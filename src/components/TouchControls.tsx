@@ -1,18 +1,23 @@
-import { Camera, scaleVector2, rotateVector2, StatefulData } from "raycaster/interfaces"
+import { Camera, scaleVector2, rotateVector2, StatefulData, GameMap } from "raycaster/interfaces"
 import { getMovedCameraPosition } from "raycaster/controls"
 import { HoldButton } from "raycaster/components";
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaRegArrowAltCircleLeft, FaRegArrowAltCircleRight } from 'react-icons/fa';
 import touchControlStyles from "components/styles/TouchControls.module.css"
 
-export const TouchControls = ({ cameraData }: { cameraData: StatefulData<Camera> }) => {
-    const [camera, setCamera] = cameraData;
+const MOVE_AMOUNT = 0.25
+const SENSITIVITY = 1;
+export const TouchControls = ({ cameraData, mapData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap> }) => {
+    const [_, setCamera] = cameraData;
+    const [map, __] = mapData;
+    const speed = MOVE_AMOUNT * SENSITIVITY
+    const turningPower = SENSITIVITY * Math.PI / 180
 
-    const moveForward = () => setCamera( (camera) => ({ ...camera, position: getMovedCameraPosition(camera.position, camera.direction, camera.moveAmount * camera.sensitivity, camera.map)}))
-    const moveBackward = () => setCamera( (camera) => ({ ...camera, position: getMovedCameraPosition(camera.position, scaleVector2(camera.direction, -1), camera.moveAmount * camera.sensitivity, camera.map)}))
-    const moveLeft = () => setCamera( (camera) => ({ ...camera, position: getMovedCameraPosition(camera.position, rotateVector2(camera.direction, Math.PI / 2), camera.moveAmount * camera.sensitivity, camera.map)}))
-    const moveRight = () => setCamera( (camera) => ({ ...camera, position: getMovedCameraPosition(camera.position, rotateVector2(camera.direction, -Math.PI / 2), camera.moveAmount * camera.sensitivity, camera.map)}))
-    const turnLeft = () => setCamera((camera) => ({...camera, direction: rotateVector2(camera.direction, -camera.sensitivity * Math.PI / 180)}))
-    const turnRight = () => setCamera((camera) => ({...camera, direction: rotateVector2(camera.direction, -camera.sensitivity * -Math.PI / 180)}))
+    const moveForward = () => setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction, speed, map)))
+    const moveBackward = () => setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.scale(-1), speed, map)))
+    const moveLeft = () => setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.rotate(Math.PI / 2), speed, map)))
+    const moveRight = () => setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.rotate(-Math.PI / 2), speed, map)))
+    const turnLeft = () => setCamera(camera => camera.face(camera.direction.rotate(turningPower)))
+    const turnRight = () => setCamera(camera => camera.face(camera.direction.rotate(-turningPower)))
 
   return (
     <div className={touchControlStyles["touch-controls"]}> 

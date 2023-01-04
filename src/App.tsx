@@ -124,14 +124,14 @@ function App() {
           <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Camera View")}><AiFillCamera /></button>
           <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Game Map")}><BsFillMapFill /></button>
           <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Editor")}><BsFillPaletteFill /></button>
-          <button className={appStyles["nav-button"]}><BiHelpCircle /></button>
-          <button className={appStyles["nav-button"]}><AiFillBook /></button>
+          {/* <button className={appStyles["nav-button"]}><BiHelpCircle /></button>
+          <button className={appStyles["nav-button"]}><AiFillBook /></button> */}
         </div>
 
         <div className={appStyles["nav-button-group"]}> {/* File Manipulation */}
           <button className={appStyles["nav-button"]} onClick={createNew}><AiFillFileAdd /></button>
-          <button className={appStyles["nav-button"]} onClick={save}><AiFillSave /></button>
-          <button className={appStyles["nav-button"]} onClick={load}><AiOutlineImport /></button>
+          {/* <button className={appStyles["nav-button"]} onClick={save}><AiFillSave /></button>
+          <button className={appStyles["nav-button"]} onClick={load}><AiOutlineImport /></button> */}
         </div>
 
         {/* <div className={appStyles["view-button-group"]}> 

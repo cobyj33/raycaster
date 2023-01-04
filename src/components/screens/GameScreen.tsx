@@ -5,6 +5,7 @@ import { TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera, GameMap } from "raycaster/interfaces";
 import gameScreenStyles from "components/styles/GameScreen.module.css"
 import { clamp } from 'functions/util';
+import { useCanvasHolderUpdater } from 'functions/hooks';
 
 const Y_MOVEMENT_TOLERANCE = 500;
 
@@ -108,6 +109,8 @@ export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<Ga
         }
     }, [camera])
 
+    useCanvasHolderUpdater(canvasRef, canvasHolderRef, render)
+
 
   return (
     <div ref={containerRef} className={gameScreenStyles["game-screen-container"]} onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
@@ -116,7 +119,7 @@ export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<Ga
             <canvas className={gameScreenStyles["game-canvas"]} onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} ref={canvasRef} tabIndex={0}> </canvas>
         </div>
         
-        {showTouchControls && <TouchControls cameraData={cameraData} />}
+        {showTouchControls && <TouchControls cameraData={cameraData} mapData={mapData}/>}
 
     </div>
   )

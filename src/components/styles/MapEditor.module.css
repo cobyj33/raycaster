@@ -1,41 +1,167 @@
 .editor-container {
     position: relative;
+    gap: 5px;
+    padding: 10px;
+    overflow: hidden;
+}
+
+/* .editor-container {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: repeat(7, 1fr);
-    flex-direction: column;
-    /* align-items: center; */
-    /* justify-content:stretch; */
-    /* overflow: none; */
+    justify-content:stretch;
     gap: 5px;
-    padding: 10px;
-    background-color: rgb(40, 40, 40);
+} */
+
+.editor-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
+
+
+@media screen and (orientation: portrait) and (max-width: 700px) {
+    .editor-container {
+        display: grid;
+        grid-template-columns: repeat(13, 1fr);
+        grid-template-rows: repeat(12, 1fr);
+        justify-content:stretch;
+        
+        gap: 5px;
+    }
+
+    .left-side-bar {
+        grid-row: 10 / 13;
+        grid-column:  2 / 14;
+    }
+
+    .right-side-bar {
+        grid-row: 1 / 3;
+        grid-column: 2 / 14;
+    }
+
+    .left-side-bar, .right-side-bar {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .editing-canvas-holder {
+        position: relative;
+        grid-row: 3 / 10;
+        grid-column: 2 / 14;
+    }
+
+    .tool-bar {
+        grid-row: 1 / 13;
+        grid-column: 1 / 2;
+
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        align-items: center;
+    }
+
+    .editing-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        align-items: center;
+        overflow-y: scroll;
+        flex-grow: 1;
+    }
+
+    .edit-button {
+        border-radius: 5px;
+        background-color: white;
+        border: none;
+        pointer-events: auto;
+        aspect-ratio: 1;
+        padding: 5px;
+    }
+
+    @media screen and (max-width: 700px) {
+        .edit-button {
+            font-size: 12px;
+            padding: 2px;
+        }
+    }
+
+}
+
+@media screen and (orientation: portrait) and (min-width: 700px), screen and (orientation: landscape) {
+    .editor-container {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        grid-template-rows: repeat(7, 1fr);
+        justify-content:stretch;
+        gap: 5px;
+    }
+
+    .left-side-bar {
+        grid-column: 1 / 4;
+        grid-row: 1 / 8;
+    }
+
+    .right-side-bar {
+        grid-column: 10 / 13;
+        grid-row: 1 / 8;
+    }
+
+    .left-side-bar, .right-side-bar {
+        display: flex;
+        flex-direction: column;
+        overflow-y: scroll;
+    }
+
+    .tool-bar {
+        overflow-x: scroll;
+    }
+    
+    .editing-canvas-holder {
+        position: relative;
+        grid-column: 4 / 10;
+        grid-row: 1 / 7;
+    }
+
+    .tool-bar {
+        grid-row: 7 / 8;
+        grid-column: 4 / 10;
+        display: flex;
+        flex-direction: row;
+        overflow-y: scroll;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .editing-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+        flex-grow: 1;
+        justify-content: space-evenly;
+        justify-self: stretch;
+        align-items: center;
+        color: black;
+    }
+
+    .edit-button {
+        border-radius: 5px;
+        background-color: white;
+        border: none;
+        pointer-events: auto;
+        aspect-ratio: 1;
+        padding: 15px;
+    }
+}
+
+
+
 
 .editing-canvas-holder {
-    grid-column: 4 / 10;
-    grid-row: 1 / 7;
-    padding: 5px;
-    margin: 10px;
-    border: 5px solid black;
-}
-
-.left-side-bar {
-    grid-column: 1 / 4;
-    grid-row: 1 / 8;
-    background-color: rgb(20, 20, 20);
-}
-
-.right-side-bar {
-    grid-column: 10 / 13;
-    grid-row: 1 / 8;
-    background-color: rgb(20, 20, 20);
-}
-
-.tool-bar {
-    grid-row: 7 / 8;
-    grid-column: 4 / 10;
-    background-color: rgb(20, 20, 20);
+    position: relative;
 }
 
 .editing-canvas {
@@ -44,18 +170,48 @@
     left: 0;
     bottom: 0;
     right: 0;
-    border: 2px solid white;
+    border: 1px solid white;
+    border-radius: 3px;
+}
+
+.left-side-bar, .right-side-bar, .tool-bar {
+    background-color: rgb(20, 20, 20);
+    border-radius: 10px;
+    padding: 5px;
 }
 
 .tile-picker {
+    background-color: rgb(15, 15, 15);
+    padding: 5px;
+    margin: 5px;
+    border-radius: 10px;
+}
+
+.selected-tiles {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    list-style: none;
 }
+
+.tool-title {
+    color: white;
+    background-color: rgb(20, 20, 20);
+    border-radius: 10px;
+    padding: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
 
 .saved-tile-selection-button {
     color: white;
-    font-size: 16px;
+    font-size: 12px;
     padding: 10px;
+    border-radius: 10px;
     margin: 5px;
     background-color: rgb(20, 20, 20);
     border: none;
@@ -73,26 +229,6 @@
 
 .saved-tile-selection-button.unselected {
     background-color: rgb(10, 10, 10);
-}
-
-
-.editing-buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    justify-self: stretch;
-    align-items: center;
-    color: black;
-}
-
-.edit-button {
-    border-radius: 5px;
-    background-color: white;
-    border: none;
-    pointer-events: auto;
-    aspect-ratio: 1;
-    margin-left: 15px;
-    padding: 15px;
 }
 
 .edit-button:hover:not(.disabled) {
@@ -130,32 +266,67 @@
 }
 
 
-.map-generator {
+.tool-area {
     display: flex;
     flex-direction: column;
+    background-color: rgb(15, 15, 15);
+    margin: 5px;
+    border-radius: 10px;
+}
+
+.map-generator:hover {
+    border-bottom: 1px solid white;
+}
+
+.map-dimensions-input-area {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(20, 20, 20);
+    margin: 5px;
+    padding: 5px;
+    border-radius: 10px;
+    gap: 5px;
+}
+
+.map-dimensions-input-field {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: stretch;
+    align-items: stretch;
+}
+
+.map-dimensions-input-label {
+    color: white;
+    border-radius: 5px;
+    border: none;
+    font-size: 12px;
 }
 
 .map-dimensions-input {
-    display: flex;
-    flex-direction: row;
-}
-
-.map-dimensions-input input {
-    background-color: black;
+    background-color:rgb(10, 10, 10);
     color: white;
     text-align: center;
-    font-family: monospace;
     caret-color: green;
+    border: none;
+    border-radius: 5px;
+    margin-left: 5px;
+    min-width: 0; /* Browsers automatically assign widths to inputs, so we need to override so that it fits into the flex container and not it's own given width: https://stackoverflow.com/questions/42421361/input-button-elements-not-shrinking-in-a-flex-container */
 }
 
 .map-generate-button {
     color: white;
     text-align: center;
     background-color: black;
-    border: 2px solid white;
+    padding: 5px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
     align-self: center;
     justify-self: center;
+}
 
+.map-generate-button:hover, .map-generate-button:active {
+    border-bottom: 1px solid white;
 }
 
 .map-generate-button:hover {
@@ -164,4 +335,19 @@
 
 .map-generate-button:active {
     color: green;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.action-button {
+    color: white;
+    text-align: center;
+    background-color: black;
+    padding: 5px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
 }
