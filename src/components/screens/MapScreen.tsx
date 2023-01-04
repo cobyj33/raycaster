@@ -200,8 +200,8 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
     useEffect(render, [render])
     useEffect( () => {
         // updateCanvasSize()
-        center()
         fit()
+        center()
     }, [])
 
     // useResizeObserver(canvasHolderRef, updateCanvasSize);
