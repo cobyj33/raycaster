@@ -40,25 +40,25 @@ export const getFillerTile = (function() {
     return () => ({...basicTile});
 })() 
 
-function isTileObject(obj: any): boolean {
-    const test: Tile = obj as Tile;
-    if (test.color !== null && test.color !== undefined &&
-        test.canHit !== null && test.canHit !== undefined &&
-        test.canCollide !== null && test.canCollide !== undefined) {
-        if (isRGBAObject(test["color"]) && typeof(test["canHit"]) === "boolean" && typeof(test["canCollide"]) === "boolean") {
-            if (test.texture !== null && test.texture !== undefined) {
-                if ("tagName" in test.texture) {
-                    if (test.texture.tagName === "img") {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            return true;
-        }
-    }
-    return false;
-}
+// function isTileObject(obj: any): boolean {
+//     const test: Tile = obj as Tile;
+//     if (test.color !== null && test.color !== undefined &&
+//         test.canHit !== null && test.canHit !== undefined &&
+//         test.canCollide !== null && test.canCollide !== undefined) {
+//         if (isRGBAObject(test["color"]) && typeof(test["canHit"]) === "boolean" && typeof(test["canCollide"]) === "boolean") {
+//             if (test.texture !== null && test.texture !== undefined) {
+//                 if ("tagName" in test.texture) {
+//                     if (test.texture.tagName === "img") {
+//                         return true;
+//                     }
+//                 }
+//                 return false;
+//             }
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 
 export const TileTypeArray = ["Empty Tile", "Wall Tile", "Red Tile", "Green Tile", "Blue Tile", "Marble Tile", "Stone Brick Tile"] as const;
