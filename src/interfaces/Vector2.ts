@@ -1,4 +1,3 @@
-import { getLine } from "functions/shape";
 
 export interface IVector2 {
     readonly row: number;
@@ -148,36 +147,6 @@ export class Vector2 implements IVector2 {
         }
     }
 }
-
-export class LineSegment implements ILineSegment {
-    readonly start: Vector2;
-    readonly end: Vector2
-
-    constructor(start: IVector2, end: IVector2) {
-        this.start = Vector2.fromIVector2(start)
-        this.end = Vector2.fromIVector2(end)
-    }
-
-    cells(): IVector2[] {
-        return getLine(this.start, this.end)
-    }
-
-    length(): number {
-        return this.start.distance(this.end)
-    }
-    
-    transform(callbackfn: (vec: Vector2) => Vector2): LineSegment {
-        return new LineSegment(callbackfn(this.start), callbackfn(this.end))
-    }
-
-    
-}
-
-export interface ILineSegment {
-    start: IVector2;
-    end: IVector2;
-}
-
 
 export function adjacentVector2(vec: IVector2): [IVector2, IVector2, IVector2, IVector2] {
     const offsets: [IVector2, IVector2, IVector2, IVector2] = [ {row: 0, col: 1}, {row: 0, col: -1}, {row: 1, col: 0}, {row: -1, col: 0} ]

@@ -2,7 +2,8 @@ import { StatefulData } from "interfaces/util"
 
 import { GameMap } from "interfaces/GameMap"
 import { Ray, RaycastHit, castRay } from "interfaces/Ray"
-import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals, LineSegment } from "interfaces/Vector2"
+import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
+import { LineSegment } from "interfaces/LineSegment"
 
 import WebGLUtils from "functions/webgl"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
