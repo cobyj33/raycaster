@@ -1,5 +1,19 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { EditorData } from "classes/Editor/EditorData";
+import { StatefulData } from "interfaces/util";
+import { GameMap }  from "interfaces/GameMap"
+import { IVector2 } from "interfaces/Vector2";
+import { Tile } from "interfaces/Tile";
+import { View } from "interfaces/View"
+
+export interface EditorData {
+    mapData: StatefulData<GameMap>;
+    viewData: StatefulData<View>;
+    lastHoveredCell: IVector2;
+    isPointerDown: boolean;
+    getHoveredCell: (event: PointerEvent<Element>) => IVector2;
+    selectedTile: Tile;
+    ghostTilePositions: StatefulData<IVector2[]>
+}
 
 export abstract class EditMode {
     protected data: EditorData;
