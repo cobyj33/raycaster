@@ -309,6 +309,10 @@ function focus(worldPosition: IVector2) {
 
   }
 
+  function EditModeButton({ children = "", editMode: buttonEditMode }: { children?: React.ReactNode, editMode: EditorEditMode } ) {
+    return <button className={`${mapEditorStyles["edit-button"]} ${ editMode === buttonEditMode ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(buttonEditMode)}>{ children}</button>
+  }
+
 
   return (
 
@@ -318,13 +322,13 @@ function focus(worldPosition: IVector2) {
 
         <div className={mapEditorStyles["tool-bar"]}>
           <div className={mapEditorStyles["editing-buttons"]}> 
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "DRAW" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("DRAW")}> <FaBrush /> </button>
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "MOVE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("MOVE")}> <FaArrowsAlt /> </button>
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "ZOOM" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("ZOOM")}> <FaSearch /> </button>
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "ERASE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("ERASE")}> <FaEraser /> </button>
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "LINE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("LINE")}> <GiStraightPipe /> </button>
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "BOX" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("BOX")}> <FaBox /> </button>
-            <button className={`${mapEditorStyles["edit-button"]} ${ editMode === "ELLIPSE" ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode("ELLIPSE")}> <BsCircle /> </button>
+            <EditModeButton editMode="DRAW"> <FaBrush /> </EditModeButton>
+            <EditModeButton editMode="MOVE"> <FaArrowsAlt /> </EditModeButton>
+            <EditModeButton editMode="ZOOM"> <FaSearch /> </EditModeButton>
+            <EditModeButton editMode="ERASE"> <FaEraser /> </EditModeButton>
+            <EditModeButton editMode="LINE"> <GiStraightPipe /> </EditModeButton>
+            <EditModeButton editMode="BOX"> <FaBox /> </EditModeButton>
+            <EditModeButton editMode="ELLIPSE"> <BsCircle /> </EditModeButton>
             {/* <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoBack() === false ? mapEditorStyles["disabled"] : '' }`} onClick={undo}> <FaUndo /> </button>
             <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoForward() === false ? mapEditorStyles["disabled"] : '' }`} onClick={redo}> <FaRedo /> </button> */}
           </div>
