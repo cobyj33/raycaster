@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ButtonHTMLAttributes } from 'react';
 import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile, RGBA, ICamera, SkyBox } from "raycaster/interfaces"
 import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { AiFillCamera, AiFillBook, AiOutlineSplitCells, AiFillSave, AiOutlineImport, AiFillFileAdd  } from 'react-icons/ai';
@@ -7,8 +7,9 @@ import { BiHelpCircle } from "react-icons/bi"
 import appStyles from 'App.module.css';
 import {initRaycaster} from 'loader';
 import { requestWebDownload } from 'functions/file';
-import { P } from 'vitest/dist/types-bae746aa';
-import { request } from 'http';
+import MapScreenHelpMenu from 'components/help/MapScreenHelpMenu';
+import GameScreenHelpMenu from 'components/help/GameScreenHelpMenu';
+import MapEditorHelpMenu from 'components/help/MapEditorHelpMenu';
 
 // import JRLogo from "assets/JRWhite.svg"
 
@@ -18,60 +19,14 @@ type Menus = typeof acceptedMenus[number];
 
 const STARTING_MAP_DIMENSIONS = { row: 50, col: 50 }
 
-// interface RaycasterDataTileSave {
-//   color: RGBA
-//   canHit: boolean
-//   canCollide: boolean
-//   texture: string | null
-// }
-
-// interface RaycasterDataSkyboxSave implements SkyBox {}
-
-// interface RaycasterDataMapSave {
-//   tilemap: string[][]
-//   tiles: { [key: string]: RaycasterDataTileSave }
-//   width: number
-//   height: number
-//   skybox: RaycasterDataSkyboxSave
-// }
-
-// interface RaycasterDataSave {
-//   format: string
-//   map: RaycasterDataMapSave
-//   camera: ICamera
-// }
-
-// function getRaycasterMapSaveData(map: GameMap): RaycasterDataMapSave {
-//   return {
-//     tilemap: map.tiles.map(tileRow => tileRow.map(tile => tile.))
-//     width: map.width,
-//     height: map.height,
-//     skybox: map.skyBox
-//   }
-// }
-
-// function getRaycasterCameraSaveData(camera: Camera): ICamera {
-//   return camera.data()
-// }
-
-// function getRaycasterSaveData(map: GameMap, camera: Camera): RaycasterDataSave {
-//   return {
-//     format: "v1",
-//     map: getRaycasterMapSaveData(map)
-//     camera: getRaycasterCameraSaveData(camera)
-//   }
-// }
-
-// function saveRaycasterSaveData(data: RaycasterDataSave): void {
-//   const stringified = JSON.stringify(data)
-//   const blob = new Blob([stringified], { type: "application/json"} )
-//   requestWebDownload(blob, "raycastersave.json")
-// }
-
-interface MenuState {
-  menus: [Menus] | [Menus, Menus]
-  split: boolean
+function NavButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+  return <button {...props} className={appStyles["nav-button"]} />
 }
+
+function SelectableNavButton({ selected, ...props }: { selected: boolean } & ButtonHTMLAttributes<HTMLButtonElement>) {
+  return <button {...props} className={`${appStyles["nav-button"]} ${selected ? appStyles["selected"] : ""} ${props.className ?? ""}`} />
+}
+
 
 function App() {
     // const [app, setApp] = React.useState<JRaycaster>(new JRaycaster(STARTING_MAP_DIMENSIONS))
@@ -79,6 +34,7 @@ function App() {
     const [gameMap, setGameMap] = React.useState<GameMap>(GameMap.filledEdges("Starting Map", STARTING_MAP_DIMENSIONS));
     const [camera, setCamera] = React.useState<Camera>(Camera.default().place(gameMap.center));
     const [currentMenu, setCurrentMenu] = React.useState<Menus>("Camera View")
+    const [showHelp, setShowHelp] = React.useState<boolean>(false)
 
     React.useEffect( () => {
         initRaycaster().then(createNew)
@@ -89,6 +45,14 @@ function App() {
       case "Game Map": return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
       case "Camera View": return <GameScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />
       case "Editor": return <MapEditor cameraData={[camera, setCamera]} mapData={[gameMap, setGameMap]} tileData={[savedTiles, setSavedTiles]} />
+    }
+  }
+
+  function getHelpMenu(menu: Menus) {
+    switch(menu) {
+      case "Game Map": return <MapScreenHelpMenu />;
+      case "Camera View": return <GameScreenHelpMenu  />
+      case "Editor": return <MapEditorHelpMenu />
     }
   }
 
@@ -112,6 +76,7 @@ function App() {
   }
 
 
+
   return (
     <div className={appStyles["app"]} tabIndex={0} >
 
@@ -121,15 +86,16 @@ function App() {
         </div> */}
 
         <div className={appStyles["nav-button-group"]}>
-          <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Camera View")}><AiFillCamera /></button>
-          <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Game Map")}><BsFillMapFill /></button>
-          <button className={appStyles["nav-button"]} onClick={() => setCurrentMenu("Editor")}><BsFillPaletteFill /></button>
+          <SelectableNavButton selected={currentMenu === "Camera View"}  onClick={() => setCurrentMenu("Camera View")}><AiFillCamera /></SelectableNavButton>
+          <SelectableNavButton selected={currentMenu === "Game Map"} onClick={() => setCurrentMenu("Game Map")}><BsFillMapFill /></SelectableNavButton>
+          <SelectableNavButton selected={currentMenu === "Editor"} onClick={() => setCurrentMenu("Editor")}><BsFillPaletteFill /></SelectableNavButton>
           {/* <button className={appStyles["nav-button"]}><BiHelpCircle /></button>
           <button className={appStyles["nav-button"]}><AiFillBook /></button> */}
         </div>
 
-        <div className={appStyles["nav-button-group"]}> {/* File Manipulation */}
-          <button className={appStyles["nav-button"]} onClick={createNew}><AiFillFileAdd /></button>
+        <div className={appStyles["nav-button-group"]}> {/* Actions Manipulation */}
+          <NavButton className={appStyles["nav-button"]} onClick={createNew}><AiFillFileAdd /></NavButton>
+          <SelectableNavButton selected={showHelp} onClick={() => setShowHelp(curr => !curr)}><BiHelpCircle /></SelectableNavButton>
           {/* <button className={appStyles["nav-button"]} onClick={save}><AiFillSave /></button>
           <button className={appStyles["nav-button"]} onClick={load}><AiOutlineImport /></button> */}
         </div>
@@ -139,8 +105,10 @@ function App() {
         </div> */}
       </nav>
 
+
+
       <div className={`${appStyles["viewing-area"]} ${appStyles["single"]}`}>
-        { getMenu(currentMenu) }
+        { showHelp ? getHelpMenu(currentMenu) : getMenu(currentMenu) }
       </div>
 
     </div>

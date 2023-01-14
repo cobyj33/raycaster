@@ -1,0 +1,40 @@
+.help-window {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    margin: 100px;
+    padding: 20px;
+
+    background-color: var(--window-background-color);
+    border: 2px solid var(--window-border-color);
+}
+
+.top-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;    
+}
+
+.title {
+    flex-grow: 1;
+}
+
+.content-area {
+    flex-grow: 1;
+}
+
+.close-button {
+    color: white;
+}
+
+.close-button:hover {
+    transition: color 0.25s;
+    color: red;
+}

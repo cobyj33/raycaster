@@ -1,0 +1,23 @@
+.window {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    padding: 20px;
+    border: 2px solid white;
+    border-radius: 5px;
+    margin: 30px;
+}
+
+.title {
+    font-size: 36px;
+    color: var(--text-color-main);
+    text-align: center;
+}
+
+.menu-description {
+    font-size: 24px;
+    color: var(--text-color-main);
+    text-align: center;
+}
