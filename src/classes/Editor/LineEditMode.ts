@@ -15,13 +15,13 @@ export class LineEditMode extends EditMode {
     }
 
     onPointerDown(event: PointerEvent<Element>) {
-        this.start = this.data.getHoveredCell(event);
+        this.start = this.data.currentHoveredCell;
         this.end = { ...this.start }
     }
 
     onPointerMove(event: PointerEvent<Element>) {
         if (this.data.isPointerDown && this.start !== undefined && this.end !== undefined) {
-            const hoveredCell = this.data.getHoveredCell(event);
+            const hoveredCell = this.data.currentHoveredCell;
             if (!(this.end.row === hoveredCell.row && this.end.col === hoveredCell.col)) {
                 const toRemove = new Set<string>(this.cells.map(cell => JSON.stringify(cell)));
                 const [, setGhostTilePositions] = this.data.ghostTilePositions;

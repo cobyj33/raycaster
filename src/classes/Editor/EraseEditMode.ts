@@ -14,7 +14,7 @@ export class EraseEditMode extends EditMode {
     }
 
     onPointerDown(event: PointerEvent<Element>) {
-        const hoveredCell = this.data.getHoveredCell(event);
+        const hoveredCell = this.data.currentHoveredCell;
         if (this.data.isPointerDown) {
             this.tryPlaceCell(hoveredCell);
         }
@@ -22,7 +22,7 @@ export class EraseEditMode extends EditMode {
 
     onPointerMove(event: PointerEvent<Element>) {
         const [map, setMap] = this.data.mapData
-        const hoveredCell = this.data.getHoveredCell(event);
+        const hoveredCell = this.data.currentHoveredCell;
         const lastHoveredCell = this.data.lastHoveredCell;
         if (this.data.isPointerDown) {
             const placementData = getLine(lastHoveredCell, hoveredCell).filter(cell => map.inBoundsVec2(cell)).map(cell => ({ position: cell, tile: getDefaultTile("Empty Tile")}) )

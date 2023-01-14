@@ -162,32 +162,32 @@ export function useCanvas2DUpdater(canvasRef: RefObject<HTMLCanvasElement>) {
 //     const editorModes: MutableRefObject<{ [key: string]: EditMode }> = useRef(modes);
 
 //     const onPointerDown = useCallback((event: PointerEvent<Element>) => {
-//         editorModes.current[editMode].setEditorData(data.current())
+//         editorModes.current[editMode].sendUpdatedEditorData(data.current())
 //         editorModes.current[editMode].onPointerDown?.(event);
 //     }, [])
 
 //     const onPointerUp = useCallback((event: PointerEvent<Element>) => {
-//         editorModes.current[editMode].setEditorData(data.current())
+//         editorModes.current[editMode].sendUpdatedEditorData(data.current())
 //         editorModes.current[editMode].onPointerUp?.(event);
 //     }, [])
 
 //     const onPointerMove = useCallback((event: PointerEvent<Element>) => {
-//         editorModes.current[editMode].setEditorData(data.current())
+//         editorModes.current[editMode].sendUpdatedEditorData(data.current())
 //         editorModes.current[editMode].onPointerMove?.(event);
 //     }, [])
 
 //     const onPointerLeave = useCallback((event: PointerEvent<Element>) => {
-//         editorModes.current[editMode].setEditorData(data.current())
+//         editorModes.current[editMode].sendUpdatedEditorData(data.current())
 //         editorModes.current[editMode].onPointerLeave?.(event);
 //     }, [])
 
 //     const onKeyDown = useCallback((event: KeyboardEvent<Element>) => {
-//         editorModes.current[editMode].setEditorData(data.current())
+//         editorModes.current[editMode].sendUpdatedEditorData(data.current())
 //         editorModes.current[editMode].onKeyDown?.(event);
 //     }, [])
 
 //     const onKeyUp = useCallback((event: KeyboardEvent<Element>) => {
-//         editorModes.current[editMode].setEditorData(data.current())
+//         editorModes.current[editMode].sendUpdatedEditorData(data.current())
 //         editorModes.current[editMode].onKeyUp?.(event);
 //     }, [])
 

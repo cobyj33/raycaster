@@ -30,14 +30,14 @@ export class BoxEditMode extends EditMode {
     private get boxCells(): IVector2[] { return removeDuplicates(this.currentBox.flatMap(line => getLine(line.start, line.end))) ?? [] }
 
     onPointerDown(event: PointerEvent<Element>) {
-        this.start = this.data.getHoveredCell(event);
+        this.start = this.data.currentHoveredCell;
         this.end = {...this.start };
     }
 
     onPointerMove(event: PointerEvent<Element>) {
         if (this.data.isPointerDown === false || this.start === undefined || this.end === undefined) return;
 
-        const hoveredCell = this.data.getHoveredCell(event);
+        const hoveredCell = this.data.currentHoveredCell;
         if (!( this.end.row === hoveredCell.row && this.end.col === hoveredCell.col  )) {
             const toRemove = new Set<string>(this.boxCells.map(cell => JSON.stringify(cell)));
             const { 1: setGhostTilePositions } = this.data.ghostTilePositions;

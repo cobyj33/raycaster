@@ -34,6 +34,10 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
       row: 0,
       col: 0
   });
+  const currentHoveredCell: MutableRefObject<IVector2> = useRef<IVector2>({
+    row: 0,
+    col: 0
+  })
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
 
   const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
@@ -111,11 +115,11 @@ function focus(worldPosition: IVector2) {
   
   const getEditorData: () => EditorData = () => {
     return {
+      currentHoveredCell: currentHoveredCell.current,
       lastHoveredCell: lastHoveredCell.current,
       isPointerDown: isPointerDown.current,
       mapData: mapData,
       viewData: [view, setView],
-      getHoveredCell: getHoveredCell,
       selectedTile: selectedTile,
       ghostTilePositions: [ghostTilePositions, setGhostTilePositions]
     }
@@ -211,35 +215,48 @@ function focus(worldPosition: IVector2) {
   }
 
   function onPointerMove(event: PointerEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
+    currentHoveredCell.current = getHoveredCell(event)
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
     editorModes.current[editMode].onPointerMove?.(event);
-    lastHoveredCell.current = getHoveredCell(event);
+    lastHoveredCell.current = currentHoveredCell.current;
     render();
   }
   
   function onPointerDown(event: PointerEvent<Element>) {
     isPointerDown.current = true;
-    editorModes.current[editMode].setEditorData(getEditorData())
+    currentHoveredCell.current = getHoveredCell(event)
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
     editorModes.current[editMode].onPointerDown?.(event);
-    lastHoveredCell.current = getHoveredCell(event);
+    lastHoveredCell.current = currentHoveredCell.current;
+    render()
   }
   
   function onPointerUp(event: PointerEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
+    currentHoveredCell.current = getHoveredCell(event)
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
     editorModes.current[editMode].onPointerUp?.(event);
+    lastHoveredCell.current = currentHoveredCell.current;
     isPointerDown.current = false;
+    render()
   }
 
   function onPointerLeave(event: PointerEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
+    currentHoveredCell.current = getHoveredCell(event)
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
     editorModes.current[editMode].onPointerLeave?.(event);
+    lastHoveredCell.current = currentHoveredCell.current;
     isPointerDown.current = false;
+    render()
+  }
+
+  function clear() {
+    setMap(GameMap.filledEdges(map.name, map.dimensions))
   }
   
   
     const [undo, redo] = useHistory(mapData, areGameMapsEqual);
   function onKeyDown(event: KeyboardEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
     editorModes.current[editMode].onKeyDown?.(event);
 
     if (event.code === "KeyZ" && event.shiftKey === true && event.ctrlKey === true) {
@@ -252,11 +269,14 @@ function focus(worldPosition: IVector2) {
       fit()
       center()
     }
+
+    render()
   }
 
   function onKeyUp(event: KeyboardEvent<Element>) {
-    editorModes.current[editMode].setEditorData(getEditorData())
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
     editorModes.current[editMode].onKeyUp?.(event);
+    render()
   }
   
   useEffect(render)
@@ -288,6 +308,7 @@ function focus(worldPosition: IVector2) {
   function onTileCreatorTextureImport(e: ChangeEvent<HTMLInputElement>) {
 
   }
+
 
   return (
 
@@ -368,6 +389,7 @@ function focus(worldPosition: IVector2) {
             <div className={mapEditorStyles["action-buttons"]}>
               <button className={mapEditorStyles["action-button"]} onClick={() => { fit(); center(); }}>{"Fit Map (F)"}</button>
               <button className={mapEditorStyles["action-button"]} onClick={center}>{"Center Map (c)"}</button>
+              <button className={mapEditorStyles["action-button"]} onClick={clear}>{"Clear"}</button>
             </div>
           </div>
 
