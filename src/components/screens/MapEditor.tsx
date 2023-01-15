@@ -338,16 +338,13 @@ function focus(worldPosition: IVector2) {
 
         <aside className={mapEditorStyles["left-side-bar"]}>
 
-          <div className={mapEditorStyles["side-tool"]}>
-            <p className={mapEditorStyles["side-tool-title"]}> Tile Picker </p>
+          <MapEditorSideTool title="Tile Picker">
             <div className={mapEditorStyles["selected-tiles"]}>
               { Object.keys(savedTiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${areEqualTiles(selectedTile, savedTiles[tileName]) ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
             </div>
-          </div>
-
-          <div className={mapEditorStyles["side-tool"]}>
-            <h3 className={mapEditorStyles["side-tool-title"]}> Tile Creator </h3>
-            
+          </MapEditorSideTool>
+          
+          <MapEditorSideTool title="Tile Creator">
             <div className={mapEditorStyles["tile-creator-color-picker"]}>
               Color
               <input type="range" min={0} max={255} />
@@ -362,22 +359,20 @@ function focus(worldPosition: IVector2) {
             <button onClick={() => setPreviewingTileCreator(!previewingTileCreator)}> Preview </button>
 
             <button> Create </button>
-          </div>
+
+          </MapEditorSideTool>
 
         </aside>
 
         <aside className={mapEditorStyles["right-side-bar"]}>
-          
-          <div className={mapEditorStyles["side-tool"]}>
-            <p className={mapEditorStyles["side-tool-title"]}> Actions </p>
+
+          <MapEditorSideTool title="Actions">
             <div className={mapEditorStyles["action-buttons"]}>
               <button className={mapEditorStyles["action-button"]} onClick={() => { fit(); center(); }}>{"Fit Map (F)"}</button>
               <button className={mapEditorStyles["action-button"]} onClick={center}>{"Center Map (c)"}</button>
               <button className={mapEditorStyles["action-button"]} onClick={clear}>{"Clear"}</button>
             </div>
-          </div>
-
-
+          </MapEditorSideTool>
         </aside>
 
         <div className={mapEditorStyles["main-view"]}>
@@ -413,34 +408,3 @@ function EditModeButton({ children = "", target, current, setter }: { children?:
   return <button className={`${mapEditorStyles["edit-button"]} ${ current === target ? mapEditorStyles["selected"] : '' }`} onClick={() => setter(target)}>{ children }</button>
 }
 
-// function MapGenerator() {
-//   return (
-//     <MapEditorSideTool title="Map Generator">
-
-//     </MapEditorSideTool>
-//   )
-// }
-
-// function EditorActions() {
-//   return (
-//     <MapEditorSideTool title="Actions">
-
-//     </MapEditorSideTool>
-//   )
-// }
-
-// function TileCreator() {
-//   return (
-//     <MapEditorSideTool title="Tile Creator">
-
-//     </MapEditorSideTool>
-//   )
-// }
-
-// function TilePicker() {
-//   return (
-//     <MapEditorSideTool title="Tile Picker">
-
-//     </MapEditorSideTool>
-//   )
-// }
