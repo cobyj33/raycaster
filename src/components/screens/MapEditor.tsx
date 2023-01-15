@@ -379,6 +379,23 @@ function EditModeButton({ children = "", target, current, setter }: { children?:
   return <button className={`${mapEditorStyles["edit-button"]} ${getSelectedStyle(current === target)}`} onClick={() => setter(target)}>{ children }</button>
 }
 
+interface EditorToggleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  selected: boolean
+}
+function EditorToggleButton({selected, ...props}: EditorToggleButtonProps) {
+  return <button className={`${mapEditorStyles["toggle-button"]} ${getSelectedStyle(selected)}`} {...props} />
+}
+
+interface EditorInputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string
+}
+function EditorInputField({ label, ...props }: EditorInputFieldProps) {
+  return ( <section className={mapEditorStyles["input-field"]}>
+    <p className={mapEditorStyles["input-label"]}>{label}</p>
+    <input className={mapEditorStyles["input"]} {...props} />
+  </section> )
+}
+
 
 function MapGenerator({ onMapGenerate }: { onMapGenerate: (dimension: IDimension2D) => void }) {
   const [newMapDimension, setNewMapDimension] = useState<Dimension2D>(new Dimension2D(10, 10));
@@ -386,15 +403,8 @@ function MapGenerator({ onMapGenerate }: { onMapGenerate: (dimension: IDimension
   return (
     <MapEditorSideTool title="Map Generator">
       <div className={mapEditorStyles["map-dimensions-input-area"]}>
-        <section className={mapEditorStyles["map-dimensions-input-field"]}>
-          <p className={mapEditorStyles["map-dimensions-input-label"]}> Width: </p>
-          <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(newMapDimension.withWidth(e.target.valueAsNumber))} value={newMapDimension.width} />
-        </section>
-
-        <section className={mapEditorStyles["map-dimensions-input-field"]}>
-          <p className={mapEditorStyles["map-dimensions-input-label"]}> Height: </p>
-          <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(newMapDimension.withHeight(e.target.valueAsNumber))} value={newMapDimension.height} />
-        </section>
+        <EditorInputField label="Width: " type="number" min={4} onChange={(e) => setNewMapDimension(newMapDimension.withWidth(e.target.valueAsNumber))} value={newMapDimension.width} />
+        <EditorInputField label="Height: " type="number" min={4} onChange={(e) => setNewMapDimension(newMapDimension.withHeight(e.target.valueAsNumber))} value={newMapDimension.height} />
       </div>
 
       <EditorActionButton onClick={() => onMapGenerate(newMapDimension)}> Generate {newMapDimension.width} x {newMapDimension.height} Empty Map </EditorActionButton>
@@ -464,11 +474,7 @@ function TileCreator({ onSubmit, onTileChange, previewData }: { onSubmit: (tile:
 
   return (
     <MapEditorSideTool title="Tile Creator">
-
-      <section className={mapEditorStyles["map-dimensions-input-field"]}>
-        <p className={mapEditorStyles["map-dimensions-input-label"]}> Name: </p>
-        <input className={mapEditorStyles["map-dimensions-input"]} type="text" onChange={(e) => setName(e.target.value)} value={name} />
-      </section>
+      <EditorInputField label="Name: " type="text" onChange={(e) => setName(e.target.value)} value={name} />
 
       <div className={mapEditorStyles["tile-creator-color-picker"]}>
         <SliderPicker
@@ -477,12 +483,12 @@ function TileCreator({ onSubmit, onTileChange, previewData }: { onSubmit: (tile:
         onChange={onColorChange} /> 
       </div>
 
-      <button onClick={toggleCanHit}> Can Hit </button> 
-      <button onClick={toggleCanCollide}> Can Collide </button>
+      <EditorToggleButton selected={tile.canHit} onClick={toggleCanHit}> Can Hit </EditorToggleButton> 
+      <EditorToggleButton selected={tile.canCollide} onClick={toggleCanCollide}> Can Collide </EditorToggleButton>
       <input type="file" onChange={onTileCreatorTextureImport} />
-      <button onClick={() => setPreviewing(!previewing)}> Preview </button>
+      <EditorToggleButton selected={previewing} onClick={() => setPreviewing(!previewing)}> Preview </EditorToggleButton>
 
-      <EditorActionButton onClick={submit}> Create </EditorActionButton>
+      <EditorActionButton onClick={submit}> Create {name} </EditorActionButton>
     </MapEditorSideTool>
   )
 
@@ -492,7 +498,7 @@ function TilePicker({ selectedTile, tiles, onTileSelect }: { selectedTile: Tile,
   return (
     <MapEditorSideTool title="Tile Picker">
       <div className={mapEditorStyles["selected-tiles"]}>
-        { Object.keys(tiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${getSelectedStyle(areEqualTiles(selectedTile, tiles[tileName]))}`} key={`tile: ${tileName}`} onClick={() => onTileSelect(tiles[tileName])}>{tileName}</button>)}
+        { Object.entries(tiles).map(([tileName, tile]) => <EditorToggleButton selected={areEqualTiles(selectedTile, tile)} key={`tile: ${tileName}`} onClick={() => onTileSelect(tile)}>{tileName}</EditorToggleButton>)}
       </div>
     </MapEditorSideTool>
   )

@@ -212,29 +212,6 @@
 }
 
 
-.saved-tile-selection-button {
-    color: white;
-    font-size: 12px;
-    padding: 10px;
-    border-radius: 10px;
-    margin: 5px;
-    background-color: rgb(20, 20, 20);
-    border: none;
-}
-
-.saved-tile-selection-button:hover {
-    border-bottom: 1px solid white;
-}
-
-.saved-tile-selection-button.selected {
-    background-color: rgb(60, 60, 60);
-    color: green;
-    font-weight: bold;
-}
-
-.saved-tile-selection-button.unselected {
-    background-color: rgb(10, 10, 10);
-}
 
 .edit-button:hover:not(.disabled) {
     transition: background-color 0.25s;
@@ -279,7 +256,7 @@
     border-radius: 10px;
 }
 
-.map-generator:hover {
+.side-tool:hover {
     border-bottom: 1px solid white;
 }
 
@@ -293,21 +270,22 @@
     gap: 5px;
 }
 
-.map-dimensions-input-field {
+.input-field {
     display: grid;
     grid-template-columns: 1fr 1fr;
     justify-content: stretch;
     align-items: stretch;
 }
 
-.map-dimensions-input-label {
+.input-label {
     color: white;
     border-radius: 5px;
     border: none;
     font-size: 12px;
+    text-align: center;
 }
 
-.map-dimensions-input {
+.input {
     background-color:rgb(10, 10, 10);
     color: white;
     text-align: center;
@@ -315,6 +293,7 @@
     border: none;
     border-radius: 5px;
     margin-left: 5px;
+    flex-grow: 1;
     min-width: 0; /* Browsers automatically assign widths to inputs, so we need to override so that it fits into the flex container and not it's own given width: https://stackoverflow.com/questions/42421361/input-button-elements-not-shrinking-in-a-flex-container */
 }
 
@@ -330,9 +309,6 @@
     justify-self: center;
 }
 
-.action-button:hover, .action-button:active {
-    border-bottom: 1px solid white;
-}
 
 .action-button:hover {
     color: lightgreen;
@@ -345,4 +321,28 @@
 .action-buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+}
+
+.toggle-button {
+    color: white;
+    font-size: 12px;
+    padding: 5px;
+    border-radius: 10px;
+    margin: 5px;
+    background-color: rgb(20, 20, 20);
+    border: none;
+}
+
+.toggle-button:hover {
+    border-bottom: 1px solid white;
+}
+
+.toggle-button.selected {
+    background-color: rgb(60, 60, 60);
+    color: green;
+    font-weight: bold;
+}
+
+.toggle-button.unselected {
+    background-color: rgb(10, 10, 10);
 }

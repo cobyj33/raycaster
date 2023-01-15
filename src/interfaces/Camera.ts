@@ -318,7 +318,6 @@ export function renderCamera(camera: Camera, map: GameMap, canvas: HTMLCanvasEle
     const atlasGLTexture = gl.createTexture()
     gl.activeTexture(gl.TEXTURE1)
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
     gl.bindTexture(gl.TEXTURE_2D, atlasGLTexture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlas.width, atlas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, atlas.pixels);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -348,7 +347,6 @@ export function renderCamera(camera: Camera, map: GameMap, canvas: HTMLCanvasEle
     const texture = gl.createTexture()
     gl.activeTexture(gl.TEXTURE0)
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, cameraLineData.length, 3, 0, gl.RGBA, gl.FLOAT, shaderInputData)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
