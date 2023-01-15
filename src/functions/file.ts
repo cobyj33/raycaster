@@ -18,3 +18,8 @@ export const requestWebDownload: (data: Blob, fileName: string) => void = ( () =
       downloadAnchor.click();
     }
   })()
+
+export function isImageFile(file: File): boolean {
+  const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+  return validImageTypes.some(imageType => imageType === file.type)
+}

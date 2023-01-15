@@ -118,6 +118,10 @@ export class GameMap implements GameMapData {
         return new GameMap(this.name, newTiles, this.dimensions, this.skyBox, this.textureAtlas)
     }
 
+    setVec2({ row, col }: IVector2, tile: Tile): GameMap {
+        return this.set(row, col, tile)
+    }
+
     setTiles(placementData: { position: IVector2, tile: Tile }[]) {
         const newTiles = cloneTileMap(this.tiles)
         placementData.forEach(data => newTiles[data.position.row][data.position.col] = data.tile)

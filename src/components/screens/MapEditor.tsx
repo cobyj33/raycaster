@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback, ChangeEvent } from 'react'
 
-import { StatefulData, IVector2, View, GameMap, getDefaultTile, Tile, areGameMapsEqual, tryPlaceCamera, Camera, areEqualTiles, Vector2, getViewOffset, inDimensionBounds, rgbaToString } from "raycaster/interfaces";
+import { StatefulData, IVector2, View, GameMap, getDefaultTile, Tile, areGameMapsEqual, tryPlaceCamera, Camera, areEqualTiles, Vector2, getViewOffset, inDimensionBounds, rgbaToString, RGBA } from "raycaster/interfaces";
 import { useHistory, useWindowEvent, useResizeObserver, getCanvasAndContext2D, useCanvasHolderUpdater, withCanvasAndContext } from "raycaster/functions";
 
 
@@ -15,6 +15,10 @@ import mapEditorStyles from "components/styles/MapEditor.module.css"
 import { GameScreen } from './GameScreen';
 import { Dimension2D, IDimension2D } from 'interfaces/Dimension';
 import { preview } from 'vite';
+import { P } from 'vitest/dist/types-bae746aa';
+import { Color as ReactColor, ColorResult, SketchPicker, SliderPicker } from 'react-color';
+import Texture from 'interfaces/Texture';
+import { isImageFile } from 'functions/file';
 
 type EditorEditMode = "MOVE" | "ZOOM" | "DRAW" | "ERASE" | "LINE" | "BOX" | "ELLIPSE"
 
@@ -23,7 +27,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
 
   const [camera, setCamera] = cameraData;
   const [map, setMap] = mapData;
-  const [savedTiles] = tileData;
+  const [savedTiles, setSavedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(getDefaultTile("Wall Tile"));
 
   const [ghostTilePositions, setGhostTilePositions] = useState<IVector2[]>([]);
@@ -39,10 +43,14 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
   
   // Tile Creator
-  const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
   const [previewingTileCreator, setPreviewingTileCreator] = useState<boolean>(false);
+  const [previewTile, setPreviewTile] = useState<Tile>(getDefaultTile("Wall Tile"))
   const [previewMap, setPreviewMap] = useState<GameMap>(GameMap.filledEdges("Preview Map", new Dimension2D(9, 9)))
   const [previewCamera, setPreviewCamera] = useState<Camera>(Camera.default().place(previewMap.center.subtract(new Vector2(2, 2) ) ))
+
+  useEffect(() => {
+    setPreviewMap(previewMap => previewMap.setVec2(previewMap.center.trunc(), previewTile))
+  }, [previewTile])
 
   function pointerPositionInCanvas(event: PointerEvent<Element>): Vector2 {
       const canvas: HTMLCanvasElement | null = canvasRef.current;
@@ -61,17 +69,17 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
     return worldPosition.subtract(view).scale(view.cellSize)
   }
 
-function focus(worldPosition: IVector2) {
-    setView(view => {
-        let newView = view;
-        withCanvasAndContext(canvasRef, (canvas, context) => {
-          const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/view.cellSize).scale(1/2)
-          const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
-          newView = view.withPosition(viewPosition)
-        })
-        return newView
-    })
-}
+  // function focus(worldPosition: IVector2) {
+  //     setView(view => {
+  //         let newView = view;
+  //         withCanvasAndContext(canvasRef, (canvas, context) => {
+  //           const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/view.cellSize).scale(1/2)
+  //           const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
+  //           newView = view.withPosition(viewPosition)
+  //         })
+  //         return newView
+  //     })
+  // }
 
   function center(): void {
     setView(view => { 
@@ -151,24 +159,6 @@ function focus(worldPosition: IVector2) {
         drawCell(context, view, row, col)
       }
     })
-
-
-    // for (let row = 0; row < canvas.height / view.cellSize; row++) {
-    //   for (let col = 0; col < canvas.width / view.cellSize; col++) {
-
-    //     const targetPosition: IVector2 = { row: Math.floor(view.row + row), col: Math.floor(view.col + col) } ;
-    //     if (inDimensionBounds(targetPosition, map.dimensions)) {
-    //       context.fillStyle = rgbaToString(map.tiles[targetPosition.row][targetPosition.col].color);
-    //       context.globalAlpha = map.tiles[targetPosition.row][targetPosition.col].color.alpha / 255;
-    //       const offset: IVector2 = getViewOffset(view);
-    //       context.fillRect(-offset.col + col * view.cellSize, -offset.row + row * view.cellSize, view.cellSize, view.cellSize);
-    //     }
-
-    //   }
-
-    // }
-
-    // context.fill();
 
     context.restore();
   }
@@ -302,17 +292,12 @@ function focus(worldPosition: IVector2) {
       center();
   }, [])
 
-  const [newMapDimension, setNewMapDimension] = useState<IDimension2D>({width: 10, height: 10});
-  function onMapGenerate() {
+  function onMapGenerate(newMapDimension: IDimension2D) {
     setMap(GameMap.filledEdges("Generated Map", newMapDimension) )
     const desiredCameraPosition = new Vector2(camera.position.row / map.dimensions.height * newMapDimension.height, camera.position.col / map.dimensions.width * newMapDimension.width)
     setCamera(camera => camera.place(tryPlaceCamera(camera, map, desiredCameraPosition)))
   }
 
-
-  function onTileCreatorTextureImport(e: ChangeEvent<HTMLInputElement>) {
-
-  }
 
 
 
@@ -337,40 +322,18 @@ function focus(worldPosition: IVector2) {
         </div>
 
         <aside className={mapEditorStyles["left-side-bar"]}>
-
-          <MapEditorSideTool title="Tile Picker">
-            <div className={mapEditorStyles["selected-tiles"]}>
-              { Object.keys(savedTiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${areEqualTiles(selectedTile, savedTiles[tileName]) ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
-            </div>
-          </MapEditorSideTool>
-          
-          <MapEditorSideTool title="Tile Creator">
-            <div className={mapEditorStyles["tile-creator-color-picker"]}>
-              Color
-              <input type="range" min={0} max={255} />
-              <input type="range" min={0} max={255} />
-              <input type="range" min={0} max={255} />
-              { /* <input type="range" min={0} max={255} /> Alpha not really supported to be honest, so will hide for now */ }
-            </div>
-
-            <button> Can Hit </button> 
-            <button> Can Collide </button>
-            <input type="file" onChange={onTileCreatorTextureImport} />
-            <button onClick={() => setPreviewingTileCreator(!previewingTileCreator)}> Preview </button>
-
-            <button> Create </button>
-
-          </MapEditorSideTool>
-
+          <TilePicker onTileSelect={(tile) => setSelectedTile(tile)} selectedTile={selectedTile} tiles={savedTiles} />
+          <TileCreator onSubmit={(tile, name) => setSavedTiles({...savedTiles, [name]: tile })} onTileChange={(tile) => setPreviewTile(tile)} previewData={[previewingTileCreator, setPreviewingTileCreator]} />
         </aside>
 
         <aside className={mapEditorStyles["right-side-bar"]}>
+          <MapGenerator onMapGenerate={onMapGenerate} />
 
           <MapEditorSideTool title="Actions">
             <div className={mapEditorStyles["action-buttons"]}>
-              <button className={mapEditorStyles["action-button"]} onClick={() => { fit(); center(); }}>{"Fit Map (F)"}</button>
-              <button className={mapEditorStyles["action-button"]} onClick={center}>{"Center Map (c)"}</button>
-              <button className={mapEditorStyles["action-button"]} onClick={clear}>{"Clear"}</button>
+              <EditorActionButton onClick={() => { fit(); center(); }}>{"Fit Map (F)"}</EditorActionButton>
+              <EditorActionButton onClick={center}>{"Center Map (c)"}</EditorActionButton>
+              <EditorActionButton onClick={clear}>{"Clear"}</EditorActionButton>
             </div>
           </MapEditorSideTool>
         </aside>
@@ -404,7 +367,133 @@ function MapEditorSideTool({ title, children = "" }: { title: string, children?:
   )
 }
 
-function EditModeButton({ children = "", target, current, setter }: { children?: React.ReactNode, target: EditorEditMode, current: EditorEditMode, setter: React.Dispatch<EditorEditMode> } ) {
-  return <button className={`${mapEditorStyles["edit-button"]} ${ current === target ? mapEditorStyles["selected"] : '' }`} onClick={() => setter(target)}>{ children }</button>
+function getSelectedStyle(condition: boolean) {
+  return condition ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]
 }
 
+function EditorActionButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return <button className={mapEditorStyles["action-button"]} {...props} />
+}
+
+function EditModeButton({ children = "", target, current, setter }: { children?: React.ReactNode, target: EditorEditMode, current: EditorEditMode, setter: React.Dispatch<EditorEditMode> } ) {
+  return <button className={`${mapEditorStyles["edit-button"]} ${getSelectedStyle(current === target)}`} onClick={() => setter(target)}>{ children }</button>
+}
+
+
+function MapGenerator({ onMapGenerate }: { onMapGenerate: (dimension: IDimension2D) => void }) {
+  const [newMapDimension, setNewMapDimension] = useState<Dimension2D>(new Dimension2D(10, 10));
+
+  return (
+    <MapEditorSideTool title="Map Generator">
+      <div className={mapEditorStyles["map-dimensions-input-area"]}>
+        <section className={mapEditorStyles["map-dimensions-input-field"]}>
+          <p className={mapEditorStyles["map-dimensions-input-label"]}> Width: </p>
+          <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(newMapDimension.withWidth(e.target.valueAsNumber))} value={newMapDimension.width} />
+        </section>
+
+        <section className={mapEditorStyles["map-dimensions-input-field"]}>
+          <p className={mapEditorStyles["map-dimensions-input-label"]}> Height: </p>
+          <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(newMapDimension.withHeight(e.target.valueAsNumber))} value={newMapDimension.height} />
+        </section>
+      </div>
+
+      <EditorActionButton onClick={() => onMapGenerate(newMapDimension)}> Generate {newMapDimension.width} x {newMapDimension.height} Empty Map </EditorActionButton>
+    </MapEditorSideTool>
+  )
+}
+
+
+
+function TileCreator({ onSubmit, onTileChange, previewData }: { onSubmit: (tile: Tile, name: string) => void, onTileChange: (tile: Tile) => void, previewData: StatefulData<boolean> }) {
+  const [name, setName] = useState<string>("Unnamed Tile")
+  const [tile, setTile] = useState<Tile>(getDefaultTile("Wall Tile"))
+  const [previewing, setPreviewing] = previewData
+
+  function submit() {
+    onSubmit(tile, name)
+  }
+
+  useEffect( () => {
+    onTileChange(tile)
+  }, [tile])
+
+  function toggleCanCollide() {
+    setTile(tile => ({...tile, canCollide: !tile.canCollide}))
+  }
+
+  function toggleCanHit() {
+    setTile(tile => ({...tile, canHit: !tile.canHit}))
+  }
+
+  function onColorChange(res: ColorResult) {
+    setTile( tile => ({...tile, color: fromReactColorResult(res) }))
+  }
+
+  function toReactColorColor(color: RGBA): ReactColor {
+    return {
+      r: color.red,
+      g: color.green,
+      b: color.blue,
+      a: color.alpha
+    }
+  }
+
+  function fromReactColorResult(color: ColorResult): RGBA {
+    return {
+      red: color.rgb.r,
+      green: color.rgb.g,
+      blue: color.rgb.b,
+      alpha: color.rgb.a !== null && color.rgb.a !== undefined ? Math.trunc(color.rgb.a * 255) : 255
+    } 
+  }
+
+  function onTileCreatorTextureImport(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.files !== null && e.target.files !== undefined) {
+      if (e.target.files.length > 0) {
+        const file: File = e.target.files[0]
+        if (isImageFile(file)) {
+          Texture.fromFile(name, file)
+          .then(texture => {
+            setTile( tile => ({ ...tile, texture: texture })  )
+          })
+        }
+      }
+    }
+  }
+
+
+  return (
+    <MapEditorSideTool title="Tile Creator">
+
+      <section className={mapEditorStyles["map-dimensions-input-field"]}>
+        <p className={mapEditorStyles["map-dimensions-input-label"]}> Name: </p>
+        <input className={mapEditorStyles["map-dimensions-input"]} type="text" onChange={(e) => setName(e.target.value)} value={name} />
+      </section>
+
+      <div className={mapEditorStyles["tile-creator-color-picker"]}>
+        <SliderPicker
+        className='sketch-picker'
+        color={toReactColorColor(tile.color)}
+        onChange={onColorChange} /> 
+      </div>
+
+      <button onClick={toggleCanHit}> Can Hit </button> 
+      <button onClick={toggleCanCollide}> Can Collide </button>
+      <input type="file" onChange={onTileCreatorTextureImport} />
+      <button onClick={() => setPreviewing(!previewing)}> Preview </button>
+
+      <EditorActionButton onClick={submit}> Create </EditorActionButton>
+    </MapEditorSideTool>
+  )
+
+}
+
+function TilePicker({ selectedTile, tiles, onTileSelect }: { selectedTile: Tile, tiles: {[key: string]: Tile}, onTileSelect: (tile: Tile) => void } ) {
+  return (
+    <MapEditorSideTool title="Tile Picker">
+      <div className={mapEditorStyles["selected-tiles"]}>
+        { Object.keys(tiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${getSelectedStyle(areEqualTiles(selectedTile, tiles[tileName]))}`} key={`tile: ${tileName}`} onClick={() => onTileSelect(tiles[tileName])}>{tileName}</button>)}
+      </div>
+    </MapEditorSideTool>
+  )
+}

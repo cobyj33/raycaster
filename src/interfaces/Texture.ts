@@ -4,7 +4,9 @@
 
 import { Color } from "interfaces/Color";
 import potpack from "potpack";
+import { loadConfigFromFile } from "vite";
 import { Box } from "./Box";
+import { getImageFileBase64 } from "./Image";
 
 // The texture class will simply hold a texture's height, width, and ImageData
 
@@ -50,6 +52,11 @@ export class Texture {
             image.src = src
         })
         return Texture.fromHTMLImage(name, image)
+    }
+
+    static async fromFile(name: string, file: File): Promise<Texture> {
+        const base64: string = await getImageFileBase64(file)
+        return this.fromSourcePath(name, base64)
     }
 
     get pixels() {

@@ -318,7 +318,7 @@
     min-width: 0; /* Browsers automatically assign widths to inputs, so we need to override so that it fits into the flex container and not it's own given width: https://stackoverflow.com/questions/42421361/input-button-elements-not-shrinking-in-a-flex-container */
 }
 
-.map-generate-button {
+.action-button {
     color: white;
     text-align: center;
     background-color: black;
@@ -330,29 +330,19 @@
     justify-self: center;
 }
 
-.map-generate-button:hover, .map-generate-button:active {
+.action-button:hover, .action-button:active {
     border-bottom: 1px solid white;
 }
 
-.map-generate-button:hover {
+.action-button:hover {
     color: lightgreen;
 }
 
-.map-generate-button:active {
+.action-button:active {
     color: green;
 }
 
 .action-buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-}
-
-.action-button {
-    color: white;
-    text-align: center;
-    background-color: black;
-    padding: 5px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
 }
