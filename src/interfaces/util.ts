@@ -8,6 +8,7 @@ export interface Serializer<Type, JSONType> {
     deserialize(data: JSONType): Type; 
 }
 
+export type Nullable<T> = { [K in keyof T]: T[K] | null };
 
 export interface IClonable<T> {
     clone(): T;

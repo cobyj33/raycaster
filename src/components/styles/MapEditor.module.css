@@ -13,6 +13,8 @@
     gap: 5px;
 } */
 
+
+
 .editor-container {
     position: absolute;
     top: 0;
@@ -48,7 +50,7 @@
         overflow-x: auto;
     }
     
-    .editing-canvas-holder {
+    .main-view {
         position: relative;
         grid-row: 3 / 10;
         grid-column: 2 / 14;
@@ -120,7 +122,7 @@
         overflow-x: scroll;
     }
     
-    .editing-canvas-holder {
+    .main-view {
         position: relative;
         grid-column: 4 / 10;
         grid-row: 1 / 7;
@@ -160,7 +162,10 @@
 
 
 
-.editing-canvas-holder {
+.main-view {
+    flex-grow: 1;
+    grid-template-columns: 1fr;
+    display: grid;
     position: relative;
 }
 

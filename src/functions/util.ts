@@ -52,6 +52,30 @@ export function withCanvasAndContext(canvasRef: React.RefObject<HTMLCanvasElemen
 }
 
 /**
+ * A helper function to get the canvas and Canvas 2D context of a React RefObject, as well as handle saving and restoring the 2D context automatically
+ * Accepts a canvas reference and a callback which only runs if the canvas and context2D from the reference are non-null
+ * Meant mostly to cut down on boilerplate of checking for a canvas and then a context, which can take around 5 or 6 lines of code to do absolutely nothing, as well as saving and restoring context
+ * Optionally, there is a function that can be passed in as a third argument if code needs to be run in case the canvas or context could not be found
+ * 
+ * This is meant to extend withCanvasAndContext
+ * @param callbackfn A callback that takes in a canvas and context2D as parameters, and only runs if the canvas and context are non-null
+ * @returns void
+ */
+export function withCanvasAndContextSaved(canvasRef: React.RefObject<HTMLCanvasElement>, callbackfn: (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => void, onerror?: () => void) {
+    const canvas: HTMLCanvasElement | null = canvasRef.current 
+    if (canvas !== null && canvas !== undefined) {
+        const context = canvas.getContext("2d");
+        if (context !== null && context !== undefined) {
+            context.save()
+            callbackfn(canvas, context)
+            context.restore()
+            return
+        }
+    }
+    onerror?.()
+}
+
+/**
  * A helper function to get the canvas and Canvas 2D context of a React RefObject
  * @param ref A React Ref Object to an HTML Canvas Element
  * @returns The HTML Canvas and the Canvas Rendering Context taken from the ref object

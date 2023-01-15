@@ -10,14 +10,15 @@ import { requestWebDownload } from 'functions/file';
 import MapScreenHelpMenu from 'components/help/MapScreenHelpMenu';
 import GameScreenHelpMenu from 'components/help/GameScreenHelpMenu';
 import MapEditorHelpMenu from 'components/help/MapEditorHelpMenu';
+import { IDimension2D } from 'interfaces/Dimension';
 
 // import JRLogo from "assets/JRWhite.svg"
 
 
 const acceptedMenus = ["Game Map", "Camera View", "Editor"] as const;
-type Menus = typeof acceptedMenus[number];
+export type Menus = typeof acceptedMenus[number];
 
-const STARTING_MAP_DIMENSIONS = { row: 50, col: 50 }
+const STARTING_MAP_DIMENSIONS: IDimension2D = { width: 50, height: 50 }
 
 function NavButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   return <button {...props} className={appStyles["nav-button"]} />

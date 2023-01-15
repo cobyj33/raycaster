@@ -12,6 +12,8 @@ import { GiStraightPipe } from "react-icons/gi"
 import { BsCircle } from 'react-icons/bs'
 
 import mapEditorStyles from "components/styles/MapEditor.module.css"
+import { GameScreen } from './GameScreen';
+import { IDimension2D } from 'interfaces/Dimension';
 
 type EditorEditMode = "MOVE" | "ZOOM" | "DRAW" | "ERASE" | "LINE" | "BOX" | "ELLIPSE"
 
@@ -22,20 +24,17 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   const [map, setMap] = mapData;
   const [savedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(getDefaultTile("Wall Tile"));
+
   const [ghostTilePositions, setGhostTilePositions] = useState<IVector2[]>([]);
+
   const [cursor, setCursor] = useState<string>('crosshair');
   const [view, setView] = useState<View>(new View(Vector2.ZERO, 10));
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasHolderRef = useRef<HTMLDivElement>(null);
-  const lastHoveredCell: MutableRefObject<IVector2> = useRef<IVector2>({
-      row: 0,
-      col: 0
-  });
-  const currentHoveredCell: MutableRefObject<IVector2> = useRef<IVector2>({
-    row: 0,
-    col: 0
-  })
+  const lastHoveredCell: MutableRefObject<IVector2> = useRef<Vector2>(Vector2.ZERO);
+  const currentHoveredCell: MutableRefObject<IVector2> = useRef<Vector2>(Vector2.ZERO)
+
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
 
   
@@ -50,12 +49,12 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
       return Vector2.ZERO
   }
 
-  function canvasToWorld(canvasPosition: IVector2): Vector2 {
-    return new Vector2(canvasPosition.row / view.cellSize - view.row, canvasPosition.col / view.cellSize - view.col)
+  function canvasToWorld(canvasPosition: Vector2): Vector2 {
+    return canvasPosition.scale(1/view.cellSize).add(view)
   }
 
-  function worldToCanvas(worldPosition: IVector2): Vector2 {
-      return new Vector2((view.row + worldPosition.row) * view.cellSize, (view.col + worldPosition.col) * view.cellSize)
+  function worldToCanvas(worldPosition: Vector2): Vector2 {
+    return worldPosition.subtract(view).scale(view.cellSize)
   }
 
 function focus(worldPosition: IVector2) {
@@ -87,15 +86,15 @@ function focus(worldPosition: IVector2) {
 
   function fit(): void {
       setView(view => {
-              try {
-                const [canvas, _] = getCanvasAndContext2D(canvasRef)
-                const viewportSize = new Vector2(canvas.height, canvas.width)
-                const cellSize = Math.min(viewportSize.row / map.dimensions.row, viewportSize.col / map.dimensions.col)
-                return view.withCellSize(cellSize)
-              } catch (error) {
-                  return view
-              }
-          })
+            try {
+              const [canvas, _] = getCanvasAndContext2D(canvasRef)
+              const viewportSize = new Vector2(canvas.height, canvas.width)
+              const cellSize = Math.min(viewportSize.row / map.dimensions.height, viewportSize.col / map.dimensions.width)
+              return view.withCellSize(cellSize)
+            } catch (error) {
+                return view
+            }
+        })
   }
 
 
@@ -103,11 +102,7 @@ function focus(worldPosition: IVector2) {
   function getHoveredCell(event: PointerEvent<Element>): Vector2 {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     if (canvas !== null && canvas !== undefined) {
-      const pointerPosition: IVector2 = pointerPositionInCanvas(event);
-      return Vector2.fromIVector2({
-          row: Math.trunc((pointerPosition.row / view.cellSize) + view.row),
-          col: Math.trunc((pointerPosition.col / view.cellSize) + view.col)
-      })
+      return canvasToWorld(pointerPositionInCanvas(event)).trunc()
     }
     return Vector2.ZERO;
   }
@@ -137,24 +132,37 @@ function focus(worldPosition: IVector2) {
   const [editMode, setEditMode] = useState<EditorEditMode>("DRAW");
 
   function drawCell(context: CanvasRenderingContext2D, view: View, row: number, col: number) {
-    context.fillRect((col - view.col) * view.cellSize, (row - view.row) * view.cellSize, view.cellSize, view.cellSize  );
+    const canvasPosition = worldToCanvas(new Vector2(row, col))
+    context.fillRect(canvasPosition.col, canvasPosition.row, view.cellSize, view.cellSize);
   }
 
   function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View, map: GameMap): void {
     context.save();
-    for (let row = 0; row < canvas.height / view.cellSize; row++) {
-      for (let col = 0; col < canvas.width / view.cellSize; col++) {
 
-        const targetPosition: IVector2 = { row: Math.floor(view.row + row), col: Math.floor(view.col + col) } ;
-        if (inDimensionBounds(targetPosition, map.dimensions)) {
-          context.fillStyle = rgbaToString(map.tiles[targetPosition.row][targetPosition.col].color);
-          context.globalAlpha = map.tiles[targetPosition.row][targetPosition.col].color.alpha / 255;
-            const offset: IVector2 = getViewOffset(view);
-          context.fillRect(-offset.col + col * view.cellSize, -offset.row + row * view.cellSize, view.cellSize, view.cellSize);
-        }
-
+    map.forEachTileLocation((tile, row, col) => {
+      const location = new Vector2(row, col)
+      const screenLocation = worldToCanvas(location)
+      if (screenLocation.row >= 0 && location.col >= 0 && location.row <= canvas.width && location.col <= canvas.height) {
+        context.fillStyle = rgbaToString(tile.color)
+        drawCell(context, view, row, col)
       }
-    }
+    })
+
+
+    // for (let row = 0; row < canvas.height / view.cellSize; row++) {
+    //   for (let col = 0; col < canvas.width / view.cellSize; col++) {
+
+    //     const targetPosition: IVector2 = { row: Math.floor(view.row + row), col: Math.floor(view.col + col) } ;
+    //     if (inDimensionBounds(targetPosition, map.dimensions)) {
+    //       context.fillStyle = rgbaToString(map.tiles[targetPosition.row][targetPosition.col].color);
+    //       context.globalAlpha = map.tiles[targetPosition.row][targetPosition.col].color.alpha / 255;
+    //       const offset: IVector2 = getViewOffset(view);
+    //       context.fillRect(-offset.col + col * view.cellSize, -offset.row + row * view.cellSize, view.cellSize, view.cellSize);
+    //     }
+
+    //   }
+
+    // }
 
     // context.fill();
 
@@ -163,15 +171,15 @@ function focus(worldPosition: IVector2) {
 
   function renderGhostTiles(context: CanvasRenderingContext2D, view: View, ghostTilePositions: IVector2[], selectedTile: Tile) {
     if (ghostTilePositions.length === 0) return;
-     context.save();
+    context.save();
     context.globalAlpha = 0.5;
     context.fillStyle = rgbaToString(selectedTile.color);
     ghostTilePositions.forEach(pos => drawCell(context, view, pos.row, pos.col))
-     context.restore();
+    context.restore();
   }
 
   function renderGrid(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View) {
-     context.save();
+    context.save();
     context.strokeStyle = 'black';
     context.beginPath()
      const viewOffset: IVector2 = getViewOffset(view);
@@ -186,7 +194,20 @@ function focus(worldPosition: IVector2) {
     }
 
     context.stroke();
-     context.restore();
+    context.restore();
+  }
+
+  function clearScreen(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function drawCurrentHoveredCellShadow(context: CanvasRenderingContext2D) {
+    context.globalAlpha = 0.5;
+    context.fillStyle = map.inBoundsVec2(lastHoveredCell.current) ? 'blue' : 'red';
+    drawCell(context, view, currentHoveredCell.current.row, currentHoveredCell.current.col);
+    context.globalAlpha = 1;
   }
 
 
@@ -197,54 +218,42 @@ function focus(worldPosition: IVector2) {
     const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
     if (context === null || context === undefined) return;
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
+    clearScreen(canvas, context)
     renderWalls(canvas, context, view, map);
     renderGrid(canvas, context, view);
     renderGhostTiles(context, view, ghostTilePositions, selectedTile);
+    drawCurrentHoveredCellShadow(context)
+  }
 
-
-    context.globalAlpha = 0.5;
-    context.fillStyle = map.inBoundsVec2(lastHoveredCell.current) ? 'blue' : 'red';
-    // context.fillStyle = gameMapInBounds(map, lastHoveredCell.current.row, lastHoveredCell.current.col) ? 'blue' : 'red';
-    drawCell(context, view, lastHoveredCell.current.row + 1, lastHoveredCell.current.col + 1);
-    context.globalAlpha = 1;
+  function updateHoveredCellData(event: PointerEvent<Element>) {
+    lastHoveredCell.current = currentHoveredCell.current
+    currentHoveredCell.current = getHoveredCell(event)
   }
 
   function onPointerMove(event: PointerEvent<Element>) {
-    currentHoveredCell.current = getHoveredCell(event)
-    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
-    editorModes.current[editMode].onPointerMove?.(event);
-    lastHoveredCell.current = currentHoveredCell.current;
+    updateHoveredCellData(event)
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData()).onPointerMove?.(event)
     render();
   }
   
   function onPointerDown(event: PointerEvent<Element>) {
     isPointerDown.current = true;
-    currentHoveredCell.current = getHoveredCell(event)
-    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
-    editorModes.current[editMode].onPointerDown?.(event);
-    lastHoveredCell.current = currentHoveredCell.current;
+    updateHoveredCellData(event)
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData()).onPointerDown?.(event)
     render()
   }
   
   function onPointerUp(event: PointerEvent<Element>) {
-    currentHoveredCell.current = getHoveredCell(event)
-    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
-    editorModes.current[editMode].onPointerUp?.(event);
-    lastHoveredCell.current = currentHoveredCell.current;
+    updateHoveredCellData(event)
     isPointerDown.current = false;
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData()).onPointerUp?.(event)
     render()
   }
 
   function onPointerLeave(event: PointerEvent<Element>) {
-    currentHoveredCell.current = getHoveredCell(event)
-    editorModes.current[editMode].sendUpdatedEditorData(getEditorData())
-    editorModes.current[editMode].onPointerLeave?.(event);
-    lastHoveredCell.current = currentHoveredCell.current;
+    updateHoveredCellData(event)
     isPointerDown.current = false;
+    editorModes.current[editMode].sendUpdatedEditorData(getEditorData()).onPointerLeave?.(event)
     render()
   }
 
@@ -291,18 +300,13 @@ function focus(worldPosition: IVector2) {
       center();
   }, [])
 
+  const [newMapDimension, setNewMapDimension] = useState<IDimension2D>({width: 10, height: 10});
   function onMapGenerate() {
     setMap(GameMap.filledEdges("Generated Map", newMapDimension) )
-    const desiredCameraPosition = new Vector2(camera.position.row / map.dimensions.row * newMapDimension.row, camera.position.col / map.dimensions.col * newMapDimension.col)
+    const desiredCameraPosition = new Vector2(camera.position.row / map.dimensions.height * newMapDimension.height, camera.position.col / map.dimensions.width * newMapDimension.width)
     setCamera(camera => camera.place(tryPlaceCamera(camera, map, desiredCameraPosition)))
   }
 
-  const [newMapDimension, setNewMapDimension] = useState<IVector2>({row: 10, col: 10});
-  const [tileCreatorBlueprint, setTileCreatorBlueprint] = useState<Tile>(getDefaultTile("Wall Tile"));
-
-  function createTile() {
-
-  }
 
   function onTileCreatorTextureImport(e: ChangeEvent<HTMLInputElement>) {
 
@@ -341,7 +345,8 @@ function focus(worldPosition: IVector2) {
             </div>
           </div>
 
-          {/* <div className={mapEditorStyles["tile-creator"]}>
+          <div className={mapEditorStyles["tile-creator"]}>
+
             <h3> Tile Creator </h3>
             
             <div className={mapEditorStyles["tile-creator-color-picker"]}>
@@ -349,15 +354,17 @@ function focus(worldPosition: IVector2) {
               <input type="range" min={0} max={255} />
               <input type="range" min={0} max={255} />
               <input type="range" min={0} max={255} />
-              {/* <input type="range" min={0} max={255} /> Alpha not really supported to be honest, so will hide for now }
+              { /* <input type="range" min={0} max={255} /> Alpha not really supported to be honest, so will hide for now */ }
             </div>
 
             <button> Can Hit </button> 
             <button> Can Collide </button>
             <input type="file" onChange={onTileCreatorTextureImport} />
+            <button> Preview </button>
+
             <button> Create </button>
 
-          </div> */}
+          </div>
 
         </aside>
 
@@ -369,17 +376,17 @@ function focus(worldPosition: IVector2) {
 
             <div className={mapEditorStyles["map-dimensions-input-area"]}>
               <section className={mapEditorStyles["map-dimensions-input-field"]}>
-                <p className={mapEditorStyles["map-dimensions-input-label"]}> Rows: </p>
-                <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(({...newMapDimension, row: e.target.valueAsNumber }))} value={newMapDimension.row} />
+                <p className={mapEditorStyles["map-dimensions-input-label"]}> Width: </p>
+                <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(({...newMapDimension, width: e.target.valueAsNumber }))} value={newMapDimension.width} />
               </section>
 
               <section className={mapEditorStyles["map-dimensions-input-field"]}>
-                <p className={mapEditorStyles["map-dimensions-input-label"]}> Cols: </p>
-                <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension({ ...newMapDimension, col: e.target.valueAsNumber })} value={newMapDimension.col} />
+                <p className={mapEditorStyles["map-dimensions-input-label"]}> Height: </p>
+                <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension({ ...newMapDimension, height: e.target.valueAsNumber })} value={newMapDimension.height} />
               </section>
             </div>
 
-            <button className={mapEditorStyles['map-generate-button']} onClick={onMapGenerate}> Generate {newMapDimension.row} x {newMapDimension.col} Empty Map </button>
+            <button className={mapEditorStyles['map-generate-button']} onClick={onMapGenerate}> Generate {newMapDimension.width} x {newMapDimension.height} Empty Map </button>
 
           </div>
           
@@ -395,18 +402,12 @@ function focus(worldPosition: IVector2) {
 
         </aside>
 
-
-        
-        <div className={mapEditorStyles["editing-canvas-holder"]} ref={canvasHolderRef}>
-            <canvas style={{cursor: cursor}} className={mapEditorStyles["editing-canvas"]} ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
+        <div className={mapEditorStyles["main-view"]}>
+          <div className={mapEditorStyles["editing-canvas-holder"]} ref={canvasHolderRef}>
+              <canvas style={{cursor: cursor}} className={mapEditorStyles["editing-canvas"]} ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
+          </div>
+          {/* <GameScreen cameraData={cameraData} mapData={mapData} /> */}
         </div>
-
-        {/* <div className={`tile-creator-container ${tileCreatorOpened ? 'opened' : ''}`}>
-          <button className='editor-tile-creator-open-button' onClick={() => setTileCreatorOpened(!tileCreatorOpened)}> <FaHammer /> </button>
-          <TileCreator className={`editor-tile-creator`} tileData={tileData} />
-        </div> */}
-
-        
 
       </main>
 

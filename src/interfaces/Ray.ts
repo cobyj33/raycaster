@@ -4,6 +4,7 @@ import {
     GameMap,
 } from "raycaster/interfaces";
 import { Cardinal } from "raycaster/types";
+import { IDimension2D } from "./Dimension";
 
 export interface Ray {
     readonly origin: IVector2;
@@ -23,8 +24,8 @@ export interface RaycastHit extends RaycastNoHit {
 }
 
 
-export function inDimensionBounds({row, col}: IVector2, {row: rows, col: cols}: IVector2) {
-    return row >= 0 && col >= 0 && row < rows && col < cols;
+export function inDimensionBounds({row, col}: IVector2, {width, height}: IDimension2D) {
+    return row >= 0 && col >= 0 && row < width && col < height;
 }
 
 export function castRayAlongAxis(ray: Ray, map: GameMap, distance: number): void {
@@ -52,7 +53,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
 
             const tileToCheck: IVector2 = rowStepDirection > 0 ? { row: Math.trunc(currentRowPosition.row), col: Math.trunc(currentRowPosition.col) } : {row: Math.floor( currentRowPosition.row + rowStepDirection), col: Math.floor(currentRowPosition.col) };
 
-            if (inDimensionBounds(tileToCheck, map.dimensions)) {
+            if (map.inBoundsVec2(tileToCheck)) {
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
                     const sideHit: Cardinal = ray.direction.row <= 0 ? "north" : "south"
                     const percentageAcross = currentRowPosition.col - Math.trunc(currentRowPosition.col)
@@ -98,7 +99,7 @@ export function castRay(ray: Ray, map: GameMap, distance: number): RaycastHit | 
 
             const tileToCheck: IVector2 = colStepDirection > 0 ? { row: Math.trunc(currentColPosition.row), col: Math.trunc(currentColPosition.col) } : { row: Math.floor(currentColPosition.row), col: Math.floor( currentColPosition.col + colStepDirection  ) };
             
-            if (inDimensionBounds(tileToCheck, map.dimensions)) {
+            if (map.inBoundsVec2(tileToCheck)) {
                 
                 if (map.tiles[tileToCheck.row][tileToCheck.col].canHit) {
                     const sideHit: Cardinal = ray.direction.col < 0 ? "east" : "west"

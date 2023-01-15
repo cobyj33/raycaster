@@ -7,32 +7,32 @@ import {
     Vector2,
     inDimensionBounds
 } from "raycaster/interfaces"
-import { P } from "vitest/dist/types-bae746aa";
+import { Dimension2D, IDimension2D } from "./Dimension";
 import Texture, { TextureAtlas } from "./Texture";
 
 
 export interface GameMapData {
     readonly tiles: Tile[][];
-    readonly dimensions: IVector2;
+    readonly dimensions: IDimension2D;
     readonly skyBox: SkyBox;
 }
 
 export class GameMap implements GameMapData {
     /** SHOULD NOT BE DIRECTLY MODIFIED */
     readonly tiles: Tile[][];
-    readonly dimensions: Vector2;
+    readonly dimensions: Dimension2D;
     readonly skyBox: SkyBox;
     readonly textureAtlas: TextureAtlas
     readonly name: string
 
-    constructor(name: string, tiles: Tile[][], dimensions: IVector2, skyBox: SkyBox = getDefaultSkyBox(), textures: TextureAtlas | Texture[] | null = null) {
+    constructor(name: string, tiles: Tile[][], dimensions: IDimension2D, skyBox: SkyBox = getDefaultSkyBox(), textures: TextureAtlas | Texture[] | null = null) {
         this.name = name
         if (isValidTileMap(tiles) === false) {
             throw new Error("Invalid tilemap passed to GameMap constructor: " + tiles)
         }
         
         this.tiles = [...tiles];
-        this.dimensions = Vector2.fromIVector2(dimensions);
+        this.dimensions = Dimension2D.fromIDimension2D(dimensions);
         this.skyBox = {...skyBox}
         if (textures === null || textures === undefined) {
             const textures: Texture[] = tiles.map(tileRow => tileRow.filter(tile => tile.texture !== null && tile.texture !== undefined))
@@ -49,13 +49,13 @@ export class GameMap implements GameMapData {
         }
     }
 
-    static filledEdges(name: string, dimensions: IVector2, fillTile: Tile = getDefaultTile("Wall Tile")) {
+    static filledEdges(name: string, dimensions: IDimension2D, fillTile: Tile = getDefaultTile("Wall Tile")) {
         return GameMap.empty(name, dimensions).fillEdges(fillTile)
     }
 
     static fromTileMap(name: string, tiles: Tile[][]): GameMap {
         if (isValidTileMap(tiles)) {
-            const dimensions = Vector2.fromDimension(tiles.length, tiles[0].length)   
+            const dimensions = new Dimension2D(tiles.length, tiles[0].length)
             return new GameMap(name, tiles, dimensions, getDefaultSkyBox())
         }
         throw new Error("Tried to create GameMap from invalid tile map " + tiles)
@@ -73,11 +73,27 @@ export class GameMap implements GameMapData {
         this.tiles.forEach(tileRow => tileRow.forEach(callbackfn, thisArg))
     }
 
+    forEachLocation(callbackfn: (row: number, col: number, index: number, array: Tile[]) => void, thisArg?: any) {
+        for (let row = 0; row < this.height; row++) {
+            for (let col = 0; col < this.width; col++) {
+                callbackfn(row, col, row * this.width + col, this.tiles[row])
+            }
+        }
+    }
+
+    forEachTileLocation(callbackfn: (tile: Tile, row: number, col: number, index: number, array: Tile[]) => void, thisArg?: any) {
+        for (let row = 0; row < this.height; row++) {
+            for (let col = 0; col < this.width; col++) {
+                callbackfn(this.tiles[row][col],  row, col, row * this.width + col, this.tiles[row])
+            }
+        }
+    }
+
     at(row: number, col: number): Tile {
         if (inDimensionBounds({row: row, col: col}, this.dimensions)) {
             return {...this.tiles[row][col]}
         }
-        throw new Error(`Attempted to grab tile from an out of bounds area ( Row: ${row} Col: ${col} ) on dimensions ( width: ${this.dimensions.col}, height: ${this.dimensions.row} ) ) `)
+        throw new Error(`Attempted to grab tile from an out of bounds area ( Row: ${row} Col: ${col} ) on dimensions ( width: ${this.dimensions.width}, height: ${this.dimensions.height} ) ) `)
     }
 
     atVec2({row, col}: { row: number, col: number}): Tile {
@@ -86,6 +102,10 @@ export class GameMap implements GameMapData {
 
 
     set(row: number, col: number, tile: Tile): GameMap {
+        if (!(Number.isInteger(row) && Number.isInteger(col))) {
+            throw new Error("Attempted to set non-integer position in GameMap, " + row + " " + col)
+        }
+
         const newTiles = cloneTileMap(this.tiles)
         this.tiles[row][col] = tile
 
@@ -119,9 +139,9 @@ export class GameMap implements GameMapData {
     fillEdges(edgeTile: Tile = getDefaultTile("Wall Tile")) {
         const newTiles: Tile[][] = cloneTileMap(this.tiles)
 
-        for (let row = 0; row < this.dimensions.row; row++) {
-            for (let col = 0; col < this.dimensions.col; col++) {
-                if (row === 0 || row === this.dimensions.row - 1 || col === 0 || col === this.dimensions.col - 1) {
+        for (let row = 0; row < this.dimensions.height; row++) {
+            for (let col = 0; col < this.dimensions.width; col++) {
+                if (row === 0 || row === this.dimensions.height - 1 || col === 0 || col === this.dimensions.width - 1) {
                     newTiles[row][col] = edgeTile;
                 }
             }
@@ -140,16 +160,16 @@ export class GameMap implements GameMapData {
         return new GameMap(name, data.tiles, data.dimensions, data.skyBox)
     }
 
-    static empty(name: string, dimensions: IVector2) {
+    static empty(name: string, dimensions: IDimension2D) {
         return new GameMap(name, getEmptyTileMatrix(dimensions), dimensions, getDefaultSkyBox())
     }
 
     get width() {
-        return this.dimensions.col
+        return this.dimensions.width
     }
 
     get height() {
-        return this.dimensions.row
+        return this.dimensions.height
     }
 
     get area() {
@@ -157,11 +177,7 @@ export class GameMap implements GameMapData {
     }
 
     get center(): Vector2 {
-        return Vector2.fromDimension(this.width / 2, this.height / 2)
-    }
-
-    clone() {
-        return new GameMap(this.name, cloneTileMap(this.tiles), this.dimensions.clone(), {...this.skyBox}, this.textureAtlas)
+        return new Vector2(this.width / 2, this.height / 2)
     }
 
     equals(other: GameMap) {
@@ -226,11 +242,11 @@ export function getTileMap(dimensions: IVector2, fillTile: Tile = getDefaultTile
 //     }
 // }
 
-export function getEmptyTileMatrix(dimensions: IVector2): Tile[][] {
+export function getEmptyTileMatrix(dimensions: IDimension2D): Tile[][] {
     const tileArray: Tile[][] = new Array<Array<Tile>>();
-    for (let row = 0; row < dimensions.row; row++) {
+    for (let row = 0; row < dimensions.height; row++) {
         tileArray.push(new Array<Tile>());
-        for (let col = 0; col < dimensions.col; col++) {
+        for (let col = 0; col < dimensions.width; col++) {
             tileArray[row].push(getDefaultTile("Empty Tile"));
         }
     }
@@ -284,12 +300,12 @@ export function tileMapToString(tileMap: Tile[][]): string {
 }
 
 export function areGameMapsEqual(first: GameMap, second: GameMap) {
-    if (!(first.dimensions.row === second.dimensions.row && first.dimensions.col === second.dimensions.col)) {
+    if (!(first.dimensions.equals(second.dimensions))) {
         return false;
     }
 
-    for (let row = 0; row < first.dimensions.row; row++) {
-        for (let col = 0; col < first.dimensions.col; col++) {
+    for (let row = 0; row < first.dimensions.height; row++) {
+        for (let col = 0; col < first.dimensions.width; col++) {
             if (!areEqualTiles(first.tiles[row][col], second.tiles[row][col])) {
                 return false;
             }

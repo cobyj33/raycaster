@@ -28,7 +28,8 @@ export function onPlacePointerMove(data: EditorData, tile: Tile) {
 }
 
 export class DrawEditMode extends EditMode {
-    cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
+    // cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }
+    cursor() { return '' }
 
     onPointerDown(event: PointerEvent<Element>) {
         onPlacePointerDown(this.data, this.data.selectedTile)

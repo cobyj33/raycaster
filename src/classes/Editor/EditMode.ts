@@ -8,11 +8,11 @@ import { View } from "interfaces/View"
 export interface EditorData {
     mapData: StatefulData<GameMap>;
     viewData: StatefulData<View>;
+    ghostTilePositions: StatefulData<IVector2[]>
     lastHoveredCell: IVector2;
     currentHoveredCell: IVector2
     isPointerDown: boolean;
     selectedTile: Tile;
-    ghostTilePositions: StatefulData<IVector2[]>
 }
 
 export abstract class EditMode {
@@ -22,8 +22,9 @@ export abstract class EditMode {
         this.data = data;
     }
     
-    sendUpdatedEditorData(data: EditorData) {
+    sendUpdatedEditorData(data: EditorData): EditMode {
         this.data = data;
+        return this;
     }
 
     onPointerDown?(event: PointerEvent<Element>): void;

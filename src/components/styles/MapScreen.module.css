@@ -3,7 +3,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: black;
 }
 
 .map-canvas-holder {
@@ -11,7 +10,6 @@
     align-self: stretch;
     flex-grow: 5;
     flex-basis: 200px;
-    border: 2px solid white;
     flex-grow: 1;
 }
 
@@ -22,6 +20,7 @@
     top: 0;
     right: 0;
     bottom: 0;
+    border: 2px solid white;
 }
 
 .tool-bar {

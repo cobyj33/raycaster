@@ -19,10 +19,6 @@ export class Vector2 implements IVector2 {
         return new Vector2(vector.row, vector.col)
     }
 
-    static fromDimension(width: number, height: number) {
-        return new Vector2(height, width)
-    }
-
     rowcomp() {
         return new Vector2(this.row, 0)
     }

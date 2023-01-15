@@ -1,7 +1,7 @@
 import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { useKeyHandler } from "raycaster/keysystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
-import { TouchControls } from "raycaster/components"
+import { MapScreen, TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera, GameMap } from "raycaster/interfaces";
 import gameScreenStyles from "components/styles/GameScreen.module.css"
 import { clamp } from 'functions/util';
@@ -92,28 +92,27 @@ export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<Ga
         setCamera( camera => camera.withFOV(camera.fieldOfView + changeInFOV) )
     }
 
-    const [showFOVIndicator, setShowFOVIndicator] = useState<boolean>(false);
-    const lastCameraFOV = useRef<number>(camera.fieldOfView);
-    const lastFOVShowTime = useRef<number>(0);
-    const timetoShowFOVIndicator = 3000;
-    useEffect(() => {
-        if (lastCameraFOV.current !== camera.fieldOfView) {
-            setShowFOVIndicator(true);
-            lastFOVShowTime.current = Date.now();
-            lastCameraFOV.current = camera.fieldOfView;
-            setTimeout(() => {
-                if (Date.now() - lastFOVShowTime.current >= timetoShowFOVIndicator) {
-                    setShowFOVIndicator(false);
-                }
-            }, timetoShowFOVIndicator);
-        }
-    }, [camera])
+    
 
     useCanvasHolderUpdater(canvasRef, canvasHolderRef, render)
 
+    const [showMap, setShowMap] = useState<boolean>(false)
+
+    function onKeyDown(event: React.KeyboardEvent<Element>) {
+        keyHandlerRef.current.onKeyDown(event)
+        
+        if (event.code === "KeyM") {
+            setShowMap(!showMap)
+        }
+    }
+
+    function onKeyUp(event: React.KeyboardEvent<Element>) {
+        keyHandlerRef.current.onKeyUp(event)
+    }
+
 
   return (
-    <div ref={containerRef} className={gameScreenStyles["game-screen-container"]} onKeyDown={(event) => keyHandlerRef.current.onKeyDown(event)} onKeyUp={(event) => keyHandlerRef.current.onKeyUp(event)} tabIndex={0}>
+    <div ref={containerRef} className={gameScreenStyles["game-screen-container"]} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}>
 
         <div className={gameScreenStyles["game-canvas-holder"]} ref={canvasHolderRef}>
             <canvas className={gameScreenStyles["game-canvas"]} onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} ref={canvasRef} tabIndex={0}> </canvas>
@@ -121,6 +120,10 @@ export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<Ga
         
         {showTouchControls && <TouchControls cameraData={cameraData} mapData={mapData}/>}
 
+
+        <div className={gameScreenStyles["internal-map"]}>
+            { showMap && <MapScreen cameraData={cameraData} mapData={mapData} />}
+        </div>
     </div>
   )
 }

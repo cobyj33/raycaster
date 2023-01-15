@@ -111,8 +111,8 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         // context.canvas.width = map.dimensions.col * screenView.cellSize;
         // context.canvas.height = map.dimensions.row * getMapScale();
-        for (let row = 0; row < map.dimensions.row; row++) {
-            for (let col = 0; col < map.dimensions.col; col++) {
+        for (let row = 0; row < map.dimensions.height; row++) {
+            for (let col = 0; col < map.dimensions.width; col++) {
                 context.fillStyle = rgbToString(map.tiles[row][col].color);
                 const pos = Vector2.fromIVector2(screenView).translate(row, col).scale(screenView.cellSize)
                 context.fillRect(pos.col, pos.row, screenView.cellSize, screenView.cellSize);

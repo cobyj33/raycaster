@@ -5,6 +5,7 @@
     justify-content: center;
     background-color: black;
     padding: 20px;
+    border: 2px solid red;
 }
 
 /* * { color: white; }  */
@@ -67,3 +68,14 @@
     padding: 5px;
     border: 1px solid white;
 } */
+
+.internal-map {
+    display: grid;
+    grid-template-columns: 1fr;
+    
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+    width: 200px;
+    height: 200px;
+}

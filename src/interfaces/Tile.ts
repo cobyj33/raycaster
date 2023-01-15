@@ -3,6 +3,7 @@ import marbleTexturePath from "assets/textures/Marble.png"
 import stoneBrickTexturePath from "assets/textures/Stone Brick Tile.png"
 import { getImage } from "functions/image";
 import Texture from "interfaces/Texture"
+import { Nullable } from "interfaces/util";
 
 /**
  * The representation of a tile in a TileMap
@@ -21,6 +22,31 @@ export interface Tile {
     readonly texture: Texture | null;
 }
 
+
+// export class TileFactory {
+//     readonly manufactured: Nullable<Tile>
+    
+//     constructor() { 
+//         this.manufactured = {
+//             color: null,
+//             canHit: null,
+//             canCollide: null,
+//             texture: null
+//         }
+//     } 
+
+//     setColor(color: RGBA) {
+
+//     }
+
+//     setCanHit(value: boolean) {
+//         this.manufactured.canHit = canHit
+//     }
+
+//     generate(): Tile {
+
+//     }
+// }
 
 
 
