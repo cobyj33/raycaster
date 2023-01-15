@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback, ChangeEvent } from 'react'
+import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback, ChangeEvent } from 'react'
 
 import { StatefulData, IVector2, View, GameMap, getDefaultTile, Tile, areGameMapsEqual, tryPlaceCamera, Camera, areEqualTiles, Vector2, getViewOffset, inDimensionBounds, rgbaToString } from "raycaster/interfaces";
 import { useHistory, useWindowEvent, useResizeObserver, getCanvasAndContext2D, useCanvasHolderUpdater, withCanvasAndContext } from "raycaster/functions";
@@ -13,7 +13,8 @@ import { BsCircle } from 'react-icons/bs'
 
 import mapEditorStyles from "components/styles/MapEditor.module.css"
 import { GameScreen } from './GameScreen';
-import { IDimension2D } from 'interfaces/Dimension';
+import { Dimension2D, IDimension2D } from 'interfaces/Dimension';
+import { preview } from 'vite';
 
 type EditorEditMode = "MOVE" | "ZOOM" | "DRAW" | "ERASE" | "LINE" | "BOX" | "ELLIPSE"
 
@@ -36,9 +37,12 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   const currentHoveredCell: MutableRefObject<IVector2> = useRef<Vector2>(Vector2.ZERO)
 
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
-
   
+  // Tile Creator
   const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
+  const [previewingTileCreator, setPreviewingTileCreator] = useState<boolean>(false);
+  const [previewMap, setPreviewMap] = useState<GameMap>(GameMap.filledEdges("Preview Map", new Dimension2D(9, 9)))
+  const [previewCamera, setPreviewCamera] = useState<Camera>(Camera.default().place(previewMap.center.subtract(new Vector2(2, 2) ) ))
 
   function pointerPositionInCanvas(event: PointerEvent<Element>): Vector2 {
       const canvas: HTMLCanvasElement | null = canvasRef.current;
@@ -210,8 +214,6 @@ function focus(worldPosition: IVector2) {
     context.globalAlpha = 1;
   }
 
-
-
   function render() {
     const canvas: HTMLCanvasElement | null = canvasRef.current;
     if (canvas === null || canvas === undefined) return;
@@ -312,9 +314,7 @@ function focus(worldPosition: IVector2) {
 
   }
 
-  function EditModeButton({ children = "", editMode: buttonEditMode }: { children?: React.ReactNode, editMode: EditorEditMode } ) {
-    return <button className={`${mapEditorStyles["edit-button"]} ${ editMode === buttonEditMode ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(buttonEditMode)}>{ children}</button>
-  }
+
 
   return (
 
@@ -324,13 +324,13 @@ function focus(worldPosition: IVector2) {
 
         <div className={mapEditorStyles["tool-bar"]}>
           <div className={mapEditorStyles["editing-buttons"]}> 
-            <EditModeButton editMode="DRAW"> <FaBrush /> </EditModeButton>
-            <EditModeButton editMode="MOVE"> <FaArrowsAlt /> </EditModeButton>
-            <EditModeButton editMode="ZOOM"> <FaSearch /> </EditModeButton>
-            <EditModeButton editMode="ERASE"> <FaEraser /> </EditModeButton>
-            <EditModeButton editMode="LINE"> <GiStraightPipe /> </EditModeButton>
-            <EditModeButton editMode="BOX"> <FaBox /> </EditModeButton>
-            <EditModeButton editMode="ELLIPSE"> <BsCircle /> </EditModeButton>
+            <EditModeButton target="DRAW" current={editMode} setter={setEditMode}> <FaBrush /> </EditModeButton>
+            <EditModeButton target="MOVE" current={editMode} setter={setEditMode}> <FaArrowsAlt /> </EditModeButton>
+            <EditModeButton target="ZOOM" current={editMode} setter={setEditMode}> <FaSearch /> </EditModeButton>
+            <EditModeButton target="ERASE" current={editMode} setter={setEditMode}> <FaEraser /> </EditModeButton>
+            <EditModeButton target="LINE" current={editMode} setter={setEditMode}> <GiStraightPipe /> </EditModeButton>
+            <EditModeButton target="BOX" current={editMode} setter={setEditMode}> <FaBox /> </EditModeButton>
+            <EditModeButton target="ELLIPSE" current={editMode} setter={setEditMode}> <BsCircle /> </EditModeButton>
             {/* <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoBack() === false ? mapEditorStyles["disabled"] : '' }`} onClick={undo}> <FaUndo /> </button>
             <button className={`${mapEditorStyles["edit-button"]} ${ mapHistory.current.canGoForward() === false ? mapEditorStyles["disabled"] : '' }`} onClick={redo}> <FaRedo /> </button> */}
           </div>
@@ -338,16 +338,15 @@ function focus(worldPosition: IVector2) {
 
         <aside className={mapEditorStyles["left-side-bar"]}>
 
-          <div className={mapEditorStyles["tool-area"]}>
-            <p className={mapEditorStyles["tool-title"]}> Tile Picker </p>
+          <div className={mapEditorStyles["side-tool"]}>
+            <p className={mapEditorStyles["side-tool-title"]}> Tile Picker </p>
             <div className={mapEditorStyles["selected-tiles"]}>
               { Object.keys(savedTiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${areEqualTiles(selectedTile, savedTiles[tileName]) ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
             </div>
           </div>
 
-          <div className={mapEditorStyles["tile-creator"]}>
-
-            <h3> Tile Creator </h3>
+          <div className={mapEditorStyles["side-tool"]}>
+            <h3 className={mapEditorStyles["side-tool-title"]}> Tile Creator </h3>
             
             <div className={mapEditorStyles["tile-creator-color-picker"]}>
               Color
@@ -360,38 +359,17 @@ function focus(worldPosition: IVector2) {
             <button> Can Hit </button> 
             <button> Can Collide </button>
             <input type="file" onChange={onTileCreatorTextureImport} />
-            <button> Preview </button>
+            <button onClick={() => setPreviewingTileCreator(!previewingTileCreator)}> Preview </button>
 
             <button> Create </button>
-
           </div>
 
         </aside>
 
         <aside className={mapEditorStyles["right-side-bar"]}>
-
-          <div className={mapEditorStyles["tool-area"]}>
-
-            <p className={mapEditorStyles["tool-title"]}> Map Generator </p>
-
-            <div className={mapEditorStyles["map-dimensions-input-area"]}>
-              <section className={mapEditorStyles["map-dimensions-input-field"]}>
-                <p className={mapEditorStyles["map-dimensions-input-label"]}> Width: </p>
-                <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension(({...newMapDimension, width: e.target.valueAsNumber }))} value={newMapDimension.width} />
-              </section>
-
-              <section className={mapEditorStyles["map-dimensions-input-field"]}>
-                <p className={mapEditorStyles["map-dimensions-input-label"]}> Height: </p>
-                <input className={mapEditorStyles["map-dimensions-input"]} type="number" min={4} onChange={(e) => setNewMapDimension({ ...newMapDimension, height: e.target.valueAsNumber })} value={newMapDimension.height} />
-              </section>
-            </div>
-
-            <button className={mapEditorStyles['map-generate-button']} onClick={onMapGenerate}> Generate {newMapDimension.width} x {newMapDimension.height} Empty Map </button>
-
-          </div>
           
-          <div className={mapEditorStyles["tool-area"]}>
-            <p className={mapEditorStyles["tool-title"]}> Actions </p>
+          <div className={mapEditorStyles["side-tool"]}>
+            <p className={mapEditorStyles["side-tool-title"]}> Actions </p>
             <div className={mapEditorStyles["action-buttons"]}>
               <button className={mapEditorStyles["action-button"]} onClick={() => { fit(); center(); }}>{"Fit Map (F)"}</button>
               <button className={mapEditorStyles["action-button"]} onClick={center}>{"Center Map (c)"}</button>
@@ -403,9 +381,10 @@ function focus(worldPosition: IVector2) {
         </aside>
 
         <div className={mapEditorStyles["main-view"]}>
+          { previewingTileCreator ? <GameScreen cameraData={[previewCamera, setPreviewCamera]} mapData={[previewMap, setPreviewMap]} /> : 
           <div className={mapEditorStyles["editing-canvas-holder"]} ref={canvasHolderRef}>
               <canvas style={{cursor: cursor}} className={mapEditorStyles["editing-canvas"]} ref={canvasRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerLeave} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}> Unsupported Web Browser </canvas>
-          </div>
+          </div> }
           {/* <GameScreen cameraData={cameraData} mapData={mapData} /> */}
         </div>
 
@@ -415,3 +394,53 @@ function focus(worldPosition: IVector2) {
 
   )
 }
+
+function MapEditorSideTool({ title, children = "" }: { title: string, children?: React.ReactNode}) {
+
+  return (
+  <div className={mapEditorStyles["side-tool"]}>
+    <p className={mapEditorStyles["side-tool-title"]}>{title}</p>
+    
+    <div className={mapEditorStyles["side-tool-contents"]}>
+      { children }
+    </div>
+
+  </div>
+  )
+}
+
+function EditModeButton({ children = "", target, current, setter }: { children?: React.ReactNode, target: EditorEditMode, current: EditorEditMode, setter: React.Dispatch<EditorEditMode> } ) {
+  return <button className={`${mapEditorStyles["edit-button"]} ${ current === target ? mapEditorStyles["selected"] : '' }`} onClick={() => setter(target)}>{ children }</button>
+}
+
+// function MapGenerator() {
+//   return (
+//     <MapEditorSideTool title="Map Generator">
+
+//     </MapEditorSideTool>
+//   )
+// }
+
+// function EditorActions() {
+//   return (
+//     <MapEditorSideTool title="Actions">
+
+//     </MapEditorSideTool>
+//   )
+// }
+
+// function TileCreator() {
+//   return (
+//     <MapEditorSideTool title="Tile Creator">
+
+//     </MapEditorSideTool>
+//   )
+// }
+
+// function TilePicker() {
+//   return (
+//     <MapEditorSideTool title="Tile Picker">
+
+//     </MapEditorSideTool>
+//   )
+// }
