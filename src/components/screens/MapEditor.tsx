@@ -22,11 +22,9 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   const [map, setMap] = mapData;
   const [savedTiles] = tileData;
   const [selectedTile, setSelectedTile] = useState<Tile>(getDefaultTile("Wall Tile"));
-
-
   const [ghostTilePositions, setGhostTilePositions] = useState<IVector2[]>([]);
   const [cursor, setCursor] = useState<string>('crosshair');
-    const [view, setView] = useState<View>(new View(Vector2.ZERO, 10));
+  const [view, setView] = useState<View>(new View(Vector2.ZERO, 10));
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasHolderRef = useRef<HTMLDivElement>(null);
@@ -40,6 +38,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   })
   const isPointerDown: MutableRefObject<boolean> = useRef<boolean>(false);
 
+  
   const [tileCreatorOpened, setTileCreatorOpened] = useState<boolean>(false);
 
   function pointerPositionInCanvas(event: PointerEvent<Element>): Vector2 {
@@ -313,7 +312,6 @@ function focus(worldPosition: IVector2) {
     return <button className={`${mapEditorStyles["edit-button"]} ${ editMode === buttonEditMode ? mapEditorStyles["selected"] : '' }`} onClick={() => setEditMode(buttonEditMode)}>{ children}</button>
   }
 
-
   return (
 
     <div className={mapEditorStyles["master-container"]}>
@@ -337,13 +335,10 @@ function focus(worldPosition: IVector2) {
         <aside className={mapEditorStyles["left-side-bar"]}>
 
           <div className={mapEditorStyles["tool-area"]}>
-
             <p className={mapEditorStyles["tool-title"]}> Tile Picker </p>
-
             <div className={mapEditorStyles["selected-tiles"]}>
               { Object.keys(savedTiles).map(tileName => <button className={`${mapEditorStyles["saved-tile-selection-button"]} ${areEqualTiles(selectedTile, savedTiles[tileName]) ? mapEditorStyles["selected"] : mapEditorStyles["unselected"]}`} key={`tile: ${tileName}`} onClick={() => setSelectedTile(savedTiles[tileName])}> {tileName}</button>)}
             </div>
-
           </div>
 
           {/* <div className={mapEditorStyles["tile-creator"]}>
