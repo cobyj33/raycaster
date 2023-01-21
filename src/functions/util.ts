@@ -2,6 +2,7 @@ import { IHasher, midPointBetweenVector2 } from "raycaster/interfaces";
 import React from "react"
 import { PointerEvent } from "react";
 import { IVector2 } from "raycaster/interfaces";
+import { IDimension2D } from "interfaces/Dimension";
 
 
 export function removeDuplicates<T>(list: T[]): T[] {
@@ -185,3 +186,39 @@ export function withCanvasAndContextWebGL2(canvasRef: React.RefObject<HTMLCanvas
     onerror?.()
 }
 
+/**
+ * Test if a matrix is rectangular or not
+ * 
+ * A matrix is considered rectangular if it's height is not 0, and all rows have the same amount of columns
+ * 
+ * @param matrix A matrix of a data type
+ * @returns If the matrix is rectangular or not
+ */
+export function isRectangularMatrix<T>(matrix: T[][]): boolean {
+    if (matrix.length === 0) return true;
+    const width = matrix[0].length;
+
+    for (let row = 0; row < matrix.length; row++) {
+        if (matrix[row].length !== width) return false;
+    }
+    return true;
+}
+
+/**
+ * Test if a matrix is rectangular or not
+ * 
+ * A matrix is considered rectangular if it's height is not 0, and all rows have the same amount of columns
+ * 
+ * @param matrix A matrix of a data type
+ * @returns If the matrix is rectangular or not
+ */
+export function getRectangularMatrixDimensions<T>(matrix: T[][]): IDimension2D {
+    if (isRectangularMatrix(matrix)) {
+        return { width: matrix.length, height: matrix[0].length }
+    }
+    throw new Error("Attempted to get Rectangular Matrix dimensions of non-rectangular matrix " + matrix)
+}
+
+export function forEach2D<T>(matrix: T[][], callbackfn: (val: T, row: number, col: number) => void) {
+    matrix.forEach((rowArray, row) => rowArray.forEach((value, col) => callbackfn(value, row, col)))
+}

@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom/client';
 import 'globals.css';
 import App from 'App';
 import reportWebVitals from 'reportWebVitals';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { GameScreen } from 'raycaster/components';
+
+
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

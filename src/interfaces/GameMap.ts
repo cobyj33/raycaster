@@ -1,4 +1,4 @@
-import { removeDuplicates } from "functions/util";
+import { forEach2D, getRectangularMatrixDimensions, isRectangularMatrix, removeDuplicates } from "functions/util";
 import {
     Tile, areEqualTiles, getDefaultTile,
     IVector2,
@@ -59,6 +59,17 @@ export class GameMap implements GameMapData {
             return new GameMap(name, tiles, dimensions, getDefaultSkyBox())
         }
         throw new Error("Tried to create GameMap from invalid tile map " + tiles)
+    }
+
+    static fromNumberMatrix(name: string, matrix: number[][], mapping: {[key: number]: Tile}): GameMap {
+        if (isRectangularMatrix(matrix)) {
+            const tileMap: Tile[][] = getTileMap(getRectangularMatrixDimensions(matrix))
+            forEach2D(matrix, (val, row, col) => {
+                tileMap[row][col] = mapping[val]
+            })
+            return GameMap.fromTileMap(name, tileMap)
+        }
+        throw new Error("Tried to create GameMap from non-rectangular matrix " + matrix)
     }
 
     inBounds(row: number, col: number) {
