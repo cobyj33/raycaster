@@ -3,6 +3,8 @@ export interface StatefulData<T> extends GenericType<[T, React.Dispatch<React.Se
     [Symbol.iterator](): IterableIterator<T | React.Dispatch<React.SetStateAction<T>>>
 }
 
+export type Cardinal = "north" | "south" | "east" | "west"
+
 export interface Serializer<Type, JSONType> {
     serialize(data: Type): JSONType;
     deserialize(data: JSONType): Type; 

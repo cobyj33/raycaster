@@ -1,8 +1,15 @@
 import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
 import { useKeyHandler } from "classes/KeySystem";
-import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
-import { MapScreen, TouchControls } from "raycaster/components"
-import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera, GameMap } from "raycaster/interfaces";
+import { PointerLockEvents } from 'classes/PointerLockEvents';
+import { FirstPersonCameraControls } from 'classes/CameraControls';
+import { MapScreen } from 'components/screens/MapScreen';
+import { TouchControls } from 'components/TouchControls';
+
+import { StatefulData } from 'interfaces/util';
+import { Camera, renderCamera, tryPlaceCamera } from 'interfaces/Camera';
+import { GameMap } from 'interfaces/GameMap';
+import { rotateVector2 } from 'interfaces/Vector2';
+
 import gameScreenStyles from "components/styles/GameScreen.module.css"
 import { clamp, withCanvasAndContext, withCanvasAndContextWebGL2 } from 'functions/util';
 import { useCanvasHolderUpdater } from 'functions/hooks';

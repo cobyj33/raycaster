@@ -1,5 +1,7 @@
-import {getLine} from "raycaster/functions";
-import { getDefaultTile, GameMap, IVector2 } from "raycaster/interfaces";
+import {getLine} from "functions/shape";
+import { IVector2 } from "interfaces/Vector2";
+import { GameMap } from "interfaces/GameMap";
+import { getDefaultTile } from "interfaces/Tile";
 import { PointerEvent } from "react";
 import { EditMode } from "classes/Editor/EditMode";
 import { onPlacePointerDown, onPlacePointerMove } from "./DrawEditMode";

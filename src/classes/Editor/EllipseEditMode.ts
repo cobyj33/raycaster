@@ -1,7 +1,8 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { EditMode } from "raycaster/editor";
-import { Tile, IVector2 } from "raycaster/interfaces"
-import { getEllipse } from "raycaster/functions";
+import { EditMode } from "classes/Editor/EditMode";
+import { Tile } from "interfaces/Tile";
+import { IVector2 } from "interfaces/Vector2";
+import { getEllipse } from "functions/shape";
 
 
 export class EllipseEditMode extends EditMode {

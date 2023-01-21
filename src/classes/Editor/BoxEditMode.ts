@@ -1,7 +1,11 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { EditMode } from "raycaster/editor";
-import { ILineSegment, Tile, IVector2, GameMap } from "raycaster/interfaces"
-import { getLine, removeDuplicates } from "raycaster/functions";
+import { EditMode } from "classes/Editor/EditMode";
+import { ILineSegment } from "interfaces/LineSegment";
+import { Tile } from "interfaces/Tile";
+import { IVector2 } from "interfaces/Vector2";
+import { GameMap } from "interfaces/GameMap";
+import { getLine } from "functions/shape"
+import { removeDuplicates } from "functions/util";
 
 function getBoxCorners(start: IVector2, end: IVector2): ILineSegment[] {
     const firstCorner = { row: start.row, col: end.col }

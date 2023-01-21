@@ -1,12 +1,10 @@
 import { forEach2D, getRectangularMatrixDimensions, isRectangularMatrix, removeDuplicates } from "functions/util";
-import {
-    Tile, areEqualTiles, getDefaultTile,
-    IVector2,
-    RGBA,
-    Color,
-    Vector2,
-    inDimensionBounds
-} from "raycaster/interfaces"
+
+import { Tile, areEqualTiles, getDefaultTile } from "interfaces/Tile";
+import { IVector2, Vector2 } from "./Vector2";
+import { RGBA, Color } from "interfaces/Color";
+import { inDimensionBounds } from "interfaces/Ray";
+
 import { Dimension2D, IDimension2D } from "./Dimension";
 import Texture, { TextureAtlas } from "./Texture";
 

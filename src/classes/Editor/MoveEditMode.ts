@@ -1,6 +1,6 @@
 import { PointerEvent } from "react";
-import { Vector2, addVector2, vector2ToLength, getVectorLength } from "raycaster/interfaces"
-import { EditMode } from "raycaster/editor";
+import { Vector2, getVectorLength } from "interfaces/Vector2"
+import { EditMode } from "classes/Editor/EditMode";
 
 const MOVE_SPEED = 20;
 export class MoveEditMode extends EditMode{

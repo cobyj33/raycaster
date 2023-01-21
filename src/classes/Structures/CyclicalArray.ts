@@ -1,5 +1,3 @@
-import { isArrayLiteralExpression } from "typescript";
-
 
 export class CyclicalArray<T> {
     private readonly array: T[] = [];

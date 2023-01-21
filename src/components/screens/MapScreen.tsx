@@ -1,12 +1,20 @@
 import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
-import { tryPlaceCamera, rgbToString, StatefulData, castRay, Ray, GameMap, Camera, RaycastHit, RaycastNoHit, View, ILineSegment, LineSegment } from "raycaster/interfaces";
-import { Vector2, IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
+
+import { Camera, tryPlaceCamera } from 'interfaces/Camera';
+import { rgbToString } from 'interfaces/Color';
+import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
+import { StatefulData } from 'interfaces/util';
+import { GameMap } from 'interfaces/GameMap';
+import { View } from 'interfaces/View';
+import { LineSegment, ILineSegment } from 'interfaces/LineSegment';
+
+import { Vector2, IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "interfaces/Vector2";
 import { useKeyHandler } from 'classes/KeySystem';
-import { BirdsEyeCameraControls } from "raycaster/controls";
+import { BirdsEyeCameraControls } from 'classes/CameraControls';
+import { TouchControls } from 'components/TouchControls';
+import { useCanvasHolderUpdater, useResizeObserver } from 'functions/hooks';
 import mapScreenStyles from "components/styles/MapScreen.module.css";
-import { TouchControls } from "raycaster/components";
 import cam from "assets/Camera.png"
-import { useCanvasHolderUpdater, useResizeObserver } from "raycaster/functions";
 import { clamp, getCanvasAndContext2D } from 'functions/util';
 
 import { FaArrowsAlt, FaMousePointer, FaSearch } from 'react-icons/fa';

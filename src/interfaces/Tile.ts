@@ -1,4 +1,4 @@
-import { RGBA, areEqualColors, isRGBAObject, rgbaToString } from "raycaster/interfaces"
+import { RGBA, areEqualColors, isRGBAObject, rgbaToString } from "interfaces/Color";
 import marbleTexturePath from "assets/textures/Marble.png"
 import stoneBrickTexturePath from "assets/textures/Stone Brick Tile.png"
 import { getImage } from "functions/util";

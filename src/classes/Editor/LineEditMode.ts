@@ -1,7 +1,7 @@
 import { PointerEvent } from "react";
-import { EditMode } from "raycaster/editor";
-import { IVector2 } from "raycaster/interfaces"
-import { getLine } from "raycaster/functions";
+import { EditMode } from "classes/Editor/EditMode";
+import { IVector2 } from "interfaces/Vector2"
+import { getLine } from "functions/shape";
 
 export class LineEditMode extends EditMode {
     cursor() { return 'url("https://img.icons8.com/ios-glyphs/30/000000/pencil-tip.png"), crosshair' }

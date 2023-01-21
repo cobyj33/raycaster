@@ -1,6 +1,9 @@
 import { RefObject, useEffect, useRef } from 'react'
-import { View, GameMap, StatefulData } from "raycaster/interfaces" 
-import { renderWalls, renderGrid, useCanvas2DUpdater } from 'raycaster/functions';
+import { View } from 'interfaces/View'; 
+import { GameMap } from 'interfaces/GameMap';
+import { StatefulData } from 'interfaces/util';
+import { renderWalls, renderGrid } from 'functions/boardRenderingFunctions';
+import { useCanvas2DUpdater } from 'functions/hooks';
 
 export const BoardDrawing = ({ mapData, view, className }: { mapData: StatefulData<GameMap>, view: View, className?: string }) => {
   const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);

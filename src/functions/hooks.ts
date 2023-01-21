@@ -1,6 +1,6 @@
 import { RefObject, MutableRefObject, useEffect, useRef, useCallback } from "react";
-import { IEqualityComparer, StatefulData } from "raycaster/interfaces"
-import { HistoryStack } from "raycaster/structures"
+import { IEqualityComparer, StatefulData } from "interfaces/util";
+import { HistoryStack } from "classes/Structures/HistoryStack";
 
 type EventAction = (event: Event) => void;
 type Action = () => void;

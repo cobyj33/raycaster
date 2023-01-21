@@ -1,4 +1,9 @@
-import { getViewOffset, View, GameMap, inDimensionBounds, Tile, IVector2, RGBA, rgbaToString } from "raycaster/interfaces"
+import { getViewOffset, View } from "interfaces/View";
+import { GameMap } from "interfaces/GameMap";
+import { inDimensionBounds } from "interfaces/Ray";
+import { Tile } from "interfaces/Tile";
+import { IVector2 } from "interfaces/Vector2";
+import { RGBA, rgbaToString } from "interfaces/Color";
 
 export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View, map: GameMap): void {
     context.save();

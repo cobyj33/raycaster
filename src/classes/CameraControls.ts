@@ -1,4 +1,6 @@
-import { Camera, GameMap, Vector2 } from "raycaster/interfaces"
+import { Camera } from "interfaces/Camera";
+import { GameMap } from "interfaces/GameMap";
+import { Vector2 } from "interfaces/Vector2";
 import { KeyBinding, KeyHandler } from "classes/KeySystem"
 
 const MOVEMENT_CHECKING_DISTANCE = 0.15;

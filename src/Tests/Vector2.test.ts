@@ -1,4 +1,14 @@
-import { IVector2, addVector2, scaleVector2, subtractVector2, rotateVector2, distanceBetweenVector2, dotProductVector2, vector2Normalized, vector2ToLength, getVectorLength } from "raycaster/interfaces"
+import { 
+    IVector2, 
+    addVector2, 
+    scaleVector2, 
+    subtractVector2, 
+    rotateVector2, 
+    distanceBetweenVector2, 
+    dotProductVector2, 
+    vector2Normalized, 
+    vector2ToLength, 
+    getVectorLength } from "interfaces/Vector2"
 
 test('vector2 addition', () => {
     const first = { row: 10, col: 5 };

@@ -1,5 +1,7 @@
-import {getLine} from "raycaster/functions";
-import { Tile, GameMap, IVector2 } from "raycaster/interfaces";
+import {getLine} from "functions/shape";
+import { Tile } from "interfaces/Tile"
+import { GameMap } from "interfaces/GameMap";
+import { IVector2 } from "interfaces/Vector2";
 import { PointerEvent } from "react";
 import { EditMode, EditorData } from "classes/Editor/EditMode";
 

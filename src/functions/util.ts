@@ -1,7 +1,7 @@
-import { IHasher, midPointBetweenVector2 } from "raycaster/interfaces";
+import { IHasher } from "interfaces/util";
 import React from "react"
 import { PointerEvent } from "react";
-import { IVector2 } from "raycaster/interfaces";
+import { IVector2, midPointBetweenVector2 } from "interfaces/Vector2";
 import { IDimension2D } from "interfaces/Dimension";
 
 

@@ -1,7 +1,14 @@
 import React from 'react';
-import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile, StatefulData } from "raycaster/interfaces"
-import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
+import { Camera } from 'interfaces/Camera';
+import { GameMap } from 'interfaces/GameMap';
+import { Tile, TileTypeArray, getDefaultTile } from 'interfaces/Tile';
+import { StatefulData } from 'interfaces/util';
+
 import {initRaycaster} from 'loader';
+
+import { MapScreen } from 'components/screens/MapScreen';
+import { GameScreen } from 'components/screens/GameScreen';
+import { MapEditor } from 'components/screens/MapEditor';
 import MapScreenHelpMenu from 'components/help/MapScreenHelpMenu';
 import GameScreenHelpMenu from 'components/help/GameScreenHelpMenu';
 import MapEditorHelpMenu from 'components/help/MapEditorHelpMenu';
@@ -10,6 +17,7 @@ import { IDimension2D } from 'interfaces/Dimension';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Page from 'Page';
 import ErrorPage from 'ErrorPage';
+import { o } from 'vitest/dist/index-761e769b';
 
 
 // import JRLogo from "assets/JRWhite.svg"

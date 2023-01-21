@@ -1,11 +1,19 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback, ChangeEvent, RefObject } from 'react'
 
-import { StatefulData, IVector2, View, GameMap, getDefaultTile, Tile, areGameMapsEqual, tryPlaceCamera, Camera, areEqualTiles, Vector2, getViewOffset, inDimensionBounds, rgbaToString, RGBA } from "raycaster/interfaces";
-import { useHistory, useWindowEvent, useResizeObserver, getCanvasAndContext2D, useCanvasHolderUpdater, withCanvasAndContext, withCanvasAndContextSaved } from "raycaster/functions";
+import { StatefulData } from 'interfaces/util';
+import { IVector2, Vector2 } from 'interfaces/Vector2';
+import { View, getViewOffset } from 'interfaces/View';
+import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
+import { Camera, tryPlaceCamera } from "interfaces/Camera"
+import { Tile, getDefaultTile, areEqualTiles } from "interfaces/Tile" 
+import { inDimensionBounds } from 'interfaces/Ray';
+import { rgbaToString } from 'interfaces/Color';
+import { RGBA } from 'interfaces/Color';
+import { useHistory, useWindowEvent, useResizeObserver, useCanvasHolderUpdater } from 'functions/hooks';
+import { getCanvasAndContext2D, withCanvasAndContext, withCanvasAndContextSaved } from 'functions/util';
 
-
-import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "raycaster/editor"
-import { HistoryStack } from "raycaster/structures";
+import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "classes/Editor"
+import { HistoryStack } from "classes/Structures/HistoryStack";
 
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaBox } from "react-icons/fa"
 import { GiStraightPipe } from "react-icons/gi"

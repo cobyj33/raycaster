@@ -1,5 +1,5 @@
-import { IVector2 } from "raycaster/interfaces"
-import { removeDuplicates } from "raycaster/functions"
+import { IVector2 } from "interfaces/Vector2";
+import { removeDuplicates } from "functions/util";
 
 
 export function getLine(start: IVector2, end: IVector2): IVector2[] {

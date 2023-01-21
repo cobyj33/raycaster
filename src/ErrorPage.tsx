@@ -1,8 +1,8 @@
 import React from 'react'
 import { Camera } from 'interfaces/Camera'
 import { GameMap } from 'interfaces/GameMap'
-import { MapScreen } from 'raycaster/components'
-import { GameScreen } from 'raycaster/components'
+import { MapScreen } from 'components/screens/MapScreen'
+import { GameScreen } from 'components/screens/GameScreen'
 import appStyles from 'App.module.css';
 import { getDefaultTile, Tile } from 'interfaces/Tile'
 import { useRouteError } from "react-router-dom";

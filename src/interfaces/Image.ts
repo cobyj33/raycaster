@@ -1,4 +1,4 @@
-import { IVector2 } from "./Vector2"
+import { IVector2 } from "interfaces/Vector2"
 
 type Pixel = [number, number, number, number]
 

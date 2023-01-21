@@ -1,4 +1,3 @@
-import { isConstructorDeclaration } from "typescript";
 
 export class HistoryStack<T> {
     private history: T[] = [];

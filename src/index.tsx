@@ -4,7 +4,7 @@ import 'globals.css';
 import App from 'App';
 import reportWebVitals from 'reportWebVitals';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { GameScreen } from 'raycaster/components';
+import { GameScreen } from 'components/screens/GameScreen';
 
 
 

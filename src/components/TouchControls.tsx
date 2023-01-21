@@ -1,6 +1,9 @@
-import { Camera, scaleVector2, rotateVector2, StatefulData, GameMap } from "raycaster/interfaces"
-import { getMovedCameraPosition } from "raycaster/controls"
-import { HoldButton } from "raycaster/components";
+import { Camera } from "interfaces/Camera";
+import { StatefulData } from "interfaces/util";
+import { GameMap } from "interfaces/GameMap";
+import { scaleVector2, rotateVector2 } from "interfaces/Vector2";
+import { getMovedCameraPosition } from "classes/CameraControls";
+import { HoldButton } from "components/HoldButton";
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaRegArrowAltCircleLeft, FaRegArrowAltCircleRight } from 'react-icons/fa';
 import touchControlStyles from "components/styles/TouchControls.module.css"
 
