@@ -1,9 +1,8 @@
 import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
 import { tryPlaceCamera, rgbToString, StatefulData, castRay, Ray, GameMap, Camera, RaycastHit, RaycastNoHit, View, ILineSegment, LineSegment } from "raycaster/interfaces";
 import { Vector2, IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "raycaster/interfaces";
-import { useKeyHandler } from 'raycaster/keysystem';
+import { useKeyHandler } from 'classes/KeySystem';
 import { MenuSelector, MenuSelection } from "raycaster/components"
-import { GenerationAlgorithm, getGenerationAlgorithm } from "raycaster/generation"
 import { BirdsEyeCameraControls } from "raycaster/controls";
 import mapScreenStyles from "components/styles/MapScreen.module.css";
 import { TouchControls } from "raycaster/components";

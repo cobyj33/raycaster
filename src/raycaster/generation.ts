@@ -1,1 +1,1 @@
-export * from "classes/Generation/GenerationAlgorithm"
+export * from "classes/GenerationAlgorithm"

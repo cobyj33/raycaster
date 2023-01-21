@@ -158,3 +158,7 @@ export async function getImage(url: string): Promise<HTMLImageElement> {
         image.src = url;
     })
 }
+
+export function getNumberMatrix(rows: number, cols: number, fill: number) {
+    return Array.from({ length: rows }, () => (Array.from({ length: cols }, () => fill ) ) )
+}

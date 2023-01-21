@@ -225,26 +225,17 @@ export const getDefaultSkyBox: () => SkyBox = ( () => {
 //     return row >= 0 && col >= 0 && row < map.tiles.length && col < map.tiles[0].length;
 // }
 
-export function getTileMap(dimensions: IVector2, fillTile: Tile = getDefaultTile("Empty Tile")): Tile[][] {
+export function getTileMap(dimensions: IDimension2D, fillTile: Tile = getDefaultTile("Empty Tile")): Tile[][] {
     const tiles: Tile[][] = [];
-    for (let row = 0; row < dimensions.row; row++) {
+    for (let row = 0; row < dimensions.height; row++) {
         tiles.push(new Array<Tile>());
-        for (let col = 0; col < dimensions.col; col++) {
+        for (let col = 0; col < dimensions.width; col++) {
             tiles[row].push(fillTile);
         }
     }
     
     return tiles;
 }
-
-
-// export function getEmptyMap(dimensions: IVector2): GameMap {
-//     return {
-//         tiles: getEmptyTileMatrix(dimensions),
-//         dimensions: {...dimensions},
-//         skyBox: getDefaultSkyBox()
-//     }
-// }
 
 export function getEmptyTileMatrix(dimensions: IDimension2D): Tile[][] {
     const tileArray: Tile[][] = new Array<Array<Tile>>();

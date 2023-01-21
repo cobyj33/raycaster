@@ -1,5 +1,5 @@
 import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
-import { useKeyHandler } from "raycaster/keysystem";
+import { useKeyHandler } from "classes/KeySystem";
 import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls";
 import { MapScreen, TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera, GameMap } from "raycaster/interfaces";
