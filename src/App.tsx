@@ -1,5 +1,5 @@
 import React, { ButtonHTMLAttributes } from 'react';
-import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile, RGBA, ICamera, SkyBox, IVector2 } from "raycaster/interfaces"
+import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile, RGBA, ICamera, SkyBox, IVector2, StatefulData } from "raycaster/interfaces"
 import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { AiFillCamera, AiFillBook, AiOutlineSplitCells, AiFillSave, AiOutlineImport, AiFillFileAdd  } from 'react-icons/ai';
 import { BsFillMapFill, BsFillPaletteFill } from "react-icons/bs"
@@ -37,6 +37,22 @@ interface AppState {
     showingHelp: boolean
 }
 
+function getMenu(menu: Menus, [gameMap, setGameMap]: StatefulData<GameMap>, [camera, setCamera]: StatefulData<Camera>, [savedTiles, setSavedTiles]: StatefulData<{ [key: string]: Tile }>) {
+    switch(menu) {
+        case "Game Map": return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
+        case "Camera View": return <GameScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />
+        case "Editor": return <MapEditor cameraData={[camera, setCamera]} mapData={[gameMap, setGameMap]} tileData={[savedTiles, setSavedTiles]} />
+    }
+}
+
+function getHelpMenu(menu: Menus) {
+    switch(menu) {
+      case "Game Map": return <MapScreenHelpMenu />;
+      case "Camera View": return <GameScreenHelpMenu  />
+      case "Editor": return <MapEditorHelpMenu />
+    }
+  }
+
 function App() {
     // const [app, setApp] = React.useState<JRaycaster>(new JRaycaster(STARTING_MAP_DIMENSIONS))
     const [savedTiles, setSavedTiles] = React.useState<{ [key: string]: Tile }>({});
@@ -49,21 +65,7 @@ function App() {
         initRaycaster().then(createNew)
     }, [])
 
-  function getMenu(menu: Menus) {
-    switch(menu) {
-      case "Game Map": return <MapScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />;
-      case "Camera View": return <GameScreen mapData={[gameMap, setGameMap]} cameraData={[camera, setCamera]} />
-      case "Editor": return <MapEditor cameraData={[camera, setCamera]} mapData={[gameMap, setGameMap]} tileData={[savedTiles, setSavedTiles]} />
-    }
-  }
-
-  function getHelpMenu(menu: Menus) {
-    switch(menu) {
-      case "Game Map": return <MapScreenHelpMenu />;
-      case "Camera View": return <GameScreenHelpMenu  />
-      case "Editor": return <MapEditorHelpMenu />
-    }
-  }
+  
 
   function createNew() {
     const newMap = GameMap.filledEdges("Starting Map", STARTING_MAP_DIMENSIONS);
@@ -75,15 +77,6 @@ function App() {
     delete customTiles["Empty Tile"];
     setSavedTiles(customTiles);
   }
-
-  function save() {
-    
-  }
-
-  function load() {
-
-  }
-
 
   return (
     <div className={appStyles["app"]} tabIndex={0} >
@@ -113,10 +106,8 @@ function App() {
         </div> */}
       </nav>
 
-
-
       <div className={`${appStyles["viewing-area"]} ${appStyles["single"]}`}>
-        { showHelp ? getHelpMenu(currentMenu) : getMenu(currentMenu) }
+        { showHelp ? getHelpMenu(currentMenu) : getMenu(currentMenu, [gameMap, setGameMap], [camera, setCamera], [savedTiles, setSavedTiles]) }
       </div>
 
     </div>
