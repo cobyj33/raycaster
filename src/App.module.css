@@ -113,7 +113,6 @@
     flex-direction: row;
     flex-wrap: nowrap;
     max-width: 100vw;
-    overflow-x: scroll;
 }
 
 .nav-button {
