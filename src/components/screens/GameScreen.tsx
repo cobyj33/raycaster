@@ -4,10 +4,35 @@ import { PointerLockEvents, FirstPersonCameraControls } from "raycaster/controls
 import { MapScreen, TouchControls } from "raycaster/components"
 import { StatefulData, Camera, renderCamera, rotateVector2, tryPlaceCamera, GameMap } from "raycaster/interfaces";
 import gameScreenStyles from "components/styles/GameScreen.module.css"
-import { clamp } from 'functions/util';
+import { clamp, withCanvasAndContext, withCanvasAndContextWebGL2 } from 'functions/util';
 import { useCanvasHolderUpdater } from 'functions/hooks';
 
 const Y_MOVEMENT_TOLERANCE = 500;
+
+interface GameScreenState {
+    mobile: boolean,
+    showTouchControls: boolean,
+    showMap: boolean
+}
+
+const INITIAL_GAME_SCREEN_STATE: GameScreenState = {
+    mobile: false,
+    showTouchControls: false,
+    showMap: false
+}
+
+type GameScreenStateToggleMapAction = { type: "toggle map" }
+type GameScreenStateMobileAction = { type: "mobile" }
+type GameScreenStateActions = GameScreenStateToggleMapAction | GameScreenStateMobileAction
+
+type GameScreenStateReducer = React.Reducer<GameScreenState, GameScreenStateActions>
+const gameScreenReducer: GameScreenStateReducer = (state, action) => {
+    const { type } = action
+    switch (type) {
+        case "toggle map": return {...state, showMap: !state.showMap}
+        case "mobile": return {...state, showTouchControls: true, mobile: true }
+    }
+}
 
 export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera>, moveSpeed?: number }  ) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
@@ -16,7 +41,8 @@ export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapDat
 
     const [camera, setCamera] = cameraData;
     const [gameMap, setGameMap] = mapData;
-    const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
+    const [screenState, screenStateDispatch] = React.useReducer<GameScreenStateReducer>(gameScreenReducer, INITIAL_GAME_SCREEN_STATE)
+    const { showTouchControls, showMap } = screenState
     // const [map, setMap] = mapData;
 
     const cameraControls = React.useRef<FirstPersonCameraControls>(new FirstPersonCameraControls(gameMap, setCamera, moveSpeed))
@@ -43,28 +69,19 @@ export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapDat
     const cameraRenderProgram = React.useRef<WebGLProgram | null>(null)
 
     function render() {
-        const canvas = canvasRef.current
-        const canvasHolder = canvasHolderRef.current
-        if (canvas !== null && canvas !== undefined && canvasHolder !== null && canvasHolder !== undefined) {
-            const rect: DOMRect = canvasHolder.getBoundingClientRect()
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            const gl = canvas.getContext("webgl2");
-            if (gl !== null && gl !== undefined) {
-                cameraRenderProgram.current = renderCamera(camera, gameMap, canvas, gl, cameraRenderProgram.current);
-            }
-        }
+        withCanvasAndContextWebGL2(canvasRef, ({ gl, canvas}) => {
+            cameraRenderProgram.current = renderCamera(camera, gameMap, canvas, gl, cameraRenderProgram.current);
+        })
     }
 
     useEffect(render, [camera]);
-    
     const pointerLockEvents: MutableRefObject<PointerLockEvents | null> = useRef<PointerLockEvents | null>(null);
 
     useEffect( () => {
         if (canvasRef.current !== null && canvasRef.current !== undefined) {
             pointerLockEvents.current = new PointerLockEvents( [ ['mousemove', mouseControls.current] ], canvasRef.current )
         }
-        setCamera(camera => camera) // Resolve any starting collisions with walls
+        setCamera(camera => camera.place(tryPlaceCamera(camera, gameMap, camera.position))) // Resolve any starting collisions with walls
 
         return () => {
             if (pointerLockEvents.current !== null && pointerLockEvents.current !== undefined) {
@@ -96,13 +113,11 @@ export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapDat
 
     useCanvasHolderUpdater(canvasRef, canvasHolderRef, render)
 
-    const [showMap, setShowMap] = useState<boolean>(false)
-
     function onKeyDown(event: React.KeyboardEvent<Element>) {
         keyHandlerRef.current.onKeyDown(event)
         
         if (event.code === "KeyM") {
-            setShowMap(!showMap)
+            screenStateDispatch({ type: "toggle map" })
         }
     }
 
@@ -115,7 +130,7 @@ export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapDat
     <div ref={containerRef} className={gameScreenStyles["game-screen-container"]} onKeyDown={onKeyDown} onKeyUp={onKeyUp} tabIndex={0}>
 
         <div className={gameScreenStyles["game-canvas-holder"]} ref={canvasHolderRef}>
-            <canvas className={gameScreenStyles["game-canvas"]} onWheel={onWheel} onTouchStart={() => setShowTouchControls(true)} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} ref={canvasRef} tabIndex={0}> </canvas>
+            <canvas className={gameScreenStyles["game-canvas"]} onWheel={onWheel} onTouchStart={() => screenStateDispatch({ type: "mobile" })} onPointerDown={runPointerLockOnMouse} onPointerMove={mouseControls.current} ref={canvasRef} tabIndex={0}> </canvas>
         </div>
         
         {showTouchControls && <TouchControls cameraData={cameraData} mapData={mapData}/>}

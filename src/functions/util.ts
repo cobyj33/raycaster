@@ -162,3 +162,26 @@ export async function getImage(url: string): Promise<HTMLImageElement> {
 export function getNumberMatrix(rows: number, cols: number, fill: number) {
     return Array.from({ length: rows }, () => (Array.from({ length: cols }, () => fill ) ) )
 }
+
+/**
+ * A helper function to get the canvas and WebGL2 context of a React RefObject
+ * Accepts a canvas reference and a callback which only runs if the canvas and webgl2 context from the reference are non-null
+ * Meant mostly to cut down on boilerplate of checking for a canvas and then a context, which can take around 5 or 6 lines of code to do absolutely nothing
+ * Optionally, there is a function that can be passed in as a third argument if code needs to be run in case the canvas or context could not be found
+ * 
+ * This is meant to replace getCanvasAndContext2D, as it throws errors which have to be handled, while in most cases when these "errors" are throne nothing is supposed to happen anyway
+ * @param callbackfn A callback that takes in a canvas and context2D as parameters, and only runs if the canvas and context are non-null
+ * @returns 
+ */
+export function withCanvasAndContextWebGL2(canvasRef: React.RefObject<HTMLCanvasElement>, callbackfn: ( { canvas, gl }: { canvas: HTMLCanvasElement, gl: WebGL2RenderingContext }) => void, onerror?: () => void) {
+    const canvas: HTMLCanvasElement | null = canvasRef.current 
+    if (canvas !== null && canvas !== undefined) {
+        const gl = canvas.getContext("webgl2");
+        if (gl !== null && gl !== undefined) {
+            callbackfn({ canvas: canvas, gl: gl })
+            return
+        }
+    }
+    onerror?.()
+}
+

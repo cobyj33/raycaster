@@ -5,11 +5,7 @@ import { FaWindowClose } from "react-icons/fa"
 
 type Action = () => void
 export const HelpWindow = ({ children, title = "", onClose = null }: { children: React.ReactNode, title?: string, onClose?: Action | null }) => {
-    function close() {
-        if (onClose !== null && onClose !== undefined) {
-            onClose()
-        }
-    }
+    const close = () => onClose?.()
 
   return (
     <div className={helpWindowStyles["help-window"]}>

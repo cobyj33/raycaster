@@ -1,14 +1,14 @@
 import React from 'react'
-import helpMenuStyles from "components/styles/HelpMenu.module.css"
 import MSHMstyles from "components/styles/MapScreenHelpMenu.module.css"
+import HelpMenu from 'components/common/HelpMenu'
 
 type Action = () => void
 export const MapScreenHelpMenu = () => {
-  return <div className={helpMenuStyles["window"]}>
-    <h1 className={helpMenuStyles["title"]}> Help: Map Screen </h1>
-    <h3 className={helpMenuStyles["menu-description"]}> Behind the Scenes </h3>
+    return (
+    <HelpMenu title="Help: Map Screen" description='Behind the Scenes'>
     
-  </div>
+    </HelpMenu>
+    ) 
 }
 
 export default MapScreenHelpMenu

@@ -1,8 +1,6 @@
 export * from "components/BoardDrawing"
 export * from "components/screens/GameScreen"
-export * from "components/GenerationMenu"
 export * from "components/HoldButton"
-export * from "components/MenuSelector"
 export * from "components/TouchControls"
 export * from "components/ToolTip/ToolTip"
 

@@ -20,15 +20,7 @@ export type Menus = typeof acceptedMenus[number];
 
 const STARTING_MAP_DIMENSIONS: IDimension2D = { width: 50, height: 50 }
 
-function NavButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button {...props} className={appStyles["nav-button"]} />
-}
 
-function SelectableNavButton({ selected, ...props }: { selected: boolean } & ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button {...props} className={`${appStyles["nav-button"]} ${selected ? appStyles["selected"] : ""} ${props.className ?? ""}`} />
-}
-
-const ModalContext = React.createContext(null)
 
 interface AppState {
     map: GameMap,
@@ -113,5 +105,14 @@ function App() {
     </div>
   );
 }
+
+function NavButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+    return <button {...props} className={appStyles["nav-button"]} />
+}
+
+function SelectableNavButton({ selected, ...props }: { selected: boolean } & ButtonHTMLAttributes<HTMLButtonElement>) {
+    return <button {...props} className={`${appStyles["nav-button"]} ${selected ? appStyles["selected"] : ""} ${props.className ?? ""}`} />
+}
+  
 
 export default App;
