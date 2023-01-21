@@ -2,13 +2,49 @@
 
 // TODO: Create constructors for the texture format, as well as the 
 
+import { getImage } from "functions/util";
 import { Color } from "interfaces/Color";
 import potpack from "potpack";
+import { GiShrug } from "react-icons/gi";
 import { loadConfigFromFile } from "vite";
 import { Box } from "./Box";
 import { getImageFileBase64 } from "./Image";
 
-// The texture class will simply hold a texture's height, width, and ImageData
+const MAX_TEXTURE_SIDELENGTH_SIZE = 256
+
+function imageDataTo2DCanvas(data: ImageData): { canvas: HTMLCanvasElement, context: CanvasRenderingContext2D } {
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")
+    if (context !== null && context !== undefined) {
+        canvas.width = data.width;
+        canvas.height = data.height;
+        context.putImageData(data, 0, 0)
+        return { canvas: canvas, context: context }
+    }
+    throw new Error("Error: Could not convert ImageData to 2D Canvas, could not get canvas 2D context")
+}
+
+function convertImageDataForTexture(data: ImageData, maxSideSize: number): ImageData {
+    if (data.width <= maxSideSize && data.height <= maxSideSize) {
+        return new ImageData(data.data, data.width, data.height)
+    }
+
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")
+    if (context !== null && context !== undefined) {
+        const shrinkFactor = Math.min(maxSideSize / data.width, maxSideSize / data.height)
+        console.log("Shrink Factor: ", shrinkFactor)
+        canvas.width = data.width * shrinkFactor
+        canvas.height = data.height * shrinkFactor
+        console.log("Canvas Size: ", canvas.width, canvas.height)
+
+        const { canvas: tempCanvas } = imageDataTo2DCanvas(data)
+        context.scale(shrinkFactor, shrinkFactor)
+        context.drawImage(tempCanvas, 0, 0)
+        return context.getImageData(0, 0, canvas.width, canvas.height)
+    }
+    throw new Error("Could not convert image to texture, could not create 2D canvas context")
+}
 
 /**
  * 
@@ -22,7 +58,7 @@ export class Texture {
 
     constructor(name: string, data: ImageData) {
         this.name = name
-        this._data = new ImageData(data.data, data.width, data.height)
+        this._data = convertImageDataForTexture(data, MAX_TEXTURE_SIDELENGTH_SIZE)
         this.width = this._data.width;
         this.height = this._data.height;
     }
@@ -54,9 +90,24 @@ export class Texture {
         return Texture.fromHTMLImage(name, image)
     }
 
-    static async fromFile(name: string, file: File): Promise<Texture> {
+    static async fromFile(name: string, file: File, flipY: boolean = true): Promise<Texture> {
         const base64: string = await getImageFileBase64(file)
-        return this.fromSourcePath(name, base64)
+        if (!flipY) {
+            return Texture.fromSourcePath(name, base64)
+        } else {
+            const image: HTMLImageElement = await getImage(base64)
+            const canvas = document.createElement("canvas")
+            const context = canvas.getContext("2d")
+            if (context !== null && context !== undefined) {
+                canvas.width = image.width;
+                canvas.height = image.height
+                context.translate(0, image.height)
+                context.scale(1, -1)
+                context.drawImage(image, 0, 0)
+                return Texture.fromContext2D(name, context)
+            }
+            throw new Error("Could not flip image from file " + file.name + ": 2D context could not be created")
+        }
     }
 
     get pixels() {

@@ -9,6 +9,14 @@ export class Vector2 implements IVector2 {
     readonly col: number
 
     static readonly ZERO: Vector2 = new Vector2(0, 0)
+    static readonly EAST: Vector2 = new Vector2(1, 0)
+    static readonly WEST: Vector2 = new Vector2(-1, 0)
+    static readonly NORTH: Vector2 = new Vector2(0, -1)
+    static readonly SOUTH: Vector2 = new Vector2(0, 1)
+    static readonly NORTHWEST: Vector2 = Vector2.NORTH.add(Vector2.WEST).normalize()
+    static readonly SOUTHWEST: Vector2 = Vector2.SOUTH.add(Vector2.WEST).normalize()
+    static readonly NORTHEAST: Vector2 = Vector2.NORTH.add(Vector2.EAST).normalize()
+    static readonly SOUTHEAST: Vector2 = Vector2.SOUTH.add(Vector2.EAST).normalize()
 
     constructor(row: number, col: number) {
         this.row = row;

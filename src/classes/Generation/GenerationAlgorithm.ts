@@ -1,5 +1,5 @@
 import { IVector2, GameMap, getDefaultSkyBox, getDefaultTile, Tile, getTileMap } from "raycaster/interfaces";
-import { isInBounds } from "functions/matrixFunctions";
+import { isInBounds } from "functions/util";
 
 export interface GenerationAlgorithm {
     readonly name: string;

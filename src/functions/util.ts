@@ -1,5 +1,8 @@
 import { IHasher, midPointBetweenVector2 } from "raycaster/interfaces";
 import React from "react"
+import { PointerEvent } from "react";
+import { IVector2 } from "raycaster/interfaces";
+
 
 export function removeDuplicates<T>(list: T[]): T[] {
     const tracker = new Set<string>([])
@@ -99,4 +102,59 @@ export function clamp(value: number, lower: number, higher: number) {
     }
     
     return Math.min(higher, Math.max(lower, value))
+}
+
+export function isInBounds<T>(matrix: T[][], row: number, col: number) {
+    if (matrix.length === 0) return false;
+    return row >= 0 && row < matrix.length && col >= 0 && col < matrix[0].length;
+}
+
+/**
+ * Make the user download a file onto their computer
+ * 
+ * NOTE: ONLY WORKS INSIDE THE CONTEXT OF THE BROWSER, SHOULD NOT BE USED SERVER-SIDE
+ * NOTE: Since we are using vite as of now, this shouldn't matter, but in case of a switch to a different framework it will become necessary
+ * NOTE: Implemented as a closure containing an anchor which is used to download files through simulated clicks
+ * Probably would need to be modified to work in a non-static site generator, but it does fit into the context of this program
+ */
+export const requestWebDownload: (data: Blob, fileName: string) => void = ( () => {
+    const downloadAnchor = document.createElement("a")
+    downloadAnchor.setAttribute("data-purpose", "downloading")
+    document.body.appendChild(downloadAnchor);
+    
+    return (data: Blob, fileName: string) => {
+      const url = URL.createObjectURL(data)
+      downloadAnchor.href = url
+      downloadAnchor.download = fileName;
+      downloadAnchor.click();
+    }
+  })()
+
+export function isImageFile(file: File): boolean {
+  const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+  return validImageTypes.some(imageType => imageType === file.type)
+}
+
+export function pointerPositionInElement(element: Element, event: PointerEvent<Element>): IVector2 {
+  const elementBounds: DOMRect = element.getBoundingClientRect();
+  // return new IVector2(event.clientY - canvasBounds.y, event.clientX - canvasBounds.x).int();
+    return {
+        row: Math.trunc(event.clientY - elementBounds.y),
+        col: Math.trunc(event.clientX - elementBounds.x)
+    }
+    return { row: 0, col: 0  };
+  }
+
+export async function getImage(url: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+            resolve(image);
+        }
+
+        image.onerror = () => {
+            reject(url)
+        }
+        image.src = url;
+    })
 }

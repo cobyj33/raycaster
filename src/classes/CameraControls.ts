@@ -33,8 +33,13 @@ export const getMovedCameraPosition = (currentPosition: Vector2, currentDirectio
     return currentPosition;
 }
 
+interface FirstPersonCameraControlsConfig {
+    moveSpeed: number,
+}
+
+const FIRST_PERSON_CAMERA_CONTROL_DEFAULT_MOVE_SPEED = 0.25;
 export class FirstPersonCameraControls extends KeyHandler {
-    moveSpeed: number = 0.25;
+    moveSpeed: number;
     moveFactor: number = 1;
     map: GameMap
     setCamera: React.Dispatch<React.SetStateAction<Camera>>
@@ -59,10 +64,11 @@ export class FirstPersonCameraControls extends KeyHandler {
         this.setCamera(camera => camera.place(getMovedCameraPosition(camera.position, camera.direction.rotate(-Math.PI / 2), this.speed, this.map) ));
     }
 
-    constructor(map: GameMap, setCamera: React.Dispatch<React.SetStateAction<Camera>>) {
+    constructor(map: GameMap, setCamera: React.Dispatch<React.SetStateAction<Camera>>, moveSpeed: number = FIRST_PERSON_CAMERA_CONTROL_DEFAULT_MOVE_SPEED) {
         super()
         this.map = map
         this.setCamera = setCamera
+        this.moveSpeed = moveSpeed
 
         super.setBindings([
             new KeyBinding({ code: 'KeyW', onDown: this.moveForward.bind(this), whileDown: this.moveForward.bind(this) }),

@@ -1,12 +1,12 @@
 import React, { ButtonHTMLAttributes } from 'react';
-import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile, RGBA, ICamera, SkyBox } from "raycaster/interfaces"
+import { Camera, GameMap, Tile, TileTypeArray, getDefaultTile, RGBA, ICamera, SkyBox, IVector2 } from "raycaster/interfaces"
 import { MapScreen, GameScreen, MapEditor } from 'raycaster/components';
 import { AiFillCamera, AiFillBook, AiOutlineSplitCells, AiFillSave, AiOutlineImport, AiFillFileAdd  } from 'react-icons/ai';
 import { BsFillMapFill, BsFillPaletteFill } from "react-icons/bs"
 import { BiHelpCircle } from "react-icons/bi"
 import appStyles from 'App.module.css';
 import {initRaycaster} from 'loader';
-import { requestWebDownload } from 'functions/file';
+import { requestWebDownload } from 'functions/util';
 import MapScreenHelpMenu from 'components/help/MapScreenHelpMenu';
 import GameScreenHelpMenu from 'components/help/GameScreenHelpMenu';
 import MapEditorHelpMenu from 'components/help/MapEditorHelpMenu';
@@ -28,6 +28,14 @@ function SelectableNavButton({ selected, ...props }: { selected: boolean } & But
   return <button {...props} className={`${appStyles["nav-button"]} ${selected ? appStyles["selected"] : ""} ${props.className ?? ""}`} />
 }
 
+const ModalContext = React.createContext(null)
+
+interface AppState {
+    map: GameMap,
+    camera: Camera,
+    currentMenu: Menus,
+    showingHelp: boolean
+}
 
 function App() {
     // const [app, setApp] = React.useState<JRaycaster>(new JRaycaster(STARTING_MAP_DIMENSIONS))
@@ -75,7 +83,6 @@ function App() {
   function load() {
 
   }
-
 
 
   return (

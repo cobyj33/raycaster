@@ -9,7 +9,7 @@ import { useCanvasHolderUpdater } from 'functions/hooks';
 
 const Y_MOVEMENT_TOLERANCE = 500;
 
-export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera> }  ) => {
+export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapData: StatefulData<GameMap>, cameraData: StatefulData<Camera>, moveSpeed?: number }  ) => {
     const canvasRef: RefObject<HTMLCanvasElement> = useRef<HTMLCanvasElement>(null);
     const canvasHolderRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
     const containerRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
@@ -19,7 +19,7 @@ export const GameScreen = ( { mapData, cameraData  }: { mapData: StatefulData<Ga
     const [showTouchControls, setShowTouchControls] = useState<boolean>(false);
     // const [map, setMap] = mapData;
 
-    const cameraControls = React.useRef<FirstPersonCameraControls>(new FirstPersonCameraControls(gameMap, setCamera))
+    const cameraControls = React.useRef<FirstPersonCameraControls>(new FirstPersonCameraControls(gameMap, setCamera, moveSpeed))
     const keyHandlerRef = useKeyHandler(cameraControls.current);
     React.useEffect( () => {
         cameraControls.current.map = gameMap

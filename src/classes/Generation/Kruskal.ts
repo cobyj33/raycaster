@@ -1,5 +1,5 @@
 export {  }
-// import { isInBounds } from "functions/matrixFunctions";
+// import { isInBounds } from "functions/util";
 // import { Tile } from "interfaces/Tile";
 // import { Dimension } from "../Data/Dimension";
 // import { GameMap } from "../GameMap";

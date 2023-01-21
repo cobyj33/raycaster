@@ -7,8 +7,8 @@ import touchControlStyles from "components/styles/TouchControls.module.css"
 const MOVE_AMOUNT = 0.25
 const SENSITIVITY = 1;
 export const TouchControls = ({ cameraData, mapData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap> }) => {
-    const [_, setCamera] = cameraData;
-    const [map, __] = mapData;
+    const setCamera = cameraData[1];
+    const map = mapData[0];
     const speed = MOVE_AMOUNT * SENSITIVITY
     const turningPower = SENSITIVITY * Math.PI / 180
 

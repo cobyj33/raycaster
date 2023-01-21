@@ -208,7 +208,27 @@
     margin-left: 5px;
     text-align: center;
     font-weight: bold;
-    font-size: 16px;
+}
+
+.side-tool-title {
+    color: white;
+    background-color: rgb(20, 20, 20);
+    border-radius: 10px;
+    padding: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.side-tool-section-title {
+    color: white;
+    background-color: rgb(20, 20, 20);
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
 }
 
 
@@ -345,4 +365,50 @@
 
 .toggle-button.unselected {
     background-color: rgb(10, 10, 10);
+}
+
+.tile-creator-color-picker {
+    padding: 20px;
+    align-self: stretch;
+}
+
+.tile-creator-toggle-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.tile-creator-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.tile-creator-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+}
+
+.texture-upload-container {
+    position: relative;
+}
+
+.texture-file-import {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.texture-upload-preview-canvas {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }

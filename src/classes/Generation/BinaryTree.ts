@@ -5,7 +5,7 @@ export {  }
 // import { EmptyTile } from "../Tiles/EmptyTile";
 // import { WallTile } from "../Tiles/WallTile";
 // import { GenerationAlgorithm } from "./GenerationAlgorithm";
-// import { getTileMap } from "functions/matrixFunctions";
+// import { getTileMap } from "functions/util";
 
 // export class BinaryTree implements GenerationAlgorithm {
 // 	get name(): string { return "Binary Tree" } 
