@@ -17,7 +17,6 @@ import { IDimension2D } from 'jsutil';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Page from 'Page';
 import ErrorPage from 'ErrorPage';
-import { o } from 'vitest/dist/index-761e769b';
 
 
 // import JRLogo from "assets/JRWhite.svg"

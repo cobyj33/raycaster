@@ -2,7 +2,8 @@ import { IVector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2A
     IDimension2D } from "jsutil"
 import { Tile } from "./Tile";
 import { GameMap } from "./GameMap";
-import { Cardinal } from "./util";
+
+type Cardinal = "north" | "south" | "east" | "west"
 
 export interface Ray {
     readonly origin: IVector2;

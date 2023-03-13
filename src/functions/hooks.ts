@@ -1,80 +1,51 @@
-import { RefObject, MutableRefObject, useEffect, useRef, useCallback } from "react";
+import React, { RefObject, MutableRefObject, useEffect, useRef, useCallback } from "react";
 import { StatefulData } from "jsutil/react";
 import { HistoryStack } from "classes/Structures/HistoryStack";
 
 type EventAction = (event: Event) => void;
 type Action = () => void;
 type Check = () => boolean
-export function useWindowEvent(event: string, callback: Action | EventAction, deps?: any[]) {
-    const callbackRef = useRef<Action | EventAction>(callback);
 
-    useEffect(() => {
-        window.removeEventListener(event, callbackRef.current);
-        callbackRef.current = callback;
-        window.addEventListener(event, callbackRef.current);
-        return () => window.removeEventListener(event, callbackRef.current);
-    }, deps)
-}
 
-export function useTimedFlag(dependencies: any[] = [], checks: Check[] = [], timeInMS: number): MutableRefObject<boolean> {
-    const flag: MutableRefObject<boolean> = useRef<boolean>(false);
-    const lastSuccess: MutableRefObject<number> = useRef<number>(0)
+// export function useResizeObserver(toObserve: RefObject<HTMLElement>, ...actions: Action[]) {
+//     const observer = useRef(new ResizeObserver(() => { actions.forEach(action => action())} ));
+//     useEffect(() => {
+//         if (toObserve.current !== null && toObserve.current !== undefined) {
+//             observer.current.disconnect()
+//             observer.current = new ResizeObserver(() => { actions.forEach(action => action())} )
+//             observer.current.observe(toObserve.current)
+//         }
+//     })
+// }
 
-    useEffect( () => {
-        if (checks.some(check => check())) {
-            lastSuccess.current = Date.now();
-            flag.current = true;
-        }
+// /**
+//  * A hook to automatically update a canvas's actual size to fit it's holder on window size changes and holder size changes
+//  * 
+//  * @param canvasRef Reference to a canvas object which is positioned absolutely and filling its holder completely
+//  * @param canvasHolderRef Reference to the holder element which holds the absolutely positioned canvas
+//  * @param actions variable argument of actions (methods which take no parameters and return void) to take on a canvas holder's resize. will generally be an action to re-render the canvas after changing sizes
+//  */
 
-        setTimeout( () => {
-            if (Date.now() - lastSuccess.current > timeInMS) {
-                flag.current = false;
-            }
-        }, timeInMS);
-    }, dependencies);
+// export function useCanvasHolderUpdater(canvasRef: RefObject<HTMLCanvasElement>, canvasHolderRef: RefObject<HTMLElement>, ...actions: Action[]): void {
 
-    return flag;
-}
+//   const updateCanvasSize = useCallback( () => {
+//     const canvas: HTMLCanvasElement | null = canvasRef.current;
+//     const canvasHolder: HTMLElement | null = canvasHolderRef.current
+//     if (canvas !== null && canvas !== undefined && canvasHolder !== null && canvasHolder !== undefined) {
+//       const rect: DOMRect = canvasHolder.getBoundingClientRect();
+//         canvas.width = rect.width;
+//         canvas.height = rect.height;
+//     }
+//   }, [])
 
-export function useResizeObserver(toObserve: RefObject<HTMLElement>, ...actions: Action[]) {
-    const observer = useRef(new ResizeObserver(() => { actions.forEach(action => action())} ));
-    useEffect(() => {
-        if (toObserve.current !== null && toObserve.current !== undefined) {
-            observer.current.disconnect()
-            observer.current = new ResizeObserver(() => { actions.forEach(action => action())} )
-            observer.current.observe(toObserve.current)
-        }
-    })
-}
+//   useResizeObserver(canvasHolderRef, updateCanvasSize, ...actions)
 
-/**
- * A hook to automatically update a canvas's actual size to fit it's holder on window size changes and holder size changes
- * 
- * @param canvasRef Reference to a canvas object which is positioned absolutely and filling its holder completely
- * @param canvasHolderRef Reference to the holder element which holds the absolutely positioned canvas
- * @param actions variable argument of actions (methods which take no parameters and return void) to take on a canvas holder's resize. will generally be an action to re-render the canvas after changing sizes
- */
-
-export function useCanvasHolderUpdater(canvasRef: RefObject<HTMLCanvasElement>, canvasHolderRef: RefObject<HTMLElement>, ...actions: Action[]): void {
-
-  const updateCanvasSize = useCallback( () => {
-    const canvas: HTMLCanvasElement | null = canvasRef.current;
-    const canvasHolder: HTMLElement | null = canvasHolderRef.current
-    if (canvas !== null && canvas !== undefined && canvasHolder !== null && canvasHolder !== undefined) {
-      const rect: DOMRect = canvasHolder.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-    }
-  }, [])
-
-  useResizeObserver(canvasHolderRef, updateCanvasSize, ...actions)
-
-  useEffect(() => {
-      updateCanvasSize();
-      window.addEventListener('resize', updateCanvasSize);
-      return () => window.removeEventListener('resize', updateCanvasSize);
-  }, [])
-}
+//   useEffect(() => {
+//       updateCanvasSize();
+//       window.addEventListener('resize', updateCanvasSize);
+//       return () => window.removeEventListener('resize', updateCanvasSize);
+//   }, [])
+// }
 
 
 // export function useCanvasUpdater(canvasRef: RefObject<HTMLCanvasElement>) {
@@ -102,61 +73,61 @@ export function useCanvasHolderUpdater(canvasRef: RefObject<HTMLCanvasElement>, 
 //       }, [])
 // }
 
-export function useHistory<T>(stateData: StatefulData<T>, comparer: (first: T, second: T) => boolean): [Action, Action] {
-    const [state, setState] = stateData;
-    const history= useRef<HistoryStack<T>>(new HistoryStack<T>());
+// export function useHistory<T>(stateData: StatefulData<T>, comparer: (first: T, second: T) => boolean): [Action, Action] {
+//     const [state, setState] = stateData;
+//     const history= useRef<HistoryStack<T>>(new HistoryStack<T>());
 
-    useEffect(() => {
-        if (history.current.empty === false) {
-          if (comparer(state, history.current.peek()) === false) {
-            history.current.pushState(state);
-          }
-        } else {
-            history.current.pushState(state);
-        }
-      }, [state])
+//     useEffect(() => {
+//         if (history.current.empty === false) {
+//           if (comparer(state, history.current.peek()) === false) {
+//             history.current.pushState(state);
+//           }
+//         } else {
+//             history.current.pushState(state);
+//         }
+//       }, [state])
     
-      function undo() {
-        if (history.current.canGoBack()) {
-          history.current.back();
-          setState(history.current.state);
-        }
-      }
+//       function undo() {
+//         if (history.current.canGoBack()) {
+//           history.current.back();
+//           setState(history.current.state);
+//         }
+//       }
     
-      function redo() {
-        if (history.current.canGoForward()) {
-            history.current.forward();
-          setState(history.current.state);
-        }
-      }
+//       function redo() {
+//         if (history.current.canGoForward()) {
+//             history.current.forward();
+//           setState(history.current.state);
+//         }
+//       }
 
-    return [undo, redo];
-}
+//     return [undo, redo];
+// }
 
-export function useCanvas2DUpdater(canvasRef: RefObject<HTMLCanvasElement>) {
-    useEffect(() => {
-        function updateCanvasSize() {
-          const canvas: HTMLCanvasElement | null = canvasRef.current;
-          if (canvas !== null) {
-            const rect: DOMRect = canvas.getBoundingClientRect();
-            const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
-            if (context !== null) {
-              const data = context.getImageData(0, 0, canvas.width, canvas.height);
-              canvas.width = rect.width;
-              canvas.height = rect.height;
-              context.putImageData(data, 0, 0);
-            } else {
-              canvas.width = rect.width;
-              canvas.height = rect.height;
-            }
-          }
-        }
+// export function useCanvas2DUpdater(canvasRef: RefObject<HTMLCanvasElement>) {
+//     useEffect(() => {
+//         function updateCanvasSize() {
+//           const canvas: HTMLCanvasElement | null = canvasRef.current;
+//           if (canvas !== null) {
+//             const rect: DOMRect = canvas.getBoundingClientRect();
+//             const context: CanvasRenderingContext2D | null = canvas.getContext('2d');
+//             if (context !== null) {
+//               const data = context.getImageData(0, 0, canvas.width, canvas.height);
+//               canvas.width = rect.width;
+//               canvas.height = rect.height;
+//               context.putImageData(data, 0, 0);
+//             } else {
+//               canvas.width = rect.width;
+//               canvas.height = rect.height;
+//             }
+//           }
+//         }
     
-        updateCanvasSize();
-        window.addEventListener('resize', updateCanvasSize);
-        return () => window.removeEventListener('resize', updateCanvasSize);
-      }, [])
-}
+//         updateCanvasSize();
+//         window.addEventListener('resize', updateCanvasSize);
+//         return () => window.removeEventListener('resize', updateCanvasSize);
+//       }, [])
+// }
 
 // export function useEditModes(modes: { [key: string]: EditMode }, data: MutableRefObject<() => EditorData>, editMode: string, canvasRef: RefObject<HTMLElement>): void {
 //     const editorModes: MutableRefObject<{ [key: string]: EditMode }> = useRef(modes);

@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 
-import { StatefulData } from 'jsutil/react';
+import { StatefulData, useHistory, useCanvasHolderUpdater } from 'jsutil/react';
 import { IVector2, Vector2 } from 'jsutil';
 import { Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil';
 import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
 import { Camera, tryPlaceCamera } from "interfaces/Camera"
 import { Tile, getDefaultTile, areEqualTiles } from "interfaces/Tile" 
 import { rgbaToString } from 'interfaces/Color';
-import { useHistory, useCanvasHolderUpdater } from 'functions/hooks';
 import { getCanvasAndContext2D } from 'functions/util';
 
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "classes/Editor"

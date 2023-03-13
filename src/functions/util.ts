@@ -121,7 +121,7 @@ export function isImageFile(file: File): boolean {
   return validImageTypes.some(imageType => imageType === file.type)
 }
 
-export function pointerPositionInElement(element: Element, event: PointerEvent<Element>): IVector2 {
+export function pointerPositionInElement(element: Element, event: PointerEvent<Element> | PointerEvent): IVector2 {
   const elementBounds: DOMRect = element.getBoundingClientRect();
     return {
         row: Math.trunc(event.clientY - elementBounds.y),

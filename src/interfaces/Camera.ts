@@ -1,5 +1,3 @@
-import { StatefulData } from "jsutil/react"
-
 import { GameMap } from "interfaces/GameMap"
 import { Ray, RaycastHit, castRay } from "interfaces/Ray"
 import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "jsutil"

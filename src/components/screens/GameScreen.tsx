@@ -5,14 +5,12 @@ import { FirstPersonCameraControls } from 'classes/CameraControls';
 import { MapScreen } from 'components/screens/MapScreen';
 import { TouchControls } from 'components/TouchControls';
 
-import { StatefulData } from 'jsutil/react';
+import { StatefulData, useCanvasHolderUpdater } from 'jsutil/react';
 import { Camera, renderCamera, tryPlaceCamera } from 'interfaces/Camera';
 import { GameMap } from 'interfaces/GameMap';
-import { rotateVector2 } from 'jsutil';
 
 import gameScreenStyles from "components/styles/GameScreen.module.css"
-import { clamp, withCanvasAndContext, withCanvasAndContextWebGL2 } from 'functions/util';
-import { useCanvasHolderUpdater } from 'functions/hooks';
+import { clamp, withCanvasAndContextWebGL2 } from 'functions/util';
 
 const Y_MOVEMENT_TOLERANCE = 500;
 

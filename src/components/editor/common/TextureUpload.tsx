@@ -1,6 +1,6 @@
 import React from "react"
 import mapEditorStyles from "components/styles/MapEditor.module.css"
-import { useCanvasHolderUpdater } from "functions/hooks"
+import { useCanvasHolderUpdater } from "jsutil/react"
 import { isImageFile, withCanvasAndContextSaved } from "functions/util"
 import Texture from "interfaces/Texture"
 

@@ -3,7 +3,7 @@ import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useSt
 import { Camera, tryPlaceCamera } from 'interfaces/Camera';
 import { rgbToString } from 'interfaces/Color';
 import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
-import { StatefulData } from 'jsutil/react';
+import { StatefulData, useCanvasHolderUpdater } from 'jsutil/react';
 import { GameMap } from 'interfaces/GameMap';
 
 import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
@@ -12,7 +12,6 @@ import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
 import { useKeyHandler } from 'classes/KeySystem';
 import { BirdsEyeCameraControls } from 'classes/CameraControls';
 import { TouchControls } from 'components/TouchControls';
-import { useCanvasHolderUpdater } from 'functions/hooks';
 import mapScreenStyles from "components/styles/MapScreen.module.css";
 import cam from "assets/Camera.png"
 import { clamp, getCanvasAndContext2D } from 'functions/util';
