@@ -1,7 +1,6 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "classes/Editor/EditMode";
-import { ILineSegment, IVector2, getLine } from "jsutil";
-import { removeDuplicates } from "functions/util";
+import { ILineSegment, IVector2, getLine, removeDuplicatesGeneric } from "jsutil";
 
 function getBoxCorners(start: IVector2, end: IVector2): ILineSegment[] {
     const firstCorner = { row: start.row, col: end.col }
@@ -27,7 +26,7 @@ export class BoxEditMode extends EditMode {
         return []
     };
 
-    private get boxCells(): IVector2[] { return removeDuplicates(this.currentBox.flatMap(line => getLine(line.start, line.end))) ?? [] }
+    private get boxCells(): IVector2[] { return removeDuplicatesGeneric(this.currentBox.flatMap(line => getLine(line.start, line.end))) ?? [] }
 
     onPointerDown(event: PointerEvent<Element>) {
         this.start = this.data.currentHoveredCell;

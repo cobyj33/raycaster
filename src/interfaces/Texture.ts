@@ -2,10 +2,9 @@
 
 // TODO: Create constructors for the texture format, as well as the 
 
-import { getImage } from "functions/util";
 import { Color, IBox } from "jsutil/common";
 import potpack from "potpack";
-import { getImageFileBase64 } from "jsutil/browser";
+import { getImageFileBase64, loadImage } from "jsutil/browser";
 
 const MAX_TEXTURE_SIDELENGTH_SIZE = 256
 
@@ -92,7 +91,7 @@ export class Texture {
         if (!flipY) {
             return Texture.fromSourcePath(name, base64)
         } else {
-            const image: HTMLImageElement = await getImage(base64)
+            const image: HTMLImageElement = await loadImage(base64)
             const canvas = document.createElement("canvas")
             const context = canvas.getContext("2d")
             if (context !== null && context !== undefined) {

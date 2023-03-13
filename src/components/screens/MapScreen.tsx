@@ -7,14 +7,15 @@ import { GameMap } from 'interfaces/GameMap';
 
 import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
     LineSegment, View,
-    rgbToCSSString } from "jsutil/common";
+    rgbToCSSString,
+    clamp } from "jsutil/common";
 
 import { useKeyHandler } from 'classes/KeySystem';
 import { BirdsEyeCameraControls } from 'classes/CameraControls';
 import { TouchControls } from 'components/TouchControls';
 import mapScreenStyles from "components/styles/MapScreen.module.css";
 import cam from "assets/Camera.png"
-import { clamp, getCanvasAndContext2D } from 'functions/util';
+import { getCanvasAndContext2D } from 'jsutil/react';
 
 import { FaArrowsAlt, FaMousePointer, FaSearch } from 'react-icons/fa';
 import { RxAngle } from "react-icons/rx"
@@ -204,37 +205,11 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
 
     useEffect(render, [render])
     useEffect( () => {
-        // updateCanvasSize()
         fit()
         center()
     }, [])
 
-    // useResizeObserver(canvasHolderRef, updateCanvasSize);
     useCanvasHolderUpdater(canvasRef, canvasHolderRef, render)
-
-    // function updateCanvasSize() {
-    //     try {
-    //         const [canvas, context]: [HTMLCanvasElement, CanvasRenderingContext2D] = getCanvasAndContext2D(canvasRef);
-    //         const canvasHolder: HTMLDivElement | null = canvasHolderRef.current;
-    //         if (canvasHolder !== null && canvasHolder !== undefined) {
-    //             const rect: DOMRect = canvasHolder.getBoundingClientRect();
-    //             if (rect.width !== canvas.width || rect.height !== canvas.height) {
-    //                 const imageData: ImageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    //                 canvas.width = rect.width;
-    //                 canvas.height = rect.height;
-    //                 context.putImageData(imageData, 0, 0);
-    //             } else {
-    //                 canvas.width = rect.width;
-    //                 canvas.height = rect.height;
-    //             }
-            
-    //             render();
-    //         }
-    //     } catch (err) {
-    //         console.error(err)
-    //     }
-
-    //   }
 
     function faceCameraToPointer(event: PointerEvent<Element>) {
         const cameraPosition = worldToCanvas(camera.position);

@@ -1,7 +1,8 @@
 import React from "react"
 import mapEditorStyles from "components/styles/MapEditor.module.css"
 import { useCanvasHolderUpdater } from "jsutil/react"
-import { isImageFile, withCanvasAndContextSaved } from "functions/util"
+import { isImageFile } from "jsutil/browser"
+import { withCanvasAndContextSaved } from "jsutil/react"
 import Texture from "interfaces/Texture"
 
 

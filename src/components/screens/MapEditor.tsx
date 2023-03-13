@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 
-import { StatefulData, useHistory, useCanvasHolderUpdater } from 'jsutil/react';
-import { IVector2, Vector2, rgbaToCSSString } from 'jsutil';
-import { Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil';
+import { StatefulData, useHistory, useCanvasHolderUpdater, getCanvasAndContext2D } from 'jsutil/react';
+import { IVector2, Vector2, rgbaToCSSString, Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil/common';
 import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
 import { Camera, tryPlaceCamera } from "interfaces/Camera"
 import { Tile, getDefaultTile, areEqualTiles } from "interfaces/Tile" 
-import { getCanvasAndContext2D } from 'functions/util';
 
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "classes/Editor"
 import { HistoryStack } from "classes/Structures/HistoryStack";
@@ -76,18 +74,6 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   function worldToCanvas(worldPosition: Vector2): Vector2 {
     return worldPosition.subtract(view).scale(view.cellSize)
   }
-
-  // function focus(worldPosition: IVector2) {
-  //     setView(view => {
-  //         let newView = view;
-  //         withCanvasAndContext(canvasRef, (canvas, context) => {
-  //           const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/view.cellSize).scale(1/2)
-  //           const viewPosition = Vector2.fromData(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
-  //           newView = view.withPosition(viewPosition)
-  //         })
-  //         return newView
-  //     })
-  // }
 
   function center(): void {
     setView(view => { 

@@ -1,7 +1,6 @@
-import { IVector2, IDimension2D } from "jsutil";
+import { IVector2, IDimension2D, isInBounds2D } from "jsutil";
 import { GameMap, getDefaultSkyBox, getTileMap } from "interfaces/GameMap";
 import { getDefaultTile, Tile } from "interfaces/Tile";
-import { getNumberMatrix, isInBounds } from "functions/util";
 
 export interface GenerationAlgorithm {
     readonly name: string;
@@ -40,7 +39,7 @@ const generateRecursiveBacktracker: GenerationFunction = (dimensions) => {
         for (let i = 0; i < cellsAround.length; i++) {
             const [neighborRow, neighborCol] = cellsAround[i];
 
-            if (isInBounds(tiles, neighborRow, neighborCol)) {
+            if (isInBounds2D(tiles, neighborRow, neighborCol)) {
                 if (visited[neighborRow][neighborCol] === false) {
                     foundPath = true;
                     tiles[neighborRow][neighborCol] = getDefaultTile("Empty Tile");
@@ -72,7 +71,7 @@ const generateRecursiveBacktracker: GenerationFunction = (dimensions) => {
 
 
 const generateKruskal: GenerationFunction = (dimensions) => {
-    const matrix: number[][] = getNumberMatrix(dimensions.height, dimensions.width, 1)
+    const matrix: number[][] = Array.from({ length: dimensions.height }, () => new Array<number>(dimensions.width).fill(1))
         const sets: number[][] = [];
     
         for (let row = 0; row < dimensions.height; row++) {
@@ -98,8 +97,8 @@ const generateKruskal: GenerationFunction = (dimensions) => {
                 const [currentWallRow, currentWallCol] = currentWall;
                 const direction: number = Math.trunc(Math.random() * 2);
     
-                const canExpandSideways = isInBounds(matrix, currentWallRow, currentWallCol - 1) && isInBounds(matrix, currentWallRow, currentWallCol + 1);
-                const canExpandUpward = isInBounds(matrix, currentWallRow - 1, currentWallCol) && isInBounds(matrix, currentWallRow, currentWallCol + 1);
+                const canExpandSideways = isInBounds2D(matrix, currentWallRow, currentWallCol - 1) && isInBounds2D(matrix, currentWallRow, currentWallCol + 1);
+                const canExpandUpward = isInBounds2D(matrix, currentWallRow - 1, currentWallCol) && isInBounds2D(matrix, currentWallRow, currentWallCol + 1);
     
                 if ((direction === 0 && canExpandSideways) || (direction == 1 && !canExpandUpward && canExpandSideways)) {
                     if (sets[currentWallRow][currentWallCol - 1] !== sets[currentWallRow][currentWallCol + 1]) {

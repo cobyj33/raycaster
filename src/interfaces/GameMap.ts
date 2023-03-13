@@ -1,6 +1,5 @@
-import { forEach2D, getRectangularMatrixDimensions, isRectangularMatrix, removeDuplicates } from "functions/util";
 import { Tile, areEqualTiles, getDefaultTile } from "interfaces/Tile";
-import { IVector2, Vector2, RGBA, Color, Dimension2D, IDimension2D } from "jsutil/common";
+import { removeDuplicatesGeneric, IVector2, Vector2, RGBA, Color, Dimension2D, IDimension2D, forEach2D, getRectangularMatrixDimensions, isRectangularMatrix } from "jsutil/common";
 import { inDimensionBounds } from "interfaces/Ray";
 import Texture, { TextureAtlas } from "./Texture";
 
@@ -32,7 +31,7 @@ export class GameMap implements GameMapData {
             const textures: Texture[] = tiles.map(tileRow => tileRow.filter(tile => tile.texture !== null && tile.texture !== undefined))
                                                 .filter(tileRow => tileRow.length > 0)
                                                 .flatMap(tileRow => tileRow.map(tile => tile.texture as Texture))
-            const uniqueTextures = removeDuplicates(textures)                   
+            const uniqueTextures = removeDuplicatesGeneric(textures)                   
             this.textureAtlas = new TextureAtlas("Map Texture Atlas", uniqueTextures)
         } else {
             if (Array.isArray(textures)) {
