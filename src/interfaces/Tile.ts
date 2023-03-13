@@ -1,8 +1,7 @@
-import { RGBA, areEqualColors, isRGBAObject, rgbaToString } from "interfaces/Color";
+import { RGBA, areEqualColors, isRGBAObject, rgbaToCSSString, Nullable } from "jsutil/common";
 import marbleTexturePath from "assets/textures/Marble.png"
 import stoneBrickTexturePath from "assets/textures/Stone Brick Tile.png"
 import Texture from "interfaces/Texture"
-import { Nullable } from "jsutil";
 
 /**
  * The representation of a tile in a TileMap
@@ -201,7 +200,7 @@ export function getDefaultTile(tileType: TileTypes) {
 
 export function tileToString(tile: Tile) {
     return `Tile: [
-        color: ${rgbaToString(tile.color)},
+        color: ${rgbaToCSSString(tile.color)},
         canHit: ${tile.canHit},
         canCollide: ${tile.canCollide}
     ]`

@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 
 import { StatefulData, useHistory, useCanvasHolderUpdater } from 'jsutil/react';
-import { IVector2, Vector2 } from 'jsutil';
+import { IVector2, Vector2, rgbaToCSSString } from 'jsutil';
 import { Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil';
 import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
 import { Camera, tryPlaceCamera } from "interfaces/Camera"
 import { Tile, getDefaultTile, areEqualTiles } from "interfaces/Tile" 
-import { rgbaToString } from 'interfaces/Color';
 import { getCanvasAndContext2D } from 'functions/util';
 
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "classes/Editor"
@@ -164,7 +163,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
       const location = new Vector2(row, col)
       const screenLocation = worldToCanvas(location)
       if (screenLocation.row >= 0 && location.col >= 0 && location.row <= canvas.width && location.col <= canvas.height) {
-        context.fillStyle = rgbaToString(tile.color)
+        context.fillStyle = rgbaToCSSString(tile.color)
         drawCell(context, view, row, col)
       }
     })
@@ -176,7 +175,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
     if (ghostTilePositions.length === 0) return;
     context.save();
     context.globalAlpha = 0.5;
-    context.fillStyle = rgbaToString(selectedTile.color);
+    context.fillStyle = rgbaToCSSString(selectedTile.color);
     ghostTilePositions.forEach(pos => drawCell(context, view, pos.row, pos.col))
     context.restore();
   }

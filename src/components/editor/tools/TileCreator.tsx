@@ -1,6 +1,7 @@
 import React from "react"
 import { getDefaultTile, Tile } from "interfaces/Tile"
-import { RGBA } from "interfaces/Color"
+import { RGBA } from "jsutil/common"
+import { StatefulData } from "jsutil/react";
 import { Color as ReactColorColor, ColorResult, SketchPicker, SliderPicker } from 'react-color';
 import Texture from "interfaces/Texture";
 import mapEditorStyles from "components/styles/MapEditor.module.css"
@@ -10,7 +11,6 @@ import MapEditorSideToolSectionTitle from "../common/MapEditorSideToolSectionTit
 import EditorToggleButton from "../common/EditorToggleButton";
 import TextureUpload from "../common/TextureUpload";
 import EditorActionButton from "../common/EditorActionButton";
-import { StatefulData } from "jsutil/react";
 
 
 interface TileCreatorState {

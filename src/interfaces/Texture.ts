@@ -3,7 +3,7 @@
 // TODO: Create constructors for the texture format, as well as the 
 
 import { getImage } from "functions/util";
-import { Color } from "interfaces/Color";
+import { Color } from "jsutil/common";
 import potpack from "potpack";
 import { Box } from "./Box";
 import { getImageFileBase64 } from "jsutil/browser";

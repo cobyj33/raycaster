@@ -1,8 +1,7 @@
-import { getViewOffset, View, IVector2 } from "jsutil";
+import { getViewOffset, View, IVector2, RGBA, rgbaToCSSString } from "jsutil/common";
 import { GameMap } from "interfaces/GameMap";
 import { inDimensionBounds } from "interfaces/Ray";
 import { Tile } from "interfaces/Tile";
-import { RGBA, rgbaToString } from "interfaces/Color";
 
 export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View, map: GameMap): void {
     context.save();
@@ -11,7 +10,7 @@ export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingC
 
         const targetPosition: IVector2 = { row: Math.floor(view.row + row), col: Math.floor(view.col + col) } ;
         if (inDimensionBounds(targetPosition, map.dimensions)) {
-          context.fillStyle = rgbaToString(map.tiles[targetPosition.row][targetPosition.col].color);
+          context.fillStyle = rgbaToCSSString(map.tiles[targetPosition.row][targetPosition.col].color);
           context.globalAlpha = map.tiles[targetPosition.row][targetPosition.col].color.alpha / 255;
             const offset: IVector2 = getViewOffset(view);
           context.fillRect(-offset.col + col * view.cellSize, -offset.row + row * view.cellSize, view.cellSize, view.cellSize);
@@ -29,7 +28,7 @@ export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingC
     if (ghostTilePositions.length === 0) return;
      context.save();
     context.globalAlpha = 0.5;
-    context.fillStyle = rgbaToString(selectedTile.color);
+    context.fillStyle = rgbaToCSSString(selectedTile.color);
     ghostTilePositions.forEach(pos => drawCell(context, view, pos.row, pos.col))
      context.restore();
   }

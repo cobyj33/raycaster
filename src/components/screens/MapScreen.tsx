@@ -1,13 +1,13 @@
 import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
 
 import { Camera, tryPlaceCamera } from 'interfaces/Camera';
-import { rgbToString } from 'interfaces/Color';
 import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
 import { StatefulData, useCanvasHolderUpdater } from 'jsutil/react';
 import { GameMap } from 'interfaces/GameMap';
 
 import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
-    LineSegment, View } from "jsutil";
+    LineSegment, View,
+    rgbToCSSString } from "jsutil/common";
 
 import { useKeyHandler } from 'classes/KeySystem';
 import { BirdsEyeCameraControls } from 'classes/CameraControls';
@@ -118,7 +118,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         // context.canvas.height = map.dimensions.row * getMapScale();
         for (let row = 0; row < map.dimensions.height; row++) {
             for (let col = 0; col < map.dimensions.width; col++) {
-                context.fillStyle = rgbToString(map.tiles[row][col].color);
+                context.fillStyle = rgbToCSSString(map.tiles[row][col].color);
                 const pos = Vector2.fromData(screenView).translate(row, col).scale(screenView.cellSize)
                 context.fillRect(pos.col, pos.row, screenView.cellSize, screenView.cellSize);
                 // context.fillRect((screenView.col + col) * screenView.cellSize, (screenView.row + row) * screenView.cellSize, screenView.cellSize, screenView.cellSize);

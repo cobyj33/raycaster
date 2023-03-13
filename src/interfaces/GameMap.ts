@@ -1,11 +1,7 @@
 import { forEach2D, getRectangularMatrixDimensions, isRectangularMatrix, removeDuplicates } from "functions/util";
-
 import { Tile, areEqualTiles, getDefaultTile } from "interfaces/Tile";
-import { IVector2, Vector2 } from "jsutil";
-import { RGBA, Color } from "interfaces/Color";
+import { IVector2, Vector2, RGBA, Color, Dimension2D, IDimension2D } from "jsutil/common";
 import { inDimensionBounds } from "interfaces/Ray";
-
-import { Dimension2D, IDimension2D } from "jsutil";
 import Texture, { TextureAtlas } from "./Texture";
 
 
