@@ -1,4 +1,4 @@
-import { getViewOffset, View } from "interfaces/View";
+import { getViewOffset, View } from "jsutil";
 import { GameMap } from "interfaces/GameMap";
 import { inDimensionBounds } from "interfaces/Ray";
 import { Tile } from "interfaces/Tile";

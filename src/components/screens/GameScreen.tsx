@@ -149,3 +149,5 @@ export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapDat
     </div>
   )
 }
+
+export default GameScreen

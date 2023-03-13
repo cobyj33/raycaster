@@ -1,5 +1,5 @@
 import { RefObject, useEffect, useRef } from 'react'
-import { View } from 'interfaces/View'; 
+import { View } from 'jsutil'; 
 import { GameMap } from 'interfaces/GameMap';
 import { StatefulData } from 'interfaces/util';
 import { renderWalls, renderGrid } from 'functions/boardRenderingFunctions';

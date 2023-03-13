@@ -1,16 +1,14 @@
-import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent, useCallback, ChangeEvent, RefObject } from 'react'
+import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 
 import { StatefulData } from 'interfaces/util';
 import { IVector2, Vector2 } from 'interfaces/Vector2';
-import { View, getViewOffset } from 'interfaces/View';
+import { Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil';
 import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
 import { Camera, tryPlaceCamera } from "interfaces/Camera"
 import { Tile, getDefaultTile, areEqualTiles } from "interfaces/Tile" 
-import { inDimensionBounds } from 'interfaces/Ray';
 import { rgbaToString } from 'interfaces/Color';
-import { RGBA } from 'interfaces/Color';
-import { useHistory, useWindowEvent, useResizeObserver, useCanvasHolderUpdater } from 'functions/hooks';
-import { getCanvasAndContext2D, withCanvasAndContext, withCanvasAndContextSaved } from 'functions/util';
+import { useHistory, useCanvasHolderUpdater } from 'functions/hooks';
+import { getCanvasAndContext2D } from 'functions/util';
 
 import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "classes/Editor"
 import { HistoryStack } from "classes/Structures/HistoryStack";
@@ -20,8 +18,7 @@ import { GiStraightPipe } from "react-icons/gi"
 import { BsCircle } from 'react-icons/bs'
 
 import mapEditorStyles from "components/styles/MapEditor.module.css"
-import { GameScreen } from './GameScreen';
-import { Dimension2D, IDimension2D } from 'jsutil';
+import GameScreen from 'components/screens/GameScreen';
 import EditorActionButton from 'components/editor/common/EditorActionButton';
 import MapGenerator from 'components/editor/tools/MapGenerator';
 import MapEditorSideTool from 'components/editor/common/MapEditorSideTool';
