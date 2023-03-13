@@ -1,10 +1,10 @@
 import React from 'react'
-import { Camera } from 'interfaces/Camera'
-import { GameMap } from 'interfaces/GameMap'
+import { Camera } from 'libray/Camera'
+import { GameMap } from 'libray/GameMap'
 import { MapScreen } from 'components/screens/MapScreen'
 import { GameScreen } from 'components/screens/GameScreen'
 import appStyles from 'App.module.css';
-import { getDefaultTile, Tile } from 'interfaces/Tile'
+import { getDefaultTile, Tile } from 'libray/Tile'
 import { useRouteError } from "react-router-dom";
 import { PageLayout } from 'PageLayout'
 import { AppStatefulState } from 'App'

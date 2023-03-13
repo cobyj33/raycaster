@@ -1,8 +1,8 @@
 import { IVector2, getLine } from "jsutil";
-import { GameMap } from "interfaces/GameMap";
-import { getDefaultTile } from "interfaces/Tile";
+import { GameMap } from "libray/GameMap";
+import { getDefaultTile } from "libray/Tile";
 import { PointerEvent } from "react";
-import { EditMode } from "classes/Editor/EditMode";
+import { EditMode } from "libray/interaction/Editor/EditMode";
 import { onPlacePointerDown, onPlacePointerMove } from "./DrawEditMode";
 
 export class EraseEditMode extends EditMode {

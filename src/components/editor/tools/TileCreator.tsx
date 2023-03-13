@@ -1,9 +1,9 @@
 import React from "react"
-import { getDefaultTile, Tile } from "interfaces/Tile"
+import { getDefaultTile, Tile } from "libray/Tile"
 import { RGBA } from "jsutil/common"
 import { StatefulData } from "jsutil/react";
 import { Color as ReactColorColor, ColorResult, SketchPicker, SliderPicker } from 'react-color';
-import Texture from "interfaces/Texture";
+import Texture from "libray/Texture";
 import mapEditorStyles from "components/styles/MapEditor.module.css"
 import MapEditorSideTool from "../common/MapEditorSideTool";
 import EditorInputField from "../common/EditorInputField";

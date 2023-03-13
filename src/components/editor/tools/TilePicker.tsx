@@ -1,6 +1,6 @@
 import mapEditorStyles from "components/styles/MapEditor.module.css"
 import MapEditorSideTool from "components/editor/common/MapEditorSideTool"
-import { areEqualTiles, Tile } from "interfaces/Tile"
+import { areEqualTiles, Tile } from "libray/Tile"
 import EditorToggleButton from "../common/EditorToggleButton"
 
 

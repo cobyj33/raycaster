@@ -1,4 +1,4 @@
-import { GameMap } from "interfaces/GameMap"
+import { GameMap } from "libray/GameMap"
 
 test("equal maps", () => {
     const firstMap: GameMap = GameMap.filledEdges("First Map", { width: 10, height: 10 })

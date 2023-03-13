@@ -2,12 +2,11 @@ import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, Key
 
 import { StatefulData, useHistory, useCanvasHolderUpdater, getCanvasAndContext2D } from 'jsutil/react';
 import { IVector2, Vector2, rgbaToCSSString, Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil/common';
-import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
-import { Camera, tryPlaceCamera } from "interfaces/Camera"
-import { Tile, getDefaultTile, areEqualTiles } from "interfaces/Tile" 
+import { GameMap, areGameMapsEqual } from 'libray/GameMap';
+import { Camera, tryPlaceCamera } from "libray/Camera"
+import { Tile, getDefaultTile, areEqualTiles } from "libray/Tile" 
 
-import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "classes/Editor"
-import { HistoryStack } from "classes/Structures/HistoryStack";
+import { EditMode, EditorData, MoveEditMode, ZoomEditMode, DrawEditMode, EraseEditMode, LineEditMode, BoxEditMode, EllipseEditMode } from "libray/interaction/Editor"
 
 import { FaBrush, FaArrowsAlt, FaSearch, FaEraser, FaBox } from "react-icons/fa"
 import { GiStraightPipe } from "react-icons/gi"
@@ -29,7 +28,6 @@ const TILE_PREVIEW_START_POSITION = new Vector2(2, 5)
 const TILE_PREVIEW_START_DIRECTION = Vector2.EAST
 
 export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: StatefulData<Camera>, mapData: StatefulData<GameMap>, tileData: StatefulData<{[key: string]: Tile}> }) => {
-  const mapHistory = useRef<HistoryStack<GameMap>>(new HistoryStack<GameMap>());
 
   const [camera, setCamera] = cameraData;
   const [map, setMap] = mapData;

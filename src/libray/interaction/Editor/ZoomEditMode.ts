@@ -1,6 +1,6 @@
 import { PointerEvent } from "react";
 import { getVectorLength, Vector2 } from "jsutil"
-import { EditMode } from "classes/Editor/EditMode";
+import { EditMode } from "libray/interaction/Editor/EditMode";
 
 const ZOOM_DIRECTION: Vector2 = new Vector2(-1, -1)
 

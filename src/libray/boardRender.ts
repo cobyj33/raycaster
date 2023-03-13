@@ -1,7 +1,7 @@
 import { getViewOffset, View, IVector2, RGBA, rgbaToCSSString } from "jsutil/common";
-import { GameMap } from "interfaces/GameMap";
-import { inDimensionBounds } from "interfaces/Ray";
-import { Tile } from "interfaces/Tile";
+import { GameMap } from "libray/GameMap";
+import { inDimensionBounds } from "libray/Ray";
+import { Tile } from "libray/Tile";
 
 export function renderWalls(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, view: View, map: GameMap): void {
     context.save();

@@ -1,11 +1,11 @@
-import { GameMap } from "interfaces/GameMap"
-import { Ray, RaycastHit, castRay } from "interfaces/Ray"
+import { GameMap } from "libray/GameMap"
+import { Ray, RaycastHit, castRay } from "libray/Ray"
 import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "jsutil"
 import { LineSegment } from "jsutil"
 
 import { createVertexBuffer, createElementArrayBuffer, compileProgramFromSourceStrings } from "jsutil/browser"
-import cameraVertexShaderSource from "shaders/camera.vert?raw"
-import cameraFragmentShaderSource from "shaders/camera.frag?raw"
+import cameraVertexShaderSource from "libray/shaders/camera.vert?raw"
+import cameraFragmentShaderSource from "libray/shaders/camera.frag?raw"
 import Texture, { TextureAtlas } from "./Texture"
 
 export interface ICamera {

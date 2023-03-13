@@ -1,5 +1,5 @@
 type Action = () => void;
-type DocEvent = [string, (event: any) => void];
+type DocEvent = [keyof DocumentEventMap, (event: DocumentEventMap[keyof DocumentEventMap]) => void];
 
 export class PointerLockEvents {
     onLockedEvents: DocEvent[];

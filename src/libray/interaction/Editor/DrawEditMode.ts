@@ -1,8 +1,8 @@
-import { Tile } from "interfaces/Tile"
-import { GameMap } from "interfaces/GameMap";
+import { Tile } from "libray/Tile"
+import { GameMap } from "libray/GameMap";
 import { IVector2, getLine } from "jsutil";
 import { PointerEvent } from "react";
-import { EditMode, EditorData } from "classes/Editor/EditMode";
+import { EditMode, EditorData } from "libray/interaction/Editor/EditMode";
 
 function tryPlaceCell({row, col}: IVector2, data: EditorData, tile: Tile) {
     const [map, setMap] = data.mapData;

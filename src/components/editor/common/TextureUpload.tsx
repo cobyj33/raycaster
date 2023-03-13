@@ -3,7 +3,7 @@ import mapEditorStyles from "components/styles/MapEditor.module.css"
 import { useCanvasHolderUpdater } from "jsutil/react"
 import { isImageFile } from "jsutil/browser"
 import { withCanvasAndContextSaved } from "jsutil/react"
-import Texture from "interfaces/Texture"
+import Texture from "libray/Texture"
 
 
 export function TextureUpload({ onTextureUpload, textureName = "" }: { onTextureUpload: (texture: Texture) => void, textureName?: string }) {

@@ -1,7 +1,7 @@
-import { Tile, areEqualTiles, getDefaultTile } from "interfaces/Tile";
+import { Tile, areEqualTiles, getDefaultTile } from "libray/Tile";
 import { removeDuplicatesGeneric, IVector2, Vector2, RGBA, Color, Dimension2D, IDimension2D, forEach2D, getRectangularMatrixDimensions, isRectangularMatrix } from "jsutil/common";
-import { inDimensionBounds } from "interfaces/Ray";
-import Texture, { TextureAtlas } from "./Texture";
+import { inDimensionBounds } from "libray/Ray";
+import Texture, { TextureAtlas } from "libray/Texture";
 
 
 export interface GameMapData {

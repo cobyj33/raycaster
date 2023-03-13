@@ -1,5 +1,5 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { EditMode } from "classes/Editor/EditMode";
+import { EditMode } from "libray/interaction/Editor/EditMode";
 import { ILineSegment, IVector2, getLine, removeDuplicatesGeneric } from "jsutil";
 
 function getBoxCorners(start: IVector2, end: IVector2): ILineSegment[] {

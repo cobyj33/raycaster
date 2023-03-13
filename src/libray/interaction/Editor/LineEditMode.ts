@@ -1,5 +1,5 @@
 import { PointerEvent } from "react";
-import { EditMode } from "classes/Editor/EditMode";
+import { EditMode } from "libray/interaction/Editor/EditMode";
 import { IVector2, getLine } from "jsutil"
 
 export class LineEditMode extends EditMode {

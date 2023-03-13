@@ -1,7 +1,7 @@
 import { IVector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2AlterToRow, vector2AlterToCol,
     IDimension2D } from "jsutil"
-import { Tile } from "./Tile";
-import { GameMap } from "./GameMap";
+import { Tile } from "libray/Tile";
+import { GameMap } from "libray/GameMap";
 
 type Cardinal = "north" | "south" | "east" | "west"
 

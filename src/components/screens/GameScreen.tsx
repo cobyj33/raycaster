@@ -1,14 +1,14 @@
 import React, { MutableRefObject, RefObject, PointerEvent, useEffect, useRef, useState, WheelEvent } from 'react'
-import { useKeyHandler } from "classes/KeySystem";
-import { PointerLockEvents } from 'classes/PointerLockEvents';
-import { FirstPersonCameraControls } from 'classes/CameraControls';
+import { useKeyHandler } from "libray/interaction/KeySystem";
+import { PointerLockEvents } from 'libray/interaction/PointerLockEvents';
+import { FirstPersonCameraControls } from 'libray/interaction/CameraControls';
 import { MapScreen } from 'components/screens/MapScreen';
 import { TouchControls } from 'components/TouchControls';
 
 import { StatefulData, useCanvasHolderUpdater, withCanvasAndContextWebGL2 } from 'jsutil/react';
 import { clamp } from "jsutil/common"
-import { Camera, renderCamera, tryPlaceCamera } from 'interfaces/Camera';
-import { GameMap } from 'interfaces/GameMap';
+import { Camera, renderCamera, tryPlaceCamera } from 'libray/Camera';
+import { GameMap } from 'libray/GameMap';
 
 import gameScreenStyles from "components/styles/GameScreen.module.css"
 
@@ -56,19 +56,23 @@ export const GameScreen = ( { mapData, cameraData, moveSpeed = 0.25  }: { mapDat
         cameraControls.current.map = gameMap
     }, [mapData])
 
-    const mouseControls = useRef<(event: PointerEvent<Element>) => void>((event: PointerEvent<Element>) => {
-        const xMovement = -event.movementX;
-        // const yMovement = -Math.sin(event.movementY / 10 * (Math.PI / 180.0));
-        const yMovement = -Math.atan2(event.movementY, Y_MOVEMENT_TOLERANCE);
-        setCamera( (camera: Camera) => {
-            const MAX_LOOKING_ANGLE = Math.PI / 4
-            const MIN_LOOKING_ANGLE = -Math.PI / 4
-            const TURN_DAMPENING_FACTOR = 1 / 40;
-
-            const newLookingAngle =  clamp(camera.lookingAngle + yMovement, MIN_LOOKING_ANGLE, MAX_LOOKING_ANGLE) 
-            const cameraRotation = xMovement * TURN_DAMPENING_FACTOR * (Math.PI / 180.0)
-            return camera.face(camera.direction.rotate(cameraRotation)).withLookingAngle(newLookingAngle)
-        });
+    const mouseControls = useRef<(event: Event | PointerEvent<Element>) => void>((event: Event | PointerEvent<Element>) => {
+        if ("movementX" in event && "movementY" in event && typeof(event.movementX) === "number" && typeof(event.movementY) === "number") {
+            const xMovement = -event.movementX;
+            // const yMovement = -Math.sin(event.movementY / 10 * (Math.PI / 180.0));
+            const yMovement = -Math.atan2(event.movementY, Y_MOVEMENT_TOLERANCE);
+            setCamera( (camera: Camera) => {
+                const MAX_LOOKING_ANGLE = Math.PI / 4
+                const MIN_LOOKING_ANGLE = -Math.PI / 4
+                const TURN_DAMPENING_FACTOR = 1 / 40;
+    
+                const newLookingAngle =  clamp(camera.lookingAngle + yMovement, MIN_LOOKING_ANGLE, MAX_LOOKING_ANGLE) 
+                const cameraRotation = xMovement * TURN_DAMPENING_FACTOR * (Math.PI / 180.0)
+                return camera.face(camera.direction.rotate(cameraRotation)).withLookingAngle(newLookingAngle)
+            });
+        } else {
+            throw new Error(`Received a non-movement event in mouseControls for GameScreen`)
+        }
     });
 
     const cameraRenderProgram = React.useRef<WebGLProgram | null>(null)

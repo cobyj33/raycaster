@@ -1,6 +1,6 @@
 import { PointerEvent } from "react";
 import { Vector2, getVectorLength } from "jsutil"
-import { EditMode } from "classes/Editor/EditMode";
+import { EditMode } from "libray/interaction/Editor/EditMode";
 
 const MOVE_SPEED = 20;
 export class MoveEditMode extends EditMode{

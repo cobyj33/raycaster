@@ -1,17 +1,17 @@
 import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useState, WheelEvent } from 'react'
 
-import { Camera, tryPlaceCamera } from 'interfaces/Camera';
-import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
+import { Camera, tryPlaceCamera } from 'libray/Camera';
+import { Ray, castRay, RaycastHit, RaycastNoHit } from 'libray/Ray';
 import { StatefulData, useCanvasHolderUpdater } from 'jsutil/react';
-import { GameMap } from 'interfaces/GameMap';
+import { GameMap } from 'libray/GameMap';
 
 import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
     LineSegment, View,
     rgbToCSSString,
     clamp } from "jsutil/common";
 
-import { useKeyHandler } from 'classes/KeySystem';
-import { BirdsEyeCameraControls } from 'classes/CameraControls';
+import { useKeyHandler } from 'libray/interaction/KeySystem';
+import { BirdsEyeCameraControls } from 'libray/interaction/CameraControls';
 import { TouchControls } from 'components/TouchControls';
 import mapScreenStyles from "components/styles/MapScreen.module.css";
 import cam from "assets/Camera.png"

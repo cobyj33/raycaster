@@ -1,8 +1,8 @@
 import { RefObject, useEffect, useRef } from 'react'
 import { View } from 'jsutil/common'; 
-import { GameMap } from 'interfaces/GameMap';
+import { GameMap } from 'libray/GameMap';
 import { StatefulData, useCanvas2DUpdater } from 'jsutil/react';
-import { renderWalls, renderGrid } from 'functions/boardRenderingFunctions';
+import { renderWalls, renderGrid } from 'libray/boardRender';
 
 
 export const BoardDrawing = ({ mapData, view, className }: { mapData: StatefulData<GameMap>, view: View, className?: string }) => {

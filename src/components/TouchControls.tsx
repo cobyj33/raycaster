@@ -1,8 +1,8 @@
-import { Camera } from "interfaces/Camera";
+import { Camera } from "libray/Camera";
 import { StatefulData } from "jsutil/react";
-import { GameMap } from "interfaces/GameMap";
+import { GameMap } from "libray/GameMap";
 import { scaleVector2, rotateVector2 } from "jsutil";
-import { getMovedCameraPosition } from "classes/CameraControls";
+import { getMovedCameraPosition } from "libray/interaction/CameraControls";
 import { HoldButton } from "components/HoldButton";
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaRegArrowAltCircleLeft, FaRegArrowAltCircleRight } from 'react-icons/fa';
 import touchControlStyles from "components/styles/TouchControls.module.css"

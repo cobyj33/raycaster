@@ -1,7 +1,7 @@
 import { RGBA, areEqualColors, isRGBAObject, rgbaToCSSString, Nullable } from "jsutil/common";
 import marbleTexturePath from "assets/textures/Marble.png"
 import stoneBrickTexturePath from "assets/textures/Stone Brick Tile.png"
-import Texture from "interfaces/Texture"
+import Texture from "libray/Texture"
 
 /**
  * The representation of a tile in a TileMap

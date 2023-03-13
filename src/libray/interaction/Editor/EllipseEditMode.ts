@@ -1,5 +1,5 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { EditMode } from "classes/Editor/EditMode";
+import { EditMode } from "libray/interaction/Editor/EditMode";
 import { IVector2, getEllipse } from "jsutil/common";
 
 
