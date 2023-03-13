@@ -5,7 +5,7 @@ import { IVector2, Vector2 } from "./Vector2";
 import { RGBA, Color } from "interfaces/Color";
 import { inDimensionBounds } from "interfaces/Ray";
 
-import { Dimension2D, IDimension2D } from "./Dimension";
+import { Dimension2D, IDimension2D } from "jsutil";
 import Texture, { TextureAtlas } from "./Texture";
 
 
@@ -30,7 +30,7 @@ export class GameMap implements GameMapData {
         }
         
         this.tiles = [...tiles];
-        this.dimensions = Dimension2D.fromIDimension2D(dimensions);
+        this.dimensions = Dimension2D.fromData(dimensions);
         this.skyBox = {...skyBox}
         if (textures === null || textures === undefined) {
             const textures: Texture[] = tiles.map(tileRow => tileRow.filter(tile => tile.texture !== null && tile.texture !== undefined))

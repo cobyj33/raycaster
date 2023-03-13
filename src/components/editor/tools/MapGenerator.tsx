@@ -1,6 +1,6 @@
 import React from "react"
 import mapEditorStyles from "components/styles/MapEditor.module.css"
-import { Dimension2D, IDimension2D } from "interfaces/Dimension";
+import { Dimension2D, IDimension2D } from "jsutil";
 import EditorActionButton from "../common/EditorActionButton";
 import EditorInputField from "../common/EditorInputField";
 import MapEditorSideTool from "../common/MapEditorSideTool";

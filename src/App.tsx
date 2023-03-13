@@ -12,7 +12,7 @@ import { MapEditor } from 'components/screens/MapEditor';
 import MapScreenHelpMenu from 'components/help/MapScreenHelpMenu';
 import GameScreenHelpMenu from 'components/help/GameScreenHelpMenu';
 import MapEditorHelpMenu from 'components/help/MapEditorHelpMenu';
-import { IDimension2D } from 'interfaces/Dimension';
+import { IDimension2D } from 'jsutil';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Page from 'Page';
