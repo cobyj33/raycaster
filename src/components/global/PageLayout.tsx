@@ -1,6 +1,6 @@
 import { AppStatefulState } from 'App'
 import appStyles from 'App.module.css';
-import NavBar from 'NavBar'
+import NavBar from 'components/global/NavBar'
 import React from 'react'
 
 export const PageLayout = ({ appState, children }: { appState: AppStatefulState, children: React.ReactNode }) => {

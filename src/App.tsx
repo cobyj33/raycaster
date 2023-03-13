@@ -15,8 +15,8 @@ import MapEditorHelpMenu from 'components/help/MapEditorHelpMenu';
 import { IDimension2D } from 'jsutil';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Page from 'Page';
-import ErrorPage from 'ErrorPage';
+import Page from 'components/global/Page';
+import ErrorPage from 'components/global/ErrorPage';
 
 
 // import JRLogo from "assets/JRWhite.svg"

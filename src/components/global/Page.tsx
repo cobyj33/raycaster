@@ -1,7 +1,7 @@
 import React  from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppStatefulState } from 'App';
-import { PageLayout } from 'PageLayout';
+import { PageLayout } from 'components/global/PageLayout';
 
 const acceptedMenus = ["Game Map", "Camera View", "Editor"] as const;
 export type Menus = typeof acceptedMenus[number];

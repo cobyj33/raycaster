@@ -6,7 +6,7 @@ import { GameScreen } from 'components/screens/GameScreen'
 import appStyles from 'App.module.css';
 import { getDefaultTile, Tile } from 'libray/Tile'
 import { useRouteError } from "react-router-dom";
-import { PageLayout } from 'PageLayout'
+import { PageLayout } from 'components/global/PageLayout'
 import { AppStatefulState } from 'App'
 
 const ERROR_PAGE_MAP_MATRIX = [
