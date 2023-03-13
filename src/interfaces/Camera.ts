@@ -3,11 +3,10 @@ import { Ray, RaycastHit, castRay } from "interfaces/Ray"
 import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "jsutil"
 import { LineSegment } from "jsutil"
 
-import WebGLUtils from "functions/webgl"
+import { createVertexBuffer, createElementArrayBuffer, compileProgramFromSourceStrings } from "jsutil/browser"
 import cameraVertexShaderSource from "shaders/camera.vert?raw"
 import cameraFragmentShaderSource from "shaders/camera.frag?raw"
 import Texture, { TextureAtlas } from "./Texture"
-
 
 export interface ICamera {
     readonly position: IVector2;
@@ -220,11 +219,11 @@ export function getCameraProgram(gl: WebGL2RenderingContext): WebGLProgram {
         0, 1, 3, 1, 3, 2
     ]
 
-    const vertexBuffer = WebGLUtils.createVertexBuffer(gl, quadVertices);
+    const vertexBuffer = createVertexBuffer(gl, quadVertices);
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    const quadVertexBuffer = WebGLUtils.createElementArrayBuffer(gl, quadIndices);
+    const quadVertexBuffer = createElementArrayBuffer(gl, quadIndices);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quadVertexBuffer);
-    const cameraRenderProgram = WebGLUtils.compileProgramFromSourceStrings(gl, cameraVertexShaderSource, cameraFragmentShaderSource)
+    const cameraRenderProgram = compileProgramFromSourceStrings(gl, cameraVertexShaderSource, cameraFragmentShaderSource)
     gl.useProgram(cameraRenderProgram)
     const aPosLocation = gl.getAttribLocation(cameraRenderProgram, "aPos");
     gl.enableVertexAttribArray(aPosLocation);
