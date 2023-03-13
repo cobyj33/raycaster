@@ -287,10 +287,10 @@ export function renderCamera(camera: Camera, map: GameMap, canvas: HTMLCanvasEle
                 //     foundTextures[tileTextureData.name].indexes.push(cameraLineData.length * 2 * 4 + i * 4)
                 // }
                 const locationBox = atlas.getTextureTexelLocation(tileTextureData.name)
-                textureTexelAtlasX = locationBox.col
-                textureTexelAtlasY = locationBox.row
-                textureTexelAtlasWidth = locationBox.width
-                textureTexelAtlasHeight = locationBox.height 
+                textureTexelAtlasX = locationBox.topleft.col
+                textureTexelAtlasY = locationBox.topleft.row
+                textureTexelAtlasWidth = locationBox.size.width
+                textureTexelAtlasHeight = locationBox.size.height 
                 hasTexture = 1;
             }
         }

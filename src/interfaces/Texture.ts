@@ -3,9 +3,8 @@
 // TODO: Create constructors for the texture format, as well as the 
 
 import { getImage } from "functions/util";
-import { Color } from "jsutil/common";
+import { Color, IBox } from "jsutil/common";
 import potpack from "potpack";
-import { Box } from "./Box";
 import { getImageFileBase64 } from "jsutil/browser";
 
 const MAX_TEXTURE_SIDELENGTH_SIZE = 256
@@ -135,7 +134,7 @@ export class Texture {
 
 export class TextureAtlas {
     private readonly textures: Texture[]
-    private readonly textureMap: { [key: string]: { box: Box, texture: Texture } }
+    private readonly textureMap: { [key: string]: { box: IBox, texture: Texture } }
     readonly atlas: Texture
     private readonly name: string
     readonly width;
@@ -160,7 +159,7 @@ export class TextureAtlas {
         textureBoxes.forEach(box => {
             const { w: width, h: height, x: col, y: row, texture } = box as { w: number, h: number, x: number, y: number, texture: Texture }
             texture.draw(context, col, row)
-            this.textureMap[texture.name] = { box: {width: width, height: height, row: row, col: col}, texture: texture }
+            this.textureMap[texture.name] = { box: { topleft: { row: row, col: col }, size: { width: width, height: height } }, texture: texture }
         })
 
 
@@ -190,7 +189,7 @@ export class TextureAtlas {
         return this.textures.map(texture => texture.name)
     }
 
-    getTextureLocation(name: string): Box {
+    getTextureLocation(name: string): IBox {
         if (this.hasTexture(name)) {
             return this.textureMap[name].box
         }
@@ -204,14 +203,18 @@ export class TextureAtlas {
      * @param name 
      * @returns 
      */
-    getTextureTexelLocation(name: string): Box {
+    getTextureTexelLocation(name: string): IBox {
         if (this.hasTexture(name)) {
             const textureBox = this.getTextureLocation(name)
             return {
-                row: textureBox.row / this.height,
-                col: textureBox.col / this.width,
-                width: textureBox.width / this.width,
-                height: textureBox.height / this.height
+                topleft: {
+                    row: textureBox.topleft.row / this.height,
+                    col: textureBox.topleft.col / this.width,
+                },
+                size: {
+                    width: textureBox.size.width / this.width,
+                    height: textureBox.size.height / this.height
+                }
             }
         }
         throw new Error(name + " on Texture Atlas " + this.name + " does not exist")
