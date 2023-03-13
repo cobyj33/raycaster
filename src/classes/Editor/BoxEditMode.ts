@@ -1,6 +1,6 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "classes/Editor/EditMode";
-import { ILineSegment } from "interfaces/LineSegment";
+import { ILineSegment } from "jsutil";
 import { Tile } from "interfaces/Tile";
 import { IVector2 } from "interfaces/Vector2";
 import { GameMap } from "interfaces/GameMap";

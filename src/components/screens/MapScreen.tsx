@@ -6,7 +6,7 @@ import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
 import { StatefulData } from 'interfaces/util';
 import { GameMap } from 'interfaces/GameMap';
 import { View } from 'interfaces/View';
-import { LineSegment, ILineSegment } from 'interfaces/LineSegment';
+import { LineSegment, ILineSegment } from 'jsutil';
 
 import { Vector2, IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "interfaces/Vector2";
 import { useKeyHandler } from 'classes/KeySystem';
