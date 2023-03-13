@@ -1,4 +1,4 @@
-import { IVector2 } from "interfaces/Vector2";
+import { IVector2 } from "jsutil";
 
 export interface Box extends IVector2 {
     width: number;

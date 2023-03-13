@@ -1,8 +1,7 @@
-import { IVector2 } from "interfaces/Vector2";
+import { IVector2, IDimension2D } from "jsutil";
 import { GameMap, getDefaultSkyBox, getTileMap } from "interfaces/GameMap";
 import { getDefaultTile, Tile } from "interfaces/Tile";
 import { getNumberMatrix, isInBounds } from "functions/util";
-import { IDimension2D } from "jsutil";
 
 export interface GenerationAlgorithm {
     readonly name: string;

@@ -2,7 +2,7 @@ import { StatefulData } from "interfaces/util"
 
 import { GameMap } from "interfaces/GameMap"
 import { Ray, RaycastHit, castRay } from "interfaces/Ray"
-import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "interfaces/Vector2"
+import { IVector2, Vector2, vector2Int, addVector2, scaleVector2, distanceBetweenVector2, angleBetweenVector2, translateVector2, vector2Equals } from "jsutil"
 import { LineSegment } from "jsutil"
 
 import WebGLUtils from "functions/webgl"
@@ -31,8 +31,8 @@ export class Camera implements ICamera {
     readonly lookingAngle: number;
 
     constructor(position: IVector2, direction: IVector2, fieldOfView: number, viewDistance: number, lookingAngle: number) {
-        this.position = Vector2.fromIVector2(position)
-        this.direction = Vector2.fromIVector2(direction)
+        this.position = Vector2.fromData(position)
+        this.direction = Vector2.fromData(direction)
         this.fieldOfView = fieldOfView
         this.viewDistance = viewDistance
         this.lookingAngle = lookingAngle
@@ -115,8 +115,8 @@ export class Camera implements ICamera {
     }
 
     static fromCameraData(cameraData: ICamera): Camera {
-        return new Camera(Vector2.fromIVector2(cameraData.position),
-                            Vector2.fromIVector2(cameraData.direction),
+        return new Camera(Vector2.fromData(cameraData.position),
+                            Vector2.fromData(cameraData.direction),
                             cameraData.fieldOfView,
                             cameraData.viewDistance,
                             cameraData.lookingAngle)
@@ -201,9 +201,9 @@ export function tryPlaceCamera(camera: Camera, map: GameMap, targetCell: IVector
                 });
             }
 
-            return Vector2.fromIVector2(current);
+            return Vector2.fromData(current);
         } else {
-            return Vector2.fromIVector2(targetCell);
+            return Vector2.fromData(targetCell);
         }
     } else {
         return map.center

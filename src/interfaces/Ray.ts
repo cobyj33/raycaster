@@ -1,8 +1,8 @@
-import { IVector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2AlterToRow, vector2AlterToCol } from "interfaces/Vector2"
+import { IVector2, addVector2, vector2ToLength, distanceBetweenVector2, vector2AlterToRow, vector2AlterToCol,
+    IDimension2D } from "jsutil"
 import { Tile } from "./Tile";
 import { GameMap } from "./GameMap";
 import { Cardinal } from "./util";
-import { IDimension2D } from "jsutil";
 
 export interface Ray {
     readonly origin: IVector2;

@@ -5,8 +5,6 @@
 import { getImage } from "functions/util";
 import { Color } from "interfaces/Color";
 import potpack from "potpack";
-import { GiShrug } from "react-icons/gi";
-import { loadConfigFromFile } from "vite";
 import { Box } from "./Box";
 import { getImageFileBase64 } from "./Image";
 

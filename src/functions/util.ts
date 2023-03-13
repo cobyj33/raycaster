@@ -1,8 +1,6 @@
-import { IHasher } from "interfaces/util";
 import React from "react"
 import { PointerEvent } from "react";
-import { IVector2, midPointBetweenVector2 } from "interfaces/Vector2";
-import { IDimension2D } from "jsutil";
+import { IVector2, IDimension2D } from "jsutil";
 
 
 export function removeDuplicates<T>(list: T[]): T[] {
@@ -19,19 +17,6 @@ export function removeDuplicates<T>(list: T[]): T[] {
     })
   }
 
-export function removeDuplicatesWithHasher<T>(list: T[], hasher: IHasher<T>): T[] {
-    const tracker = new Set<string>([])
-
-    return list.filter(val => {
-        const stringified: string = hasher.hash(val);
-        if (tracker.has(stringified)) {
-            return false;
-        } else {
-            tracker.add(stringified)
-            return true
-        }
-    })
-  }
 
 /**
  * A helper function to get the canvas and Canvas 2D context of a React RefObject
@@ -138,12 +123,10 @@ export function isImageFile(file: File): boolean {
 
 export function pointerPositionInElement(element: Element, event: PointerEvent<Element>): IVector2 {
   const elementBounds: DOMRect = element.getBoundingClientRect();
-  // return new IVector2(event.clientY - canvasBounds.y, event.clientX - canvasBounds.x).int();
     return {
         row: Math.trunc(event.clientY - elementBounds.y),
         col: Math.trunc(event.clientX - elementBounds.x)
     }
-    return { row: 0, col: 0  };
   }
 
 export async function getImage(url: string): Promise<HTMLImageElement> {

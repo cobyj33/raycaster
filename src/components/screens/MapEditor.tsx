@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 
 import { StatefulData } from 'interfaces/util';
-import { IVector2, Vector2 } from 'interfaces/Vector2';
+import { IVector2, Vector2 } from 'jsutil';
 import { Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil';
 import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';
 import { Camera, tryPlaceCamera } from "interfaces/Camera"
@@ -84,7 +84,7 @@ export const MapEditor = ( { cameraData, mapData, tileData }: { cameraData: Stat
   //         let newView = view;
   //         withCanvasAndContext(canvasRef, (canvas, context) => {
   //           const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/view.cellSize).scale(1/2)
-  //           const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
+  //           const viewPosition = Vector2.fromData(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
   //           newView = view.withPosition(viewPosition)
   //         })
   //         return newView

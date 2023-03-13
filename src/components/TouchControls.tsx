@@ -1,7 +1,7 @@
 import { Camera } from "interfaces/Camera";
 import { StatefulData } from "interfaces/util";
 import { GameMap } from "interfaces/GameMap";
-import { scaleVector2, rotateVector2 } from "interfaces/Vector2";
+import { scaleVector2, rotateVector2 } from "jsutil";
 import { getMovedCameraPosition } from "classes/CameraControls";
 import { HoldButton } from "components/HoldButton";
 import { FaArrowDown, FaArrowLeft, FaArrowRight, FaArrowUp, FaRegArrowAltCircleLeft, FaRegArrowAltCircleRight } from 'react-icons/fa';

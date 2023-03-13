@@ -1,8 +1,6 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "classes/Editor/EditMode";
-import { Tile } from "interfaces/Tile";
-import { IVector2 } from "interfaces/Vector2";
-import { getEllipse } from "functions/shape";
+import { IVector2, getEllipse } from "jsutil";
 
 
 export class EllipseEditMode extends EditMode {

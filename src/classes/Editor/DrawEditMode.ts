@@ -1,7 +1,6 @@
-import {getLine} from "functions/shape";
 import { Tile } from "interfaces/Tile"
 import { GameMap } from "interfaces/GameMap";
-import { IVector2 } from "interfaces/Vector2";
+import { IVector2, getLine } from "jsutil";
 import { PointerEvent } from "react";
 import { EditMode, EditorData } from "classes/Editor/EditMode";
 

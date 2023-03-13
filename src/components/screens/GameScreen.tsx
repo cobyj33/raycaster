@@ -8,7 +8,7 @@ import { TouchControls } from 'components/TouchControls';
 import { StatefulData } from 'interfaces/util';
 import { Camera, renderCamera, tryPlaceCamera } from 'interfaces/Camera';
 import { GameMap } from 'interfaces/GameMap';
-import { rotateVector2 } from 'interfaces/Vector2';
+import { rotateVector2 } from 'jsutil';
 
 import gameScreenStyles from "components/styles/GameScreen.module.css"
 import { clamp, withCanvasAndContext, withCanvasAndContextWebGL2 } from 'functions/util';

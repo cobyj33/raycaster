@@ -1,5 +1,5 @@
 import { PointerEvent } from "react";
-import { Vector2, getVectorLength } from "interfaces/Vector2"
+import { Vector2, getVectorLength } from "jsutil"
 import { EditMode } from "classes/Editor/EditMode";
 
 const MOVE_SPEED = 20;

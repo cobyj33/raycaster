@@ -5,13 +5,14 @@ import { rgbToString } from 'interfaces/Color';
 import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
 import { StatefulData } from 'interfaces/util';
 import { GameMap } from 'interfaces/GameMap';
-import { LineSegment, ILineSegment, View } from 'jsutil';
 
-import { Vector2, IVector2, translateVector2, addVector2, vector2Int, scaleVector2, vector2ToAngle, vector2ToLength, subtractVector2, vector2Normalized, distanceBetweenVector2 } from "interfaces/Vector2";
+import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
+    LineSegment, View } from "jsutil";
+    
 import { useKeyHandler } from 'classes/KeySystem';
 import { BirdsEyeCameraControls } from 'classes/CameraControls';
 import { TouchControls } from 'components/TouchControls';
-import { useCanvasHolderUpdater, useResizeObserver } from 'functions/hooks';
+import { useCanvasHolderUpdater } from 'functions/hooks';
 import mapScreenStyles from "components/styles/MapScreen.module.css";
 import cam from "assets/Camera.png"
 import { clamp, getCanvasAndContext2D } from 'functions/util';
@@ -67,7 +68,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
             try {
                 const [canvas, _] = getCanvasAndContext2D(canvasRef)
                 const worldViewportCenter = new Vector2(canvas.height, canvas.width).scale(1/screenView.cellSize).scale(1/2)
-                const viewPosition = Vector2.fromIVector2(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
+                const viewPosition = Vector2.fromData(worldPosition).scale(-1).subtract(worldViewportCenter.scale(-1))
                 return screenView.withPosition(viewPosition)
             } catch (error) {
                 return screenView
@@ -119,7 +120,7 @@ export const MapScreen = ({ mapData, cameraData }: { mapData: StatefulData<GameM
         for (let row = 0; row < map.dimensions.height; row++) {
             for (let col = 0; col < map.dimensions.width; col++) {
                 context.fillStyle = rgbToString(map.tiles[row][col].color);
-                const pos = Vector2.fromIVector2(screenView).translate(row, col).scale(screenView.cellSize)
+                const pos = Vector2.fromData(screenView).translate(row, col).scale(screenView.cellSize)
                 context.fillRect(pos.col, pos.row, screenView.cellSize, screenView.cellSize);
                 // context.fillRect((screenView.col + col) * screenView.cellSize, (screenView.row + row) * screenView.cellSize, screenView.cellSize, screenView.cellSize);
             }

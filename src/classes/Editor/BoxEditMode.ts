@@ -1,10 +1,6 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { EditMode } from "classes/Editor/EditMode";
-import { ILineSegment } from "jsutil";
-import { Tile } from "interfaces/Tile";
-import { IVector2 } from "interfaces/Vector2";
-import { GameMap } from "interfaces/GameMap";
-import { getLine } from "functions/shape"
+import { ILineSegment, IVector2, getLine } from "jsutil";
 import { removeDuplicates } from "functions/util";
 
 function getBoxCorners(start: IVector2, end: IVector2): ILineSegment[] {

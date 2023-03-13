@@ -1,6 +1,6 @@
 import { Camera } from "interfaces/Camera";
 import { GameMap } from "interfaces/GameMap";
-import { Vector2 } from "interfaces/Vector2";
+import { Vector2 } from "jsutil";
 import { KeyBinding, KeyHandler } from "classes/KeySystem"
 
 const MOVEMENT_CHECKING_DISTANCE = 0.15;

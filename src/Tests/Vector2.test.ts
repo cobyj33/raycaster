@@ -8,7 +8,7 @@ import {
     dotProductVector2, 
     vector2Normalized, 
     vector2ToLength, 
-    getVectorLength } from "interfaces/Vector2"
+    getVectorLength } from "jsutil"
 
 test('vector2 addition', () => {
     const first = { row: 10, col: 5 };

@@ -1,9 +1,8 @@
 import { KeyboardEvent, PointerEvent } from "react";
 import { StatefulData } from "interfaces/util";
 import { GameMap }  from "interfaces/GameMap"
-import { IVector2 } from "interfaces/Vector2";
 import { Tile } from "interfaces/Tile";
-import { View } from "jsutil"
+import { View, IVector2 } from "jsutil"
 
 export interface EditorData {
     mapData: StatefulData<GameMap>;
