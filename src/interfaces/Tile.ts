@@ -2,7 +2,7 @@ import { RGBA, areEqualColors, isRGBAObject, rgbaToString } from "interfaces/Col
 import marbleTexturePath from "assets/textures/Marble.png"
 import stoneBrickTexturePath from "assets/textures/Stone Brick Tile.png"
 import Texture from "interfaces/Texture"
-import { Nullable } from "interfaces/util";
+import { Nullable } from "jsutil";
 
 /**
  * The representation of a tile in a TileMap

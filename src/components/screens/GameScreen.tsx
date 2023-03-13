@@ -5,7 +5,7 @@ import { FirstPersonCameraControls } from 'classes/CameraControls';
 import { MapScreen } from 'components/screens/MapScreen';
 import { TouchControls } from 'components/TouchControls';
 
-import { StatefulData } from 'interfaces/util';
+import { StatefulData } from 'jsutil/react';
 import { Camera, renderCamera, tryPlaceCamera } from 'interfaces/Camera';
 import { GameMap } from 'interfaces/GameMap';
 import { rotateVector2 } from 'jsutil';

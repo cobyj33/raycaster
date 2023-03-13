@@ -2,7 +2,7 @@ import React from 'react';
 import { Camera } from 'interfaces/Camera';
 import { GameMap } from 'interfaces/GameMap';
 import { Tile, TileTypeArray, getDefaultTile } from 'interfaces/Tile';
-import { StatefulData } from 'interfaces/util';
+import { StatefulData } from 'jsutil/react';
 
 import {initRaycaster} from 'loader';
 

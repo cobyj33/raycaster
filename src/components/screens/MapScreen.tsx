@@ -3,12 +3,12 @@ import React, { KeyboardEvent, PointerEvent, RefObject, useEffect, useRef, useSt
 import { Camera, tryPlaceCamera } from 'interfaces/Camera';
 import { rgbToString } from 'interfaces/Color';
 import { Ray, castRay, RaycastHit, RaycastNoHit } from 'interfaces/Ray';
-import { StatefulData } from 'interfaces/util';
+import { StatefulData } from 'jsutil/react';
 import { GameMap } from 'interfaces/GameMap';
 
 import { Vector2, IVector2, addVector2, vector2ToAngle, vector2ToLength,
     LineSegment, View } from "jsutil";
-    
+
 import { useKeyHandler } from 'classes/KeySystem';
 import { BirdsEyeCameraControls } from 'classes/CameraControls';
 import { TouchControls } from 'components/TouchControls';

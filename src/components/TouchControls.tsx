@@ -1,5 +1,5 @@
 import { Camera } from "interfaces/Camera";
-import { StatefulData } from "interfaces/util";
+import { StatefulData } from "jsutil/react";
 import { GameMap } from "interfaces/GameMap";
 import { scaleVector2, rotateVector2 } from "jsutil";
 import { getMovedCameraPosition } from "classes/CameraControls";

@@ -10,7 +10,7 @@ import MapEditorSideToolSectionTitle from "../common/MapEditorSideToolSectionTit
 import EditorToggleButton from "../common/EditorToggleButton";
 import TextureUpload from "../common/TextureUpload";
 import EditorActionButton from "../common/EditorActionButton";
-import { StatefulData } from "interfaces/util";
+import { StatefulData } from "jsutil/react";
 
 
 interface TileCreatorState {

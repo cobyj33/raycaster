@@ -1,4 +1,4 @@
-import { StatefulData } from "interfaces/util"
+import { StatefulData } from "jsutil/react"
 
 import { GameMap } from "interfaces/GameMap"
 import { Ray, RaycastHit, castRay } from "interfaces/Ray"

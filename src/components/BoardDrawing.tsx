@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef } from 'react'
 import { View } from 'jsutil'; 
 import { GameMap } from 'interfaces/GameMap';
-import { StatefulData } from 'interfaces/util';
+import { StatefulData } from 'jsutil/react';
 import { renderWalls, renderGrid } from 'functions/boardRenderingFunctions';
 import { useCanvas2DUpdater } from 'functions/hooks';
 

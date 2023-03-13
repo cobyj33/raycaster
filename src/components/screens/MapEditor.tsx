@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, MutableRefObject, PointerEvent, KeyboardEvent } from 'react'
 
-import { StatefulData } from 'interfaces/util';
+import { StatefulData } from 'jsutil/react';
 import { IVector2, Vector2 } from 'jsutil';
 import { Dimension2D, IDimension2D, View, getViewOffset } from 'jsutil';
 import { GameMap, areGameMapsEqual } from 'interfaces/GameMap';

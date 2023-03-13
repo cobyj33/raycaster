@@ -1,5 +1,5 @@
 import { RefObject, MutableRefObject, useEffect, useRef, useCallback } from "react";
-import { IEqualityComparer, StatefulData } from "interfaces/util";
+import { StatefulData } from "jsutil/react";
 import { HistoryStack } from "classes/Structures/HistoryStack";
 
 type EventAction = (event: Event) => void;
@@ -102,7 +102,7 @@ export function useCanvasHolderUpdater(canvasRef: RefObject<HTMLCanvasElement>, 
 //       }, [])
 // }
 
-export function useHistory<T>(stateData: StatefulData<T>, comparer: IEqualityComparer<T>): [Action, Action] {
+export function useHistory<T>(stateData: StatefulData<T>, comparer: (first: T, second: T) => boolean): [Action, Action] {
     const [state, setState] = stateData;
     const history= useRef<HistoryStack<T>>(new HistoryStack<T>());
 

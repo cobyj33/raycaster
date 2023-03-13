@@ -1,5 +1,5 @@
 import { KeyboardEvent, PointerEvent } from "react";
-import { StatefulData } from "interfaces/util";
+import { StatefulData } from "jsutil/react";
 import { GameMap }  from "interfaces/GameMap"
 import { Tile } from "interfaces/Tile";
 import { View, IVector2 } from "jsutil"
